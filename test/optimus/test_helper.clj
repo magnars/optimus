@@ -4,6 +4,11 @@
 
 (def tmp-dir "test/resources/with-files-tmp")
 
+(def public-dir "with-files-tmp")
+
+(defn app-that-returns-request [request]
+  request)
+
 (defmacro with-files [files & body]
   `(do
      (.mkdir (File. tmp-dir))
