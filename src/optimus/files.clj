@@ -50,6 +50,18 @@
     (-> (file-struct path :css (slurp resource))
         (replace-css-urls #(combine-paths (:original-path %1) %2)))))
 
+;; css children
+
+(defn- paths-in-css [file]
+  (->> file
+       :contents
+       (re-seq css-url-re)
+       (map (comp (partial combine-paths (:original-path file)) second))))
+
+(defn- css-file-and-children [public-dir path]
+  (let [file (css-file public-dir path)]
+    (concat [file] (map #(binary-file public-dir %) (paths-in-css file)))))
+
 ;; js
 
 (defn- js-file [public-dir path]
@@ -62,6 +74,6 @@
   (when-not (.startsWith path "/")
     (throw (Exception. (str "File paths must start with a slash. Got: " path))))
   (cond
-   (.endsWith path ".css") [(css-file public-dir path)]
+   (.endsWith path ".css") (css-file-and-children public-dir path)
    (.endsWith path ".js") [(js-file public-dir path)]
    :else [(binary-file public-dir path)]))

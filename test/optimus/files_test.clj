@@ -7,7 +7,7 @@
 (with-files [["/app.js" "1 + 2"]]
 
   (fact
-   "It creates a map of basic information about the file. 
+   "It creates a map of basic information about the file.
 
     The reason it returns a list, is that one file may reference other
     files that need also be added."
@@ -19,7 +19,7 @@
 
   (fact
    "It requires all file paths to start with a slash, ie beginning at
-    the root of public-dir. You have to bring your own slash."
+    the root of public-dir. So bring your own slash."
 
    (->files public-dir "app.js") => (throws Exception "File paths must start with a slash. Got: app.js"))
 
@@ -41,8 +41,16 @@
    (->> "/theme/styles/main.css"
         (->files public-dir)
         first :contents)
+   => "#id { background: url('/theme/images/bg.png'); }")
 
-   => "#id { background: url('/theme/images/bg.png'); }"))
+  (fact
+   "Files referenced in css files must also be served. They are
+    returned along with the css file."
+
+   (->> "/theme/styles/main.css"
+        (->files public-dir)
+        second :path)
+   => "/theme/images/bg.png"))
 
 (with-files [["/query.css" "#id { background: url(\"/bg.png?query\"); }"]
              ["/ref.css"   "#id { background: url(/bg.png#ref); }"]
