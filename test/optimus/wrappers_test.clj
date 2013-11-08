@@ -63,7 +63,8 @@
                         :original-path "/code.js"
                         :contents "1 + 2"}]}))
 
-(with-files [["/main.css" "#id { background: url(bg.png); }"]
+(with-files [["/main.css" "#id1 { background: url(bg.png); }"]
+             ["/more.css" "#id2 { background: url(bg.png); }"]
              ["/bg.png" "binary"]]
 
   (fact
@@ -76,7 +77,18 @@
           (map (juxt :path :bundle))))
 
    => [["/main.css" "/styles.css"]
-       ["/bg.png" nil]]))
+       ["/bg.png" nil]])
+
+  (fact
+   "The same file may be referenced by multiple files, but they are
+    only included once in the files list."
+
+   (let [app (-> app-that-returns-request
+                 (wrap-with-file-bundle "/styles.css" public-dir ["/main.css" "/more.css"]))]
+     (->> (app {}) :optimus-files
+          (map :path)))
+
+   => ["/main.css" "/bg.png" "/more.css"]))
 
 ;; cache busters and expires headers
 

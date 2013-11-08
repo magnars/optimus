@@ -12,8 +12,11 @@
        (map #(assoc-in (vec %) [0 :bundle] bundle))
        (apply concat)))
 
+(defn- distinct-by [f col]
+  (map first (vals (group-by f col))))
+
 (defn- concat-files [request files]
-  (update-in request [:optimus-files] concat (doall files)))
+  (update-in request [:optimus-files] #(distinct-by :path (concat % (doall files)))))
 
 (defn wrap-with-file-bundle [app bundle public-dir files]
   (fn [request]

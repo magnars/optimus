@@ -25,7 +25,6 @@ Raise an exception if any deletion fails unless silently is true."
 
 (defmacro with-files [files & body]
   `(do
-     (.mkdir (io/file tmp-dir))
      (doseq [[path# contents#] ~files] (create-file-and-dirs path# contents#))
      (let [result# (do ~@body)]
        (delete-file-recursively tmp-dir)
