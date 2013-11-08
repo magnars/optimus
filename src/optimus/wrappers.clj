@@ -1,18 +1,15 @@
 (ns optimus.wrappers
-  (:require [clojure.java.io :as io]
-            [clj-time.core :as time]
+  (:require [clj-time.core :as time]
             [clj-time.format]
-            [optimus.digest :as digest]))
+            [optimus.digest :as digest]
+            [optimus.files :refer [->files]]))
 
 ;; wrap with files
 
-(defn ->file [public-dir file]
-  {:path file
-   :original-path file
-   :contents (slurp (io/resource (str public-dir file)))})
-
 (defn- ->bundled-files [bundle public-dir files]
-  (map #(assoc (->file public-dir %) :bundle bundle) files))
+  (->> files
+       (mapcat #(->files public-dir %))
+       (map #(assoc % :bundle bundle))))
 
 (defn- concat-files [request files]
   (update-in request [:optimus-files] concat (doall files)))
@@ -28,7 +25,7 @@
 
 (defn wrap-with-files [app public-dir files]
   (fn [request]
-    (app (concat-files request (map #(->file public-dir %) files)))))
+    (app (concat-files request (mapcat #(->files public-dir %) files)))))
 
 ;; cache-busters and expired headers
 

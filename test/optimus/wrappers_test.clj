@@ -1,7 +1,7 @@
 (ns optimus.wrappers-test
-  (:use [midje.sweet]
+  (:use [optimus.wrappers]
         [optimus.test-helper]
-        [optimus.wrappers])
+        [midje.sweet])
   (:require [clj-time.core :as time]))
 
 ;; Adding files to the request
