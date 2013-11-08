@@ -8,8 +8,9 @@
 
 (defn- ->bundled-files [bundle public-dir files]
   (->> files
-       (mapcat #(->files public-dir %))
-       (map #(assoc % :bundle bundle))))
+       (map #(->files public-dir %))
+       (map #(assoc-in (vec %) [0 :bundle] bundle))
+       (apply concat)))
 
 (defn- concat-files [request files]
   (update-in request [:optimus-files] concat (doall files)))

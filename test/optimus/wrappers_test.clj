@@ -63,6 +63,21 @@
                         :original-path "/code.js"
                         :contents "1 + 2"}]}))
 
+(with-files [["/main.css" "#id { background: url(bg.png); }"]
+             ["/bg.png" "binary"]]
+
+  (fact
+   "Some files reference other files. These need to be added to the
+    file list too. But they're not part of the bundle."
+
+   (let [app (-> app-that-returns-request
+                 (wrap-with-file-bundle "/styles.css" public-dir ["/main.css"]))]
+     (->> (app {}) :optimus-files
+          (map (juxt :path :bundle))))
+
+   => [["/main.css" "/styles.css"]
+       ["/bg.png" nil]]))
+
 ;; cache busters and expires headers
 
 (with-files [["/code.js" "1 + 2"]]
