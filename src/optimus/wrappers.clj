@@ -2,21 +2,17 @@
   (:require [clj-time.core :as time]
             [clj-time.format]
             [optimus.digest :as digest]
-            [optimus.files :refer [->files]]))
+            [optimus.files :refer [->file]]))
 
 ;; wrap with files
 
 (defn- ->bundled-files [bundle public-dir files]
   (->> files
-       (map #(->files public-dir %))
-       (map #(assoc-in (vec %) [0 :bundle] bundle))
-       (apply concat)))
-
-(defn- distinct-by [f col]
-  (map first (vals (group-by f col))))
+       (map #(->file public-dir %))
+       (map #(assoc % :bundle bundle))))
 
 (defn- concat-files [request files]
-  (update-in request [:optimus-files] #(distinct-by :path (concat % (doall files)))))
+  (update-in request [:optimus-files] #(concat % (doall files))))
 
 (defn wrap-with-file-bundle [app bundle public-dir files]
   (fn [request]
@@ -29,7 +25,7 @@
 
 (defn wrap-with-files [app public-dir files]
   (fn [request]
-    (app (concat-files request (mapcat #(->files public-dir %) files)))))
+    (app (concat-files request (map #(->file public-dir %) files)))))
 
 ;; cache-busters and expired headers
 

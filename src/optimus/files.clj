@@ -17,7 +17,7 @@
 
 (defn- binary-file [public-dir path]
   (let [resource (existing-resource public-dir path)]
-    (file-struct path :binary (io/input-stream resource))))
+    (file-struct path :binary (slurp resource))))
 
 ;; css
 
@@ -42,15 +42,8 @@
 
 (defn- replace-css-urls [file replacement-fn]
   (assoc-in file [:contents]
-   (str/replace (:contents file) css-url-re
-                (fn [[_ url]] (css-url-str (replacement-fn file url))))))
-
-(defn- css-file [public-dir path]
-  (let [resource (existing-resource public-dir path)]
-    (-> (file-struct path :css (slurp resource))
-        (replace-css-urls #(combine-paths (:original-path %1) %2)))))
-
-;; css children
+            (str/replace (:contents file) css-url-re
+                         (fn [[_ url]] (css-url-str (replacement-fn file url))))))
 
 (defn- paths-in-css [file]
   (->> file
@@ -58,9 +51,11 @@
        (re-seq css-url-re)
        (map (comp (partial combine-paths (:original-path file)) second))))
 
-(defn- css-file-and-children [public-dir path]
-  (let [file (css-file public-dir path)]
-    (concat [file] (map #(binary-file public-dir %) (paths-in-css file)))))
+(defn- css-file [public-dir path]
+  (let [resource (existing-resource public-dir path)
+        file (-> (file-struct path :css (slurp resource))
+                 (replace-css-urls #(combine-paths (:original-path %1) %2)))]
+    (assoc file :references (paths-in-css file))))
 
 ;; js
 
@@ -70,10 +65,10 @@
 
 ;; public api
 
-(defn ->files [public-dir path]
+(defn ->file [public-dir path]
   (when-not (.startsWith path "/")
     (throw (Exception. (str "File paths must start with a slash. Got: " path))))
   (cond
-   (.endsWith path ".css") (css-file-and-children public-dir path)
-   (.endsWith path ".js") [(js-file public-dir path)]
-   :else [(binary-file public-dir path)]))
+   (.endsWith path ".css") (css-file public-dir path)
+   (.endsWith path ".js") (js-file public-dir path)
+   :else (binary-file public-dir path)))
