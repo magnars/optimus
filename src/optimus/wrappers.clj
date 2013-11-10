@@ -27,6 +27,13 @@
   (fn [request]
     (app (concat-files request (map #(->file public-dir %) files)))))
 
+(defn wrap-with-referenced-files [app public-dir]
+  (fn [request]
+    (let [files (->>  request :optimus-files
+                     (mapcat :references)
+                     (map #(->file public-dir %)))]
+      (app (concat-files request files)))))
+
 ;; cache-busters and expired headers
 
 (def http-date-format

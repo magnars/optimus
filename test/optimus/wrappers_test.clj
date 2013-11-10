@@ -63,17 +63,42 @@
                         :original-path "/code.js"
                         :contents "1 + 2"}]}))
 
+(with-files [["/main.css" "#id1 { background: url('/bg.png'); }"]
+             ["/bg.png" "binary"]]
+
+  (fact
+   "By including files that aren't part of bundles, but are referenced
+    in the bundle files, we can optimize those files as well.
+
+    Remember that this has to be done after including all other files,
+    to ensure we find all the referenced files. And since the
+    wrap-chain is inverted, that means it needs to be before all the
+    file including wrappers in the list.
+
+    What if the referenced files reference more files, you ask? Yeah,
+    that isn't handled at this point. I guess we'll need it when
+    tackling @import in CSS."
+
+   (let [app (-> app-that-returns-request
+                 (wrap-with-referenced-files public-dir)
+                 (wrap-with-files public-dir ["/main.css"]))]
+     (->> (app {})
+          :optimus-files
+          (map :path)))
+
+   => ["/main.css" "/bg.png"]))
+
 ;; cache busters and expires headers
 
 (with-redefs [time/now (fn [] (time/date-time 2013 07 30))]
 
   (fact
    "By adding cache busters based on content to the path, we can
-     have far-future expires headers - maximizing cache time without
-     worrying about stale content in the users browsers.
+    have far-future expires headers - maximizing cache time without
+    worrying about stale content in the users browsers.
 
-     We still serve the original file, but only if you ask for it
-     directly. Otherwise we count it as :outdated."
+    We still serve the original file, but only if you ask for it
+    directly. Otherwise we count it as :outdated."
 
    (let [app (-> app-that-returns-request
                  (wrap-with-cache-busted-expires-headers))]
@@ -92,7 +117,7 @@
                                   "Expires" "Fri, 28 Jul 2023 00:00:00 GMT"}}]})
 
   #_(fact
-   "The file paths in CSS files must be updated to include cache
+     "The file paths in CSS files must be updated to include cache
     busters, so that they too can be served with far-future expires
     headers. There is a snag, tho:
 
@@ -106,19 +131,19 @@
     inside CSS. We handle this by ensuring all referenced files are
     fixed first, along with updating URLs in the referencing files."
 
-   (let [app (-> app-that-returns-request
-                 (wrap-with-cache-busted-expires-headers))]
-     (->> (app {:optimus-files [{:path "/main.css"
-                                 :original-path "/main.css"
-                                 :contents "#id1 { background: url('/bg.png'); }"
-                                 :references ["/bg.png"]}
-                                {:path "/bg.png"
-                                 :original-path "/bg.png"
-                                 :contents "binary"}]})
-          :optimus-files
-          (map (juxt :path :contents)))
+     (let [app (-> app-that-returns-request
+                   (wrap-with-cache-busted-expires-headers))]
+       (->> (app {:optimus-files [{:path "/main.css"
+                                   :original-path "/main.css"
+                                   :contents "#id1 { background: url('/bg.png'); }"
+                                   :references ["/bg.png"]}
+                                  {:path "/bg.png"
+                                   :original-path "/bg.png"
+                                   :contents "binary"}]})
+            :optimus-files
+            (map (juxt :path :contents)))
 
-     => [["/main.css" "#id1 { background: url('/7e57cfe84314/bg.png'); }"]
-         ["/bg.png" "binary"]
-         ["/0508e66b8b0d/main.css" "#id1 { background: url('/7e57cfe84314/bg.png'); }"]
-         ["/7e57cfe84314/bg.png" "binary"]])))
+       => [["/main.css" "#id1 { background: url('/7e57cfe84314/bg.png'); }"]
+           ["/bg.png" "binary"]
+           ["/0508e66b8b0d/main.css" "#id1 { background: url('/7e57cfe84314/bg.png'); }"]
+           ["/7e57cfe84314/bg.png" "binary"]])))
