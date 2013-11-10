@@ -73,8 +73,7 @@
 
     ;;    -> then take those first
       (if (seq remaining-references)
-        (recur (concat remaining-references
-                       (difference to-replace (:references next)))
+        (recur (concat remaining-references (difference to-replace remaining-references))
                files)
 
         ;; 3. otherwise update all references in this file, and fix it too.
