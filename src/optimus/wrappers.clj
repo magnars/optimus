@@ -3,7 +3,8 @@
             [clj-time.format]
             [optimus.digest :as digest]
             [optimus.files :refer [->file replace-css-urls]]
-            [clojure.set :refer [intersection difference]]))
+            [clojure.set :refer [intersection difference union]]
+            [clojure.string :as str]))
 
 ;; wrap with files
 
@@ -67,7 +68,7 @@
   (if (empty? to-replace)
     files
 
-    ;; 2. are there files referenced by this file that are yet to be fixed?
+    ;; 2. are there files referenced by this file that aren't fixed yet?
     (let [next (by-path (first to-replace) files)
           remaining-references (intersection to-replace (:references next))]
 
@@ -77,11 +78,12 @@
                files)
 
         ;; 3. otherwise update all references in this file, and fix it too.
-        ;;    then continue with the rest that remain.
         (->> files
              (replace {next (-> next
                                 (replace-css-urls-with-new-ones files)
                                 (add-cache-busted-expires-header))})
+
+             ;; and continue with the rest that remain.
              (recur (set (rest to-replace))))))))
 
 (defn- add-cache-busted-expires-headers [files]
@@ -93,3 +95,21 @@
 (defn wrap-with-cache-busted-expires-headers [app]
   (fn [request]
     (app (update-in request [:optimus-files] add-cache-busted-expires-headers))))
+
+;; concatenate bundles
+
+(defn- concatenate-bundle [[name files]]
+  (when name
+    {:path (str "/bundles/" name)
+     :original-path (str "/bundles/" name)
+     :contents (str/join "\n" (map :contents files))
+     :references (apply union (map :references files))
+     :bundle name}))
+
+(defn- concatenate-bundles [files]
+  (concat (map #(dissoc % :bundle) files)
+          (keep concatenate-bundle (group-by :bundle files))))
+
+(defn wrap-to-concatenate-bundles [app]
+  (fn [request]
+    (app (update-in request [:optimus-files] concatenate-bundles))))

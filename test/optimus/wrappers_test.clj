@@ -15,41 +15,41 @@
     in the bundle are loaded in the correct sequence."
 
    (let [app (-> app-that-returns-request
-                 (wrap-with-file-bundle "/app.js" public-dir
+                 (wrap-with-file-bundle "app.js" public-dir
                                         ["/code.js" "/more.js"]))]
      (app {}))
 
    => {:optimus-files [{:path "/code.js"
                         :original-path "/code.js"
                         :contents "1 + 2"
-                        :bundle "/app.js"}
+                        :bundle "app.js"}
                        {:path "/more.js"
                         :original-path "/more.js"
                         :contents "3 + 5"
-                        :bundle "/app.js"}]})
+                        :bundle "app.js"}]})
 
   (fact
    "Several bundles can be added."
 
    (let [app (-> app-that-returns-request
-                 (wrap-with-file-bundle "/lib.js" public-dir
+                 (wrap-with-file-bundle "lib.js" public-dir
                                         ["/code.js"])
-                 (wrap-with-file-bundle "/app.js" public-dir
+                 (wrap-with-file-bundle "app.js" public-dir
                                         ["/more.js"]))]
      (set (map :bundle (:optimus-files (app {})))))
 
-   => #{"/lib.js" "/app.js"})
+   => #{"lib.js" "app.js"})
 
   (fact
    "There's wrap-with-file-bundles to reduce verbosity."
 
    (let [app (-> app-that-returns-request
                  (wrap-with-file-bundles public-dir
-                                         {"/lib.js" ["/code.js"]
-                                          "/app.js" ["/more.js"]}))]
+                                         {"lib.js" ["/code.js"]
+                                          "app.js" ["/more.js"]}))]
      (set (map :bundle (:optimus-files (app {})))))
 
-   => #{"/lib.js" "/app.js"})
+   => #{"lib.js" "app.js"})
 
   (fact
    "You can also add individual files that are not bundled. This is
@@ -148,3 +148,62 @@
          ["/bg.png" "binary" nil]
          ["/0508e66b8b0d/main.css" "#id1 { background: url('/7e57cfe84314/bg.png'); }" #{"/7e57cfe84314/bg.png"}]
          ["/7e57cfe84314/bg.png" "binary" nil]])))
+
+;; concatenate
+
+(with-files [["/code.js" "1 + 2"]
+             ["/more.js" "3 + 5"]]
+  (fact
+   "When files are bundled together, we still keep the original ones.
+    That way you can still cherry-pick files. However, the :bundle property
+    is removed - they are no longer to be included with the bundle.
+
+    Note that the ordering of wrappers again must be reversed."
+
+   (let [app (-> app-that-returns-request
+                 (wrap-to-concatenate-bundles)
+                 (wrap-with-file-bundle "app.js" public-dir
+                                        ["/code.js" "/more.js"]))]
+     (->> (app {})
+          :optimus-files))
+
+   => [{:path "/code.js" :original-path "/code.js" :contents "1 + 2"}
+       {:path "/more.js" :original-path "/more.js" :contents "3 + 5"}
+       {:path "/bundles/app.js"
+        :original-path "/bundles/app.js"
+        :contents "1 + 2\n3 + 5"
+        :references nil
+        :bundle "app.js"}]))
+
+(with-files [["/main.css" "#id1 { background: url('/bg.png'); }"]
+             ["/more.css" "#id3 { background: url('/logo.png'); }"]
+             ["/bg.png" "binary"]
+             ["/logo.png" "binary"]]
+
+  (fact
+   "When files are bundled together, the bundle references is a union
+    of the set."
+
+   (let [app (-> app-that-returns-request
+                 (wrap-to-concatenate-bundles)
+                 (wrap-with-file-bundle "styles.css" public-dir
+                                        ["/main.css" "/more.css"]))]
+     (->> (app {})
+          :optimus-files
+          (map (juxt :path :references))))
+
+   => [["/main.css" #{"/bg.png"}]
+       ["/more.css" #{"/logo.png"}]
+       ["/bundles/styles.css" #{"/bg.png" "/logo.png"}]]))
+
+;; ok, det er noe snålt her. Alle wrappers så langt gjør "update-in request [:optimus-files]"
+;;  - det virker unødvendig at de alle skal gjøre det.
+;;  - det virker også galt. Fordi da gjør den alt arbeidet for hver eneste request.
+;;     - og det skal den gjøre også, i development-mode
+;;  - så kanskje bruker vi chainen i production-mode til å generere files først
+;; kanskje er det ikke så galt likevel
+
+;; hver av disse wrapperne kan flyttes - dvs, innholdet i dem. Jeg kan
+;; teste funksjonene uten wrapping for seg i hver sine filer. Også kan
+;; alle wrapperne samles i wrappers, slik at de er lette å bruke.
+;; Testene der kan fokusere på samspillet mellom wrapperne. Awesome.
