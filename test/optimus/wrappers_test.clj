@@ -113,11 +113,12 @@
                        {:path "/f549e6e556ea/code.js"
                         :original-path "/code.js"
                         :contents "1 + 2"
+                        :references nil
                         :headers {"Cache-Control" "max-age=315360000"
                                   "Expires" "Fri, 28 Jul 2023 00:00:00 GMT"}}]})
 
-  #_(fact
-     "The file paths in CSS files must be updated to include cache
+  (fact
+   "The file paths in CSS files must be updated to include cache
     busters, so that they too can be served with far-future expires
     headers. There is a snag, tho:
 
@@ -131,19 +132,19 @@
     inside CSS. We handle this by ensuring all referenced files are
     fixed first, along with updating URLs in the referencing files."
 
-     (let [app (-> app-that-returns-request
-                   (wrap-with-cache-busted-expires-headers))]
-       (->> (app {:optimus-files [{:path "/main.css"
-                                   :original-path "/main.css"
-                                   :contents "#id1 { background: url('/bg.png'); }"
-                                   :references ["/bg.png"]}
-                                  {:path "/bg.png"
-                                   :original-path "/bg.png"
-                                   :contents "binary"}]})
-            :optimus-files
-            (map (juxt :path :contents)))
+   (let [app (-> app-that-returns-request
+                 (wrap-with-cache-busted-expires-headers))]
+     (->> (app {:optimus-files [{:path "/main.css"
+                                 :original-path "/main.css"
+                                 :contents "#id1 { background: url('/bg.png'); }"
+                                 :references #{"/bg.png"}}
+                                {:path "/bg.png"
+                                 :original-path "/bg.png"
+                                 :contents "binary"}]})
+          :optimus-files
+          (map (juxt :path :contents :references)))
 
-       => [["/main.css" "#id1 { background: url('/7e57cfe84314/bg.png'); }"]
-           ["/bg.png" "binary"]
-           ["/0508e66b8b0d/main.css" "#id1 { background: url('/7e57cfe84314/bg.png'); }"]
-           ["/7e57cfe84314/bg.png" "binary"]])))
+     => [["/main.css" "#id1 { background: url('/bg.png'); }" #{"/bg.png"}]
+         ["/bg.png" "binary" nil]
+         ["/0508e66b8b0d/main.css" "#id1 { background: url('/7e57cfe84314/bg.png'); }" #{"/7e57cfe84314/bg.png"}]
+         ["/7e57cfe84314/bg.png" "binary" nil]])))

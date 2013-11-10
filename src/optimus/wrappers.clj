@@ -2,7 +2,8 @@
   (:require [clj-time.core :as time]
             [clj-time.format]
             [optimus.digest :as digest]
-            [optimus.files :refer [->file]]))
+            [optimus.files :refer [->file replace-css-urls]]
+            [clojure.set :refer [intersection difference]]))
 
 ;; wrap with files
 
@@ -30,8 +31,8 @@
 (defn wrap-with-referenced-files [app public-dir]
   (fn [request]
     (let [files (->>  request :optimus-files
-                     (mapcat :references)
-                     (map #(->file public-dir %)))]
+                      (mapcat :references)
+                      (map #(->file public-dir %)))]
       (app (concat-files request files)))))
 
 ;; cache-busters and expired headers
@@ -50,10 +51,44 @@
                        "Expires" (http-date-formatter (time/plus (time/now)
                                                                  (time/days 3650)))})))
 
+(defn- by-path [path files]
+  (first (filter #(= path (:path %)) files)))
+
+(defn- replace-css-urls-with-new-ones [file files]
+  (let [orig->curr (into {} (map (juxt :original-path :path) files))]
+    (-> file
+        (replace-css-urls (fn [_ url] (get orig->curr url url)))
+        (update-in [:references] (fn [refs] (when refs (set (replace orig->curr refs))))))))
+
+(defn- add-cache-busted-expires-headers-in-order [to-replace files]
+  ;; three cases:
+
+  ;; 1. nothing more to replace? return the files
+  (if (empty? to-replace)
+    files
+    (let [next (by-path (first to-replace) files)
+          remaining-references (intersection to-replace (:references next))]
+
+      ;; 2. are there files referenced by this file that are yet to be fixed?
+      ;;    -> then take those first
+      (if (seq remaining-references)
+        (recur (concat remaining-references
+                       (difference to-replace (:references next)))
+               files)
+
+        ;; 3. otherwise update all references in this file, and fix it too.
+        ;;    then continue with the rest that remain.
+        (->> files
+             (replace {next (-> next
+                                (replace-css-urls-with-new-ones files)
+                                (add-cache-busted-expires-header))})
+             (recur (set (rest to-replace))))))))
+
 (defn- add-cache-busted-expires-headers [files]
-  (concat
-   (map #(assoc % :outdated true) files)
-   (map add-cache-busted-expires-header files)))
+  (let [cache-busted-files (add-cache-busted-expires-headers-in-order (set (map :path files)) files)]
+    (concat
+     (map #(assoc % :outdated true) files)
+     cache-busted-files)))
 
 (defn wrap-with-cache-busted-expires-headers [app]
   (fn [request]

@@ -40,7 +40,7 @@
 (defn- css-url-str [url]
   (str "url('" url "')"))
 
-(defn- replace-css-urls [file replacement-fn]
+(defn replace-css-urls [file replacement-fn]
   (assoc-in file [:contents]
             (str/replace (:contents file) css-url-re
                          (fn [[_ url]] (css-url-str (replacement-fn file url))))))
@@ -55,7 +55,7 @@
   (let [resource (existing-resource public-dir path)
         file (-> (file-struct path :css (slurp resource))
                  (replace-css-urls #(combine-paths (:original-path %1) %2)))]
-    (assoc file :references (paths-in-css file))))
+    (assoc file :references (set (paths-in-css file)))))
 
 ;; js
 

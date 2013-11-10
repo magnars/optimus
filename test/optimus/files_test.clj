@@ -42,7 +42,7 @@
    => {:path "/theme/styles/main.css"
        :original-path "/theme/styles/main.css"
        :contents "#id { background: url('/theme/images/bg.png'); }"
-       :references ["/theme/images/bg.png"]}))
+       :references #{"/theme/images/bg.png"}}))
 
 (with-files [["/query.css" "#id { background: url(\"/bg.png?query\"); }"]
              ["/ref.css"   "#id { background: url(/bg.png#ref); }"]
