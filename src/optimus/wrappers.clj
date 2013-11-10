@@ -66,11 +66,12 @@
   ;; 1. nothing more to replace? return the files
   (if (empty? to-replace)
     files
+
+    ;; 2. are there files referenced by this file that are yet to be fixed?
     (let [next (by-path (first to-replace) files)
           remaining-references (intersection to-replace (:references next))]
 
-      ;; 2. are there files referenced by this file that are yet to be fixed?
-      ;;    -> then take those first
+    ;;    -> then take those first
       (if (seq remaining-references)
         (recur (concat remaining-references
                        (difference to-replace (:references next)))
