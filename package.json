@@ -1,0 +1,20 @@
+{
+    "name": "optimus",
+    "description": "Clojure asset optimization",
+    "homepage": "https://github.com/magnars/optimus",
+    "version": "0.0.1",
+    "maintainers": [{
+        "name": "Magnar Sveen",
+        "email": "magnars@gmail.com"
+    }, {
+        "name": "Christian Johansen",
+        "email": "christian@cjohansen.,no"
+    }],
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/magnars/optimus.git"
+    },
+    "dependencies": {
+        "uglify-js" : "~2.4"
+    }
+}
