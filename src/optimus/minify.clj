@@ -19,7 +19,7 @@ stream.toString();")))
 (def uglify
   "The UglifyJS source code, free of dependencies and runnable in a
 stripped context"
-  (slurp (.getFile (clojure.java.io/resource "uglify.js"))))
+  (slurp (clojure.java.io/resource "uglify.js")))
 
 (defn minify-js [js]
   "Minify JS with the bundled UglifyJS version"
