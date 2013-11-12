@@ -51,10 +51,9 @@
                          (fn [[_ url]] (css-url-str (replacement-fn file url))))))
 
 (defn paths-in-css [file]
-  (->> file
-       :contents
+  (->> file :contents
        (re-seq css-url-re)
-       (map (comp (partial combine-paths (original-path file)) second))))
+       (map #(combine-paths (original-path file) (second %)))))
 
 (defn- load-css-asset [public-dir path]
   (let [contents (slurp (existing-resource public-dir path))
@@ -76,3 +75,6 @@
 
 (defn load-assets [public-dir paths]
   (mapcat #(load-asset-and-refs public-dir %) paths))
+
+;; load-bundles
+

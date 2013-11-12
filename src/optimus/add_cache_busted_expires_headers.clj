@@ -2,7 +2,7 @@
   (:require [clj-time.core :as time]
             [clj-time.format]
             [optimus.digest :as digest]
-            [optimus.files :refer [replace-css-urls]]
+            [optimus.assets :refer [replace-css-urls]]
             [clojure.set :refer [intersection difference]]))
 
 (def http-date-format
