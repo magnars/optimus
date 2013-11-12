@@ -8,5 +8,7 @@
                  [clj-time "0.5.1"]
                  [clj-v8 "0.1.4"]]
   :profiles {:dev {:dependencies [[midje "1.5.0"]]
-                   :plugins [[lein-midje "3.0.0"]]
-                   :resource-paths ["test/resources"]}})
+                   :plugins [[lein-midje "3.0.0"]
+                             [lein-shell "0.3.0"]]
+                   :resource-paths ["test/resources"]}}
+  :prep-tasks [["shell" "./build-uglify.sh"]])
