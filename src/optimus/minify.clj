@@ -5,7 +5,7 @@
   "Given a V8 context with the UglifyJS global loaded, minify JS and return the
 results as a string"
   (v8/run-script-in-context context (str "
-var ast = UglifyJS.parse('" js "');
+var ast = UglifyJS.parse('" (clojure.string/replace js "'" "\\'") "');
 ast.figure_out_scope();
 var compressor = UglifyJS.Compressor();
 var compressed = ast.transform(compressor);

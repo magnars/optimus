@@ -3,3 +3,5 @@
             [midje.sweet :refer [fact =>]]))
 
 (fact (minify-js "var hello = 2 + 3;") => "var hello=5;")
+
+(fact (minify-js "var hello = 'Hey';") => "var hello=\"Hey\";")
