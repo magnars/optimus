@@ -4,6 +4,18 @@ A Ring middleware for frontend performance optimization.
 
 ## How to run the tests
 
+### Installing dependencies
+
+We're using uglify to compress javascript. Fetch and build like so:
+
+```
+npm install
+mkdir resources
+./node_modules/.bin/uglifyjs --self -c -m -o resources/uglify.js
+```
+
+### Running the tests
+
 `lein midje` will run all tests.
 
 `lein midje namespace.*` will run only tests beginning with "namespace.".
