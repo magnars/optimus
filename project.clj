@@ -11,4 +11,4 @@
                    :plugins [[lein-midje "3.0.0"]
                              [lein-shell "0.3.0"]]
                    :resource-paths ["test/resources"]}}
-  :prep-tasks [["shell" "./build-uglify.sh"]])
+  :prep-tasks [["shell" "./build-js-sources.sh"]])
