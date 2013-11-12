@@ -21,10 +21,10 @@ A Ring middleware for frontend performance optimization.
                                        #"^/scripts/angular-ui/.+\.js$"]
                              "app.js" ["/scripts/controllers.js"
                                        "/scripts/directives.js"]})
-       (assets/load-all "public" ["/images/sprites.png"
-                                  "/images/bg.png"])
-       [(assets/asset "/init.js" (str "var serverTime = " (.getTime (Date.)))
-                      :bundle "app.js")])
+       (assets/load-assets "public" ["/images/sprites.png"
+                                     "/images/bg.png"])
+       [(assets/create-asset "/init.js" (str "var serverTime = " (.getTime (Date.)))
+                             :bundle "app.js")])
      (case (:optimus-strategy env)
        :develop strategies/serve-unchanged-assets
        :debug strategies/serve-optimized-assets
