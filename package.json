@@ -1,6 +1,6 @@
 {
     "name": "optimus",
-    "description": "Clojure asset optimization",
+    "description": "A Ring middleware for frontend performance optimization.",
     "homepage": "https://github.com/magnars/optimus",
     "version": "0.0.1",
     "maintainers": [{

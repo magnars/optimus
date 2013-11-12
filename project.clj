@@ -1,6 +1,6 @@
 (defproject optimus "0.0.1-SNAPSHOT"
   :description "A Ring middleware for frontend performance optimization."
-  :url "http://github.com/magnars/catenate"
+  :url "http://github.com/magnars/optimus"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.5.1"]
