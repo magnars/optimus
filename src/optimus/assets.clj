@@ -61,7 +61,7 @@
                   (replace-css-urls #(combine-paths (original-path %1) %2)))]
     (assoc asset :references (set (paths-in-css asset)))))
 
-;; load-asset
+;; load-assets
 
 (defn- load-asset [public-dir path]
   (guard-path path)

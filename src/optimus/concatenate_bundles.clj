@@ -5,7 +5,6 @@
 (defn- concatenate-bundle [[name files]]
   (when name
     {:path (str "/bundles/" name)
-     :original-path (str "/bundles/" name)
      :contents (str/join "\n" (map :contents files))
      :references (apply union (map :references files))
      :bundle name}))
