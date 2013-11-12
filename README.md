@@ -2,28 +2,6 @@
 
 A Ring middleware for frontend performance optimization.
 
-## How to run the tests
-
-### Installing dependencies
-
-We're using uglify to compress javascript. Fetch and build like so:
-
-```
-npm install
-mkdir resources
-./node_modules/.bin/uglifyjs --self -c -m -o resources/uglify.js
-```
-
-### Running the tests
-
-`lein midje` will run all tests.
-
-`lein midje namespace.*` will run only tests beginning with "namespace.".
-
-`lein midje :autotest` will run all the tests indefinitely. It sets up a
-watcher on the code files. If they change, only the relevant tests will be
-run again.
-
 ## Porcelain example
 
 ```clj
@@ -113,3 +91,26 @@ You don't have to serve all assets through optimus. Any paths that are
 not present in the list of assets will be passed to the next ring
 middleware. So you can serve additional static resources from
 `compojure.route/resources` for instance.
+
+## How to run the tests
+
+#### Installing dependencies
+
+We're using uglify to compress javascript. Fetch and build like so:
+
+```
+npm install
+mkdir resources
+./node_modules/.bin/uglifyjs --self -c -m -o resources/uglify.js
+```
+
+#### Running the tests
+
+`lein midje` will run all tests.
+
+`lein midje namespace.*` will run only tests beginning with "namespace.".
+
+`lein midje :autotest` will run all the tests indefinitely. It sets up a
+watcher on the code files. If they change, only the relevant tests will be
+run again.
+
