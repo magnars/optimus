@@ -74,6 +74,41 @@
    (-> (load-assets public-dir ["/query.css"]) first :contents) => "#id { background: url('/bg.png'); }"
    (-> (load-assets public-dir ["/ref.css"]) first :contents) => "#id { background: url('/bg.png'); }"))
 
+(with-files [["/code.js" "1 + 2"]
+             ["/more.js" "3 + 5"]]
+  (fact
+   "load-bundle is like load-assets, except it sets the :bundle
+    property - allowing the files to be concatenated later. The order
+    is preserved to ensure files in the bundle are loaded in the
+    correct sequence."
+
+   (load-bundle public-dir "app.js" ["/code.js" "/more.js"]) => [{:path "/code.js"
+                                                                  :contents "1 + 2"
+                                                                  :bundle "app.js"}
+                                                                 {:path "/more.js"
+                                                                  :contents "3 + 5"
+                                                                  :bundle "app.js"}])
+
+  (fact
+   "There's load-bundles to reduce verbosity."
+
+   (load-bundles public-dir {"lib.js" ["/code.js"]
+                             "app.js" ["/more.js"]}) => [{:path "/code.js"
+                                                          :contents "1 + 2"
+                                                          :bundle "lib.js"}
+                                                         {:path "/more.js"
+                                                          :contents "3 + 5"
+                                                          :bundle "app.js"}]))
+
+(with-files [["/main.css" "#id { background: url('/bg.png'); }"]
+             ["/bg.png" "binary"]]
+  (fact
+   "Referenced files are not part of the bundle."
+
+   (->> (load-bundle public-dir "styles.css" ["/main.css"])
+        (map (juxt :path :bundle))) => [["/main.css" "styles.css"]
+                                        ["/bg.png" nil]]))
+
 (fact
  "File names might be garbled beyond recognition by the optimizations
   inflicted on it. We must be able to look up a file by its original

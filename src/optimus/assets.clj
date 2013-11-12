@@ -78,3 +78,15 @@
 
 ;; load-bundles
 
+(defn load-bundle [public-dir bundle paths]
+  (let [assets (load-assets public-dir paths)
+        paths (set paths)
+        set-bundle-for-original-files (fn [asset] (if (contains? paths (:path asset))
+                                                    (assoc asset :bundle bundle)
+                                                    asset))]
+    (map set-bundle-for-original-files assets)))
+
+(defn load-bundles [public-dir bundles]
+  (mapcat (fn [[bundle paths]]
+            (load-bundle public-dir bundle paths))
+          bundles))
