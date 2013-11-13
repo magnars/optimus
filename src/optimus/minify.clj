@@ -2,7 +2,9 @@
   (:require [v8.core :as v8]))
 
 (defn- escape [str]
-  (clojure.string/replace (clojure.string/replace str "'" "\\'") "\n" "\\n"))
+  (-> str
+      (clojure.string/replace "'" "\\'")
+      (clojure.string/replace "\n" "\\n")))
 
 (defn- throw-v8-exception [text]
   (if (= (.indexOf text "ERROR: ") 0)
