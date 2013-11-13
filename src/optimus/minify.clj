@@ -56,7 +56,7 @@ var console = {
         var process;
         var compressor = new CSSOCompressor();
         var translator = new CSSOTranslator();
-        var compressed = compressor.compress(srcToCSSP('" (escape css) "', \"stylesheet\", true));
+        var compressed = compressor.compress(srcToCSSP('" (escape css) "', 'stylesheet', true));
         return translator.translate(cleanInfo(compressed));
     } catch (e) { return 'ERROR: ' + e.message; }
 }());"))
