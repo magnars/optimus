@@ -1,4 +1,5 @@
 (ns optimus.digest
+  (:require [clojure.data.codec.base64 :as b64])
   (import java.security.MessageDigest))
 
 (def ^:private byte->hex-str
@@ -16,3 +17,6 @@
   (bytes->hex-str
     (.digest (MessageDigest/getInstance "SHA-1")
       (.getBytes contents))))
+
+(defn base64-string [contents]
+  (String. (b64/encode (.getBytes contents)) "UTF-8"))
