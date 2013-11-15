@@ -96,13 +96,8 @@ middleware. So you can serve additional static resources from
 
 #### Installing dependencies
 
-We're using uglify to compress javascript. Fetch and build like so:
-
-```
-npm install
-mkdir resources
-./node_modules/.bin/uglifyjs --self -c -m -o resources/uglify.js
-```
+You need [npm](https://npmjs.org/) installed to fetch the JavaScript
+dependencies. The actual fetching is automated however.
 
 #### Running the tests
 
