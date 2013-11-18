@@ -3,6 +3,7 @@
         [midje.sweet]))
 
 (defn noop [_])
+(defn return-request [req] req)
 
 (fact
  "Serving unchanged assets means they're not touched, yo."
@@ -33,3 +34,14 @@
    (app {:uri "/code.js"}) => nil
    (swap! assets conj {:path "/code.js" :contents "1 + 2"})
    (app {:uri "/code.js"}) => {:status 200 :body "1 + 2"}))
+
+(fact
+ "If there is no matching path, add the files to the request to be
+  used by linking functions."
+
+ (defn get-assets []
+   [{:path "/code.js" :contents "1 + 2"}])
+
+ (let [app (serve-unchanged-assets return-request get-assets)]
+   (app {:uri "/index.html"}) => {:uri "/index.html"
+                                  :optimus-assets [{:path "/code.js" :contents "1 + 2"}]}))

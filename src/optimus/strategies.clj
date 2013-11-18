@@ -11,6 +11,8 @@
 
 (defn serve-unchanged-assets [app get-assets]
   (fn [request]
-    (let [path->asset (into {} (map (juxt :path identity) (get-assets)))]
+    (let [assets (get-assets)
+          path->asset (into {} (map (juxt :path identity) assets))]
       (if-let [asset (path->asset (:uri request))]
-        (serve asset)))))
+        (serve asset)
+        (app (assoc request :optimus-assets assets))))))
