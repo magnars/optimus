@@ -1,11 +1,11 @@
 (ns optimus.strategies)
 
-(defn assoc-non-nil [map key val]
+(defn- assoc-non-nil [map key val]
   (if val
     (assoc map key val)
     map))
 
-(defn serve [asset]
+(defn- serve [asset]
   (-> {:status 200 :body (:contents asset)}
       (assoc-non-nil :headers (:headers asset))))
 
