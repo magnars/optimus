@@ -119,3 +119,15 @@
  "Of course, some files might not have been changed at all. We still
   need to look them up by their 'original path'."
  (original-path {:path "/code.js"}) => "/code.js")
+
+(fact
+ "If you're listing out a bunch of files in the same folders, it can
+  be useful to extract the common prefix, if only to preserve your
+  sanity."
+
+ (with-prefix "/scripts/angular/"
+   ["some.js"
+    "more.js"
+    "code.js"]) => ["/scripts/angular/some.js"
+                    "/scripts/angular/more.js"
+                    "/scripts/angular/code.js"])

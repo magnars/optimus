@@ -90,3 +90,10 @@
   (mapcat (fn [[bundle paths]]
             (load-bundle public-dir bundle paths))
           bundles))
+
+;; with-prefix
+
+(defn with-prefix
+  [prefix & paths]
+  (map (partial str prefix)
+       (apply concat paths)))
