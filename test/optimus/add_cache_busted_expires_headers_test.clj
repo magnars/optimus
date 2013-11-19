@@ -21,7 +21,6 @@
        {:path "/f549e6e556ea/code.js"
         :original-path "/code.js"
         :contents "1 + 2"
-        :references nil
         :headers {"Cache-Control" "max-age=315360000"
                   "Expires" "Fri, 28 Jul 2023 00:00:00 GMT"}}])
 

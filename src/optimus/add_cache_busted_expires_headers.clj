@@ -3,6 +3,7 @@
             [clj-time.format]
             [optimus.digest :as digest]
             [optimus.assets :refer [replace-css-urls original-path]]
+            [optimus.homeless :refer [assoc-non-nil]]
             [clojure.set :refer [intersection difference]]))
 
 (def http-date-format
@@ -27,7 +28,8 @@
   (let [orig->curr (into {} (map (juxt original-path :path) files))]
     (-> file
         (replace-css-urls (fn [_ url] (get orig->curr url url)))
-        (update-in [:references] (fn [refs] (when refs (set (replace orig->curr refs))))))))
+        (assoc-non-nil :references (when (:references file)
+                                     (set (replace orig->curr (:references file))))))))
 
 (defn- add-cache-busted-expires-headers-in-order [to-replace files]
   ;; three cases:

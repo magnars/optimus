@@ -16,7 +16,6 @@
      {:path "/more.js" :original-path "/more.js" :contents "3 + 5"}
      {:path "/bundles/app.js"
       :contents "1 + 2\n3 + 5"
-      :references nil
       :bundle "app.js"}])
 
 (fact
