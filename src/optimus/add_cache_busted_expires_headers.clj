@@ -2,8 +2,9 @@
   (:require [clj-time.core :as time]
             [clj-time.format]
             [optimus.digest :as digest]
-            [optimus.assets :refer [replace-css-urls original-path]]
+            [optimus.assets :refer [original-path]]
             [optimus.homeless :refer [assoc-non-nil]]
+            [clojure.string :as str]
             [clojure.set :refer [intersection difference]]))
 
 (def http-date-format
@@ -24,12 +25,19 @@
 (defn- by-path [path files]
   (first (filter #(= path (:path %)) files)))
 
-(defn- replace-css-urls-with-new-ones [file files]
-  (let [orig->curr (into {} (map (juxt original-path :path) files))]
-    (-> file
-        (replace-css-urls (fn [_ url] (get orig->curr url url)))
-        (assoc-non-nil :references (when (:references file)
-                                     (set (replace orig->curr (:references file))))))))
+(defn- replace-referenced-url [file old new]
+  (update-in file [:contents] #(str/replace % old new)))
+
+(defn- replace-referenced-urls [file old->new]
+  (reduce #(replace-referenced-url %1 %2 (old->new %2)) file (:references file)))
+
+(defn- replace-referenced-urls-with-new-ones [file files]
+  (if-let [references (:references file)]
+    (let [orig->curr (into {} (map (juxt original-path :path) files))]
+      (-> file
+          (replace-referenced-urls orig->curr)
+          (assoc :references (set (replace orig->curr references)))))
+    file))
 
 (defn- add-cache-busted-expires-headers-in-order [to-replace files]
   ;; three cases:
@@ -50,7 +58,7 @@
         ;; 3. otherwise update all references in this file, and fix it too.
         (->> files
              (replace {next (-> next
-                                (replace-css-urls-with-new-ones files)
+                                (replace-referenced-urls-with-new-ones files)
                                 (add-cache-busted-expires-header))})
 
              ;; and continue with the rest that remain.

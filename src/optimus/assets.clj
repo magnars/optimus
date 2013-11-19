@@ -45,7 +45,7 @@
 (defn- css-url-str [url]
   (str "url('" url "')"))
 
-(defn replace-css-urls [file replacement-fn]
+(defn- replace-css-urls [file replacement-fn]
   (assoc-in file [:contents]
             (str/replace (:contents file) css-url-re
                          (fn [[_ url]] (css-url-str (replacement-fn file url))))))
