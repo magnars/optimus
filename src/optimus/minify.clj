@@ -6,7 +6,7 @@
       (clojure.string/replace "'" "\\'")
       (clojure.string/replace "\n" "\\n")))
 
-(defn- throw-v8-exception [text]
+(defn- throw-v8-exception [#^String text]
   (if (= (.indexOf text "ERROR: ") 0)
     (throw (Exception. (clojure.core/subs text 7)))
     text))

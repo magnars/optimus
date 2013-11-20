@@ -248,6 +248,31 @@ And then grab the cache buster URL like so:
 (link/file-path request "/images/logo.png")
 ```
 
+## Can I tweak how optimus behaves?
+
+There are some options to be tuned, but if you're planning on doing
+major things there's nothing wrong with writing your own strategies or
+optimizations. A pull request is welcome too.
+
+Now, for the options. You pass them to the wrapper after the strategy:
+
+```cl
+(-> app
+    (optimus/wrap
+     get-assets
+     the-strategy
+     :cache-live-assets 2000))
+```
+
+- *cache-live-assets*: Assets can be costly to fetch, especially if
+  you're looking up lots of different regexen on the class path.
+  Considering that this has to be done for every request, it can take
+  its toll on the load times in development mode.
+
+  Tune this parameter to change for how many milliseconds the "live"
+  assets should be frozen. Two seconds is the default. `false` turns
+  it off.
+
 ## I heard rumours about support for Angular templates?
 
 Yeah, you can use optimus to serve concatenated Angular.JS templates:

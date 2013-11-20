@@ -33,7 +33,7 @@
 
  (def assets (atom []))
 
- (let [app (serve-unchanged-assets noop #(deref assets))]
+ (let [app (serve-unchanged-assets noop #(deref assets) {:cache-live-assets false})]
    (app {:uri "/code.js"}) => nil
    (swap! assets conj {:path "/code.js" :contents "1 + 2"})
    (app {:uri "/code.js"}) => {:status 200 :body "1 + 2"}))
@@ -83,7 +83,7 @@
 
    (def assets (atom [{:path "/core.js" :contents "var x = 1 + 2;"}]))
 
-   (let [app (serve-optimized-assets noop #(deref assets))]
+   (let [app (serve-optimized-assets noop #(deref assets) {:cache-live-assets false})]
      (app {:uri "/core.js"}) => {:status 200 :body "var x = 1 + 2;"}
      (swap! assets conj {:path "/core.js" :contents "var y = 3 + 4;"})
      (app {:uri "/core.js"}) => {:status 200 :body "var y = 3 + 4;"}))

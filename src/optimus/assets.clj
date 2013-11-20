@@ -7,7 +7,7 @@
 
 ;; create-asset
 
-(defn guard-path [path]
+(defn guard-path [#^String path]
   (when-not (.startsWith path "/")
     (throw (Exception. (str "Asset paths must start with a slash. Got: " path)))))
 
@@ -64,7 +64,7 @@
 
 ;; load-assets
 
-(defn- load-asset [public-dir path]
+(defn- load-asset [public-dir #^String path]
   (guard-path path)
   (if (.endsWith path ".css")
     (load-css-asset public-dir path)
@@ -74,14 +74,14 @@
   (let [asset (load-asset public-dir path)]
     (concat [asset] (mapcat #(load-asset-and-refs public-dir %) (:references asset)))))
 
-(defn slice-path-to-after [public-dir s]
+(defn slice-path-to-after [public-dir #^String s]
   (subs s (+ (count public-dir)
              (.indexOf s (str public-dir "/")))))
 
 (defn realize-regex-paths [public-dir path]
   (if (instance? java.util.regex.Pattern path)
     (let [paths (->> (file-paths-on-class-path)
-                     (filter #(.contains % public-dir))
+                     (filter (fn [#^String p] (.contains p public-dir)))
                      (map #(slice-path-to-after public-dir %))
                      (filter #(re-find path %)))]
       (if (empty? paths)
