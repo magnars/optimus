@@ -121,6 +121,16 @@
                                                                   :bundle "app.js"}])
 
   (fact
+   "Files matched with a regexp are also part of the bundle."
+
+   (set (load-bundle public-dir "app.js" [#"/.+\.js$"])) => #{{:path "/code.js"
+                                                               :contents "1 + 2"
+                                                               :bundle "app.js"}
+                                                              {:path "/more.js"
+                                                               :contents "3 + 5"
+                                                               :bundle "app.js"}})
+
+  (fact
    "There's load-bundles to reduce verbosity."
 
    (load-bundles public-dir {"lib.js" ["/code.js"]
