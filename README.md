@@ -2,10 +2,10 @@
 
 A Ring middleware for frontend performance optimization.
 
-It serves your static files:
+It serves your static assets as:
 
- - in production: in optimized bundles
- - in development: unchanged
+ - in production: optimized bundles
+ - in development: unchanged, individual files
 
 In other words: Develop with ease. Optimize in production.
 
@@ -59,7 +59,7 @@ Let's look at an example:
 
 3. Declare how to get your assets in a function.
 
-4. It returns a list of assets, in the form `[{:path :contents}]`
+4. It returns a list of assets.
 
 5. The helpers in `optimus.assets` load files from a given directory
    on the classpath (normally in the `src/resources` directory). So in
@@ -67,8 +67,8 @@ Let's look at an example:
 
 6. The name of this bundle is `styles.css`.
 
-7. It takes a list of paths. These paths double as the URL to the
-   assets, and the path to the file in the public directory.
+7. It takes a list of paths. These paths double as URLs to the
+   assets, and paths to the files in the public directory.
 
 8. The contents are concatenated together in the order specified in the
    bundle.
@@ -79,11 +79,11 @@ Let's look at an example:
     individually. Make sure you're specific enough to avoid including
     weird things out of other jars on the class path.
 
-11. You can add individual assets that aren't parts of a bundle, but
-    that should be optimized and served through optimus. This is
-    useful to add cache busters and
-    [far future Expires headers](http://developer.yahoo.com/performance/rules.html#expires)
-    to images served straight from your HTML.
+11. You can add individual assets that aren't part of a bundle, but
+     should be optimized and served through optimus. This is useful to
+     add cache busters and
+     [far future Expires headers](http://developer.yahoo.com/performance/rules.html#expires)
+     to images served straight from your HTML.
 
     If you use the `optimus.assets` helpers, you don't have to list
     all images and fonts referenced in your CSS files - those are
@@ -183,9 +183,9 @@ eg. `public/app/some.js` on the classpath.
 
 ## What about production mode?
 
-All the contents for each bundle is read at startup. URLs are
-generated from the hash of the contents and the identifier of the
-bundle.
+When you use the `serve-frozen-optimized-assets` strategy, all the
+contents for each bundle is read at startup. URLs are generated from
+the hash of the contents and the identifier of the bundle.
 
 So when you call `(link/bundle-urls request ["app.js"])`, it now
 returns:
@@ -196,21 +196,6 @@ returns:
 
 and the middleware handles this URL by returning the concatenated
 file contents in the order given by the bundle.
-
-#### How do I handle cache busters on images?
-
-CSS files that reference images are rewritten so that they point to
-cache busting URLs.
-
-If you're using static images in your HTML, then you'll add a list of
-these files with `optimus.assets/load-assets` like point 11 in the big
-example.
-
-And then grab the cache buster URL like so:
-
-```cl
-(link/file-path request "/images/logo.png")
-```
 
 #### What if the contents have changed?
 
@@ -227,7 +212,7 @@ doing rolling restarts of app servers.
 #### Why not just ignore the hash and return the current contents?
 
 Because then the user might be visiting an old app server with a new
-URL, and suddenly he is caching stale contents. Or worse, your Nginx
+URL, and suddenly she is caching stale contents. Or worse, your Nginx
 or Varnish cache picks up on it and is now serving out old shit in a
 new wrapping. Not cool.
 
@@ -244,8 +229,24 @@ When you're serving optimized assets, the bundles are also available. For
 instance: `/d131dd02c5e6eec4/bundles/app.js` can also be accessed on
 `/bundles/app.js`.
 
-*Please note:* **You have to make sure these URLs are not served with
-far future expires headers**, or you'll be in trouble when updating.
+*Please note:* **You have to make extra sure these URLs are not served
+with far future expires headers**, or you'll be in trouble when
+updating.
+
+#### How do I handle cache busters on images?
+
+CSS files that reference images are rewritten so that they point to
+cache busting URLs.
+
+If you're using static images in your HTML, then you'll add a list of
+these files with `optimus.assets/load-assets` like point 11 in the big
+example.
+
+And then grab the cache buster URL like so:
+
+```cl
+(link/file-path request "/images/logo.png")
+```
 
 ## I heard rumours about support for Angular templates?
 
@@ -270,14 +271,14 @@ and adds them to the `$templateCache`.
 You link to this script with:
 
 ```cl
-(optimus/file-url request "/templates/angular.js")
+(optimus/file-path request "/templates/angular.js")
 ```
 
 Or you can add a `:bundle "app.js"` pair to the
 `create-template-cache` call, and the file will be bundled together
 with the rest of the javascript files in `/bundles/app.js`. Nifty.
 
-## What are these assets anyway? They seem too magical for me.
+## What are these assets anyway? They seem magical to me.
 
 Luckily they're just data. The most basic operation of optimus is
 serving assets from a list, with this minimal structure:
@@ -291,8 +292,8 @@ In addition to `:path` and `:contents`, the asset map may contain:
  - `:bundle` - the name of the bundle this asset is part of.
  - `:headers` - headers to be served along with the asset.
  - `:original-path` - the path before any changes was made, like cache-busters.
- - `:outdated` - will only be served when referenced directly.
- - `:browsers` - will only be served to this set of browsers *(todo)*
+ - `:outdated` - the asset won't be linked to, but is available when referenced directly.
+ - `:browsers` - the asset will only be linked to for this set of browsers *(todo)*
 
 Built on top of that is a bunch of operations that either help you:
 
