@@ -2,10 +2,10 @@
 
 A Ring middleware for frontend performance optimization.
 
-It serves your static assets as:
+It serves your static assets:
 
- - in production: optimized bundles
- - in development: unchanged, individual files
+ - in production: as optimized bundles
+ - in development: as unchanged, individual files
 
 In other words: Develop with ease. Optimize in production.
 
@@ -300,6 +300,10 @@ Built on top of that is a bunch of operations that either help you:
  - Load assets to put in the list: `optimus.assets`
  - Optimize the assets in the list somehow: `optimus.strategies`
  - Link to the assets: `optimus.link`
+
+If you want to know more, the [tests](test/optimus) are a good place
+to start reading. They go in to all the details of how optimus works
+and even has some commentary on reasoning and reasons.
 
 ## How do I run the tests?
 
