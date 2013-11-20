@@ -80,10 +80,13 @@
 
 (defn realize-regex-paths [public-dir path]
   (if (instance? java.util.regex.Pattern path)
-    (->> (file-paths-on-class-path)
-         (filter #(.contains % public-dir))
-         (map #(slice-path-to-after public-dir %))
-         (filter #(re-find path %)))
+    (let [paths (->> (file-paths-on-class-path)
+                     (filter #(.contains % public-dir))
+                     (map #(slice-path-to-after public-dir %))
+                     (filter #(re-find path %)))]
+      (if (empty? paths)
+        (throw (Exception. (str "No files matched regex " path)))
+        paths))
     [path]))
 
 (defn load-assets [public-dir paths]

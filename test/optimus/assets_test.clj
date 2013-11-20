@@ -40,6 +40,11 @@
                     "/styles/main.css"})
 
   (fact
+   "If no files match the regex, you want to know."
+
+   (load-assets public-dir [#"/stlyes/.+\.css%"]) => (throws Exception "No files matched regex /stlyes/.+\\.css%"))
+
+  (fact
    "If you need the files in a specific order, you can list the
     ordered ones first."
 
