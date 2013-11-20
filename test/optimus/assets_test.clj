@@ -28,6 +28,32 @@
    "Missing files are not tolerated."
    (load-assets public-dir ["/gone.js"]) => (throws FileNotFoundException "/gone.js")))
 
+(with-files [["/styles/reset.css" ""]
+             ["/styles/main.css" ""]
+             ["/external/kalendae.css" ""]]
+  (fact
+   "You can load multiple assets using regex."
+
+   (->> (load-assets public-dir [#"/styles/.+\.css$"])
+        (map :path)
+        (set)) => #{"/styles/reset.css"
+                    "/styles/main.css"})
+
+  (fact
+   "If you need the files in a specific order, you can list the
+    ordered ones first."
+
+   (->> (load-assets public-dir ["/styles/reset.css"
+                                 #"/styles/.+\.css$"])
+        (map :path)) => ["/styles/reset.css"
+                         "/styles/main.css"])
+
+  (fact
+   (->> (load-assets public-dir ["/styles/main.css"
+                                 #"/styles/.+\.css$"])
+        (map :path)) => ["/styles/main.css"
+                         "/styles/reset.css"]))
+
 (with-files [["/main.css" "#id { background: url('/bg.png'); }"]
              ["/bg.png" "binary"]]
   (fact

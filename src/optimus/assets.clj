@@ -1,7 +1,8 @@
 (ns optimus.assets
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
-            [pathetic.core :as pathetic])
+            [pathetic.core :as pathetic]
+            [optimus.class-path :refer [file-paths-on-class-path]])
   (:import java.io.FileNotFoundException))
 
 ;; create-asset
@@ -73,8 +74,23 @@
   (let [asset (load-asset public-dir path)]
     (concat [asset] (mapcat #(load-asset-and-refs public-dir %) (:references asset)))))
 
+(defn slice-path-to-after [public-dir s]
+  (subs s (+ (count public-dir)
+             (.indexOf s (str public-dir "/")))))
+
+(defn realize-regex-paths [public-dir path]
+  (if (instance? java.util.regex.Pattern path)
+    (->> (file-paths-on-class-path)
+         (filter #(.contains % public-dir))
+         (map #(slice-path-to-after public-dir %))
+         (filter #(re-find path %)))
+    [path]))
+
 (defn load-assets [public-dir paths]
-  (mapcat #(load-asset-and-refs public-dir %) paths))
+  (->> paths
+       (mapcat #(realize-regex-paths public-dir %))
+       (mapcat #(load-asset-and-refs public-dir %))
+       (distinct)))
 
 ;; load-bundles
 
