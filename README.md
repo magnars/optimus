@@ -277,7 +277,7 @@ Values in this example are all defaults, so it's just a verbose noop.
   its toll on the load times in development mode.
 
   Tune this parameter to change for how many milliseconds the live
-  assets should be frozen. `false` disabled the caching.
+  assets should be frozen. `false` disables the caching.
 
 - *mangle-js-names*: When minifying JavaScript, local variable names
   are changed to be just one letter. This reduces file size, but
