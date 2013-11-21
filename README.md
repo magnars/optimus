@@ -31,7 +31,7 @@ Let's look at an example:
                         "/styles/main.css"]) ;; 8
    (assets/load-bundles "public" ;; 9
                         {"lib.js" ["/scripts/angular.js"
-                                   #"/scripts/angular-ui/.+\.js$"] ;; 10
+                                   #"/scripts/.+\.js$"] ;; 10
                          "app.js" ["/scripts/controllers.js"
                                    "/scripts/directives.js"]})
    (assets/load-assets "public" ;; 11
@@ -78,6 +78,10 @@ Let's look at an example:
 10. You can use regexen to find multiple files without specifying each
     individually. Make sure you're specific enough to avoid including
     weird things out of other jars on the class path.
+
+    Notice that `angular.js` is included first, even tho it is
+    included by the regex. This how you make sure dependencies are
+    loaded first.
 
 11. You can add individual assets that aren't part of a bundle, but
      should be optimized and served through optimus. This is useful to
@@ -261,17 +265,24 @@ Now, for the options. You pass them to the wrapper after the strategy:
     (optimus/wrap
      get-assets
      the-strategy
-     :cache-live-assets 2000))
+     :cache-live-assets 2000
+     :mangle-js-names true))
 ```
+
+Values in this example are all defaults, so it's just a verbose noop.
 
 - *cache-live-assets*: Assets can be costly to fetch, especially if
   you're looking up lots of different regexen on the class path.
   Considering that this has to be done for every request, it can take
   its toll on the load times in development mode.
 
-  Tune this parameter to change for how many milliseconds the "live"
-  assets should be frozen. Two seconds is the default. `false` turns
-  it off.
+  Tune this parameter to change for how many milliseconds the live
+  assets should be frozen. `false` disabled the caching.
+
+- *mangle-js-names*: When minifying JavaScript, local variable names
+  are changed to be just one letter. This reduces file size, but
+  disrupts some libraries that use clever reflection tricks - like
+  Angular.JS. Set to `false` to keep local variable names intact.
 
 ## I heard rumours about support for Angular templates?
 

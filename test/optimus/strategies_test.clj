@@ -68,12 +68,12 @@
    (let [app (serve-optimized-assets return-request get-assets)]
      (:optimus-assets (app {})) =>
 
-     [{:path "/core.js" :contents "var x = 1 + 2;" :outdated true}
-      {:path "/main.js" :contents "var y = 3 + 4;" :outdated true}
-      {:path "/bundles/app.js" :contents "var x = 1 + 2;\nvar y = 3 + 4;" :bundle "app.js" :outdated true}
-      {:path "/7c88f58018c5/core.js" :original-path "/core.js" :contents "var x = 1 + 2;" :headers headers}
-      {:path "/56ea15143f13/main.js" :original-path "/main.js" :contents "var y = 3 + 4;" :headers headers}
-      {:path "/f37403af7031/bundles/app.js" :original-path "/bundles/app.js" :contents "var x = 1 + 2;\nvar y = 3 + 4;" :bundle "app.js" :headers headers}]))
+     [{:path "/core.js" :contents "var x=3;" :outdated true}
+      {:path "/main.js" :contents "var y=7;" :outdated true}
+      {:path "/bundles/app.js" :contents "var x=3;\nvar y=7;" :bundle "app.js" :outdated true}
+      {:path "/1e10b6b7ffe7/core.js" :original-path "/core.js" :contents "var x=3;" :headers headers}
+      {:path "/3984012ce8f1/main.js" :original-path "/main.js" :contents "var y=7;" :headers headers}
+      {:path "/acc6196d6f45/bundles/app.js" :original-path "/bundles/app.js" :contents "var x=3;\nvar y=7;" :bundle "app.js" :headers headers}]))
 
   (fact
    "The serve-optimized-assets strategy is useful to debug in the same
@@ -84,9 +84,9 @@
    (def assets (atom [{:path "/core.js" :contents "var x = 1 + 2;"}]))
 
    (let [app (serve-optimized-assets noop #(deref assets) {:cache-live-assets false})]
-     (app {:uri "/core.js"}) => {:status 200 :body "var x = 1 + 2;"}
+     (app {:uri "/core.js"}) => {:status 200 :body "var x=3;"}
      (swap! assets conj {:path "/core.js" :contents "var y = 3 + 4;"})
-     (app {:uri "/core.js"}) => {:status 200 :body "var y = 3 + 4;"}))
+     (app {:uri "/core.js"}) => {:status 200 :body "var y=7;"}))
 
   ;; serve-frozen-optimized-assets
 
@@ -98,6 +98,6 @@
    (def assets (atom [{:path "/core.js" :contents "var x = 1 + 2;"}]))
 
    (let [app (serve-frozen-optimized-assets noop #(deref assets))]
-     (app {:uri "/7c88f58018c5/core.js"}) => {:status 200 :body "var x = 1 + 2;" :headers headers}
+     (app {:uri "/1e10b6b7ffe7/core.js"}) => {:status 200 :body "var x=3;" :headers headers}
      (swap! assets conj {:path "/core.js" :contents "var y = 3 + 4"})
-     (app {:uri "/7c88f58018c5/core.js"}) => {:status 200 :body "var x = 1 + 2;" :headers headers})))
+     (app {:uri "/1e10b6b7ffe7/core.js"}) => {:status 200 :body "var x=3;" :headers headers})))

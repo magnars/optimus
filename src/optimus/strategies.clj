@@ -1,6 +1,7 @@
 (ns optimus.strategies
   (:require [optimus.concatenate-bundles :refer [concatenate-bundles]]
             [optimus.add-cache-busted-expires-headers :refer [add-cache-busted-expires-headers]]
+            [optimus.minify :refer [minify-js-assets]]
             [optimus.homeless :refer [assoc-non-nil]]
             [clojure.core.memoize :as memo]))
 
@@ -28,8 +29,9 @@
     (fn [request]
       (serve-asset-or-continue assets path->asset app request))))
 
-(defn- optimize-assets [assets]
+(defn- optimize-assets [assets options]
   (-> assets
+      (minify-js-assets options)
       concatenate-bundles
       add-cache-busted-expires-headers))
 
@@ -39,8 +41,8 @@
 
 (defn serve-optimized-assets
   ([app get-assets] (serve-optimized-assets app get-assets {}))
-  ([app get-assets options] (serve-live-assets app #(optimize-assets (get-assets)) options)))
+  ([app get-assets options] (serve-live-assets app #(optimize-assets (get-assets) options) options)))
 
 (defn serve-frozen-optimized-assets
   ([app get-assets] (serve-frozen-optimized-assets app get-assets {}))
-  ([app get-assets options] (serve-frozen-assets app #(optimize-assets (get-assets)) options)))
+  ([app get-assets options] (serve-frozen-assets app #(optimize-assets (get-assets) options) options)))
