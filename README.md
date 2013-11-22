@@ -295,10 +295,10 @@ Yeah, you can use optimus to serve concatenated Angular.JS templates:
    [(optimus.angular/create-template-cache
      :path "/templates/angular.js"
      :module "MYAPP"
-     :public-dir "public"
-     :templates ["/angular/templates/home.html"
-                 "/angular/templates/create.html"
-                 "/angular/templates/update.html"])]))
+     :templates (assets/load-assets "public"
+                 ["/angular/templates/home.html"
+                  "/angular/templates/create.html"
+                  "/angular/templates/update.html"]))]))
 ```
 
 This creates a file `/templates/angular.js` that inlines the templates
