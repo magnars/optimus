@@ -62,7 +62,7 @@ stripped context"
 
 ;; minify CSS
 
-(defn- css-minify-code [css]
+(defn- css-minify-code [css options]
   (str "
 var console = {
     error: function (message) {
@@ -80,18 +80,33 @@ var console = {
     } catch (e) { return 'ERROR: ' + e.message; }
 }());"))
 
-(defn minify-css-in-csso-context [context css]
-  "Given a V8 context with the CSSOCompressor, CSSOTranslator, cleanInfo and
-srcToCSSP globals loaded, minify CSS and return the results as a string"
-  (throw-v8-exception (v8/run-script-in-context context (css-minify-code css)) nil))
-
 (def csso
   "The CSSO source code, free of dependencies and runnable in a
 stripped context"
   (slurp (clojure.java.io/resource "csso.js")))
 
-(defn minify-css [css]
+(defn create-csso-context []
   "Minify CSS with the bundled CSSO version"
   (let [context (v8/create-context)]
     (v8/run-script-in-context context csso)
-    (minify-css-in-csso-context context css)))
+    context))
+
+(defn minify-css
+  ([css] (minify-css css {}))
+  ([css options] (minify-css (create-csso-context) css options))
+  ([context css options]
+     (throw-v8-exception (v8/run-script-in-context context (css-minify-code css options))
+                         (:path options))))
+
+(defn minify-css-asset
+  [context asset options]
+  (let [#^String path (:path asset)]
+    (if (.endsWith path ".css")
+      (update-in asset [:contents] #(minify-css context % (assoc options :path path)))
+      asset)))
+
+(defn minify-css-assets
+  ([assets] (minify-css-assets assets {}))
+  ([assets options]
+     (let [context (create-csso-context)]
+       (map #(minify-css-asset context % options) assets))))

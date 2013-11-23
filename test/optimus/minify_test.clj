@@ -40,7 +40,7 @@
    (minify-js cx "var hello = 3 + 4;" {}) => "var hello=7;"))
 
 (fact
- "It minifies a list of assets."
+ "It minifies a list of JS assets."
  (minify-js-assets [{:path "code.js" :contents "var a = 2 + 3;"}
                     {:path "more.js" :contents "var b = 4 + 5;"}])
  => [{:path "code.js" :contents "var a=5;"}
@@ -49,9 +49,9 @@
 (fact
  "It only minifies .js files"
  (minify-js-assets [{:path "code.js" :contents "var a = 2 + 3;"}
-                    {:path "styles.css" :contents "#id {margin: 0}"}])
+                    {:path "styles.css" :contents "#id { margin: 0; }"}])
  => [{:path "code.js" :contents "var a=5;"}
-     {:path "styles.css" :contents "#id {margin: 0}"}])
+     {:path "styles.css" :contents "#id { margin: 0; }"}])
 
 (fact
  "It passes options along."
@@ -71,3 +71,23 @@
 (fact (minify-css "body { color: red; }") => "body{color:red}")
 (fact (minify-css "body {\n    color: red;\n}") => "body{color:red}")
 (fact (minify-css "body {\n    color: red") => (throws Exception "Please check the validity of the CSS block starting from the line #1"))
+
+(fact
+ "It minifies a list of CSS assets."
+ (minify-css-assets [{:path "reset.css" :contents "body { color: red; }"}
+                     {:path "style.css" :contents "body { color: #ffff00; }"}])
+ => [{:path "reset.css" :contents "body{color:red}"}
+     {:path "style.css" :contents "body{color:#ff0}"}])
+
+(fact
+ "It only minifies .css files"
+ (minify-css-assets [{:path "code.js" :contents "var a = 2 + 3;"}
+                     {:path "styles.css" :contents "#id { margin: 0; }"}])
+ => [{:path "code.js" :contents "var a = 2 + 3;"}
+     {:path "styles.css" :contents "#id{margin:0}"}])
+
+
+(fact
+ "It includes the path in exception."
+ (minify-css-assets [{:path "styles.css" :contents "body {\n    color: red"}])
+ => (throws Exception "Exception in styles.css: Please check the validity of the CSS block starting from the line #1"))

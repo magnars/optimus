@@ -1,7 +1,7 @@
 (ns optimus.strategies
   (:require [optimus.concatenate-bundles :refer [concatenate-bundles]]
             [optimus.add-cache-busted-expires-headers :refer [add-cache-busted-expires-headers]]
-            [optimus.minify :refer [minify-js-assets]]
+            [optimus.minify :refer [minify-js-assets minify-css-assets]]
             [optimus.homeless :refer [assoc-non-nil]]
             [clojure.core.memoize :as memo]))
 
@@ -32,8 +32,9 @@
 (defn- optimize-assets [assets options]
   (-> assets
       (minify-js-assets options)
-      concatenate-bundles
-      add-cache-busted-expires-headers))
+      (minify-css-assets options)
+      (concatenate-bundles)
+      (add-cache-busted-expires-headers)))
 
 (defn serve-unchanged-assets
   ([app get-assets] (serve-unchanged-assets app get-assets {}))
