@@ -1,4 +1,4 @@
-(defproject optimus "0.9.0"
+(defproject optimus "0.9.1"
   :description "A Ring middleware for frontend performance optimization."
   :url "http://github.com/magnars/optimus"
   :license {:name "Eclipse Public License"
@@ -8,7 +8,9 @@
                  [org.clojure/data.codec "0.1.0"]
                  [pathetic "0.5.1"]
                  [clj-time "0.5.1"]
-                 [clj-v8 "0.1.4"]]
+                 [clj-v8-native "0.1.4"]
+                 [org.clojars.elmom/clojure-jna "0.9"]
+                 [net.java.dev.jna/jna "3.5.1"]]
   :profiles {:dev {:dependencies [[midje "1.5.0"]]
                    :plugins [[lein-midje "3.0.0"]
                              [lein-shell "0.3.0"]]
