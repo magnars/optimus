@@ -72,6 +72,17 @@
 (fact (minify-css "body {\n    color: red;\n}") => "body{color:red}")
 (fact (minify-css "body {\n    color: red") => (throws Exception "Please check the validity of the CSS block starting from the line #1"))
 
+
+(fact
+ "You can turn off structural optimizations."
+
+ (minify-css "body { color: red; } body { font-size: 10px; }")
+ => "body{color:red;font-size:10px}"
+
+ (minify-css "body { color: red; } body { font-size: 10px; }" {:optimize-css-structure false})
+ => "body{color:red}body{font-size:10px}")
+
+
 (fact
  "It minifies a list of CSS assets."
  (minify-css-assets [{:path "reset.css" :contents "body { color: red; }"}
@@ -85,7 +96,6 @@
                      {:path "styles.css" :contents "#id { margin: 0; }"}])
  => [{:path "code.js" :contents "var a = 2 + 3;"}
      {:path "styles.css" :contents "#id{margin:0}"}])
-
 
 (fact
  "It includes the path in exception."

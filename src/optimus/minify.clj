@@ -14,7 +14,7 @@
       (throw (Exception. (str prefix error))))
     text))
 
-(defn- js-minify-code [js {:keys [mangle-js-names] :or {mangle-js-names true}}]
+(defn- js-minify-code [js options]
   (str "(function () {
     try {
         var ast = UglifyJS.parse('" (escape js) "');
@@ -23,7 +23,7 @@
         var compressed = ast.transform(compressor);
         compressed.figure_out_scope();
         compressed.compute_char_frequency();"
-        (if mangle-js-names "compressed.mangle_names();" "")
+        (if (get options :mangle-js-names true) "compressed.mangle_names();" "")
         "var stream = UglifyJS.OutputStream();
         compressed.print(stream);
         return stream.toString();
@@ -75,7 +75,7 @@ var console = {
         var process;
         var compressor = new CSSOCompressor();
         var translator = new CSSOTranslator();
-        var compressed = compressor.compress(srcToCSSP('" (escape css) "', 'stylesheet', true));
+        var compressed = compressor.compress(srcToCSSP('" (escape css) "', 'stylesheet', true), " (not (get options :optimize-css-structure true)) ");
         return translator.translate(cleanInfo(compressed));
     } catch (e) { return 'ERROR: ' + e.message; }
 }());"))

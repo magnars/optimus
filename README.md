@@ -18,8 +18,8 @@ Add `[optimus "0.9.1"]` to `:dependencies` in your `project.clj`.
 Depending on how you use it, optimus will:
 
 - concatenate your JavaScript and CSS files into bundles.
-- minify your JavaScript with uglify
-- minify your CSS with csso
+- minify your JavaScript with [UglifyJS 2](https://github.com/mishoo/UglifyJS2)
+- minify your CSS with [CSSO](http://bem.info/tools/optimizers/csso/)
 - add cache-busters to your static asset URLs
 - add [far future Expires headers](http://developer.yahoo.com/performance/rules.html#expires)
 
@@ -281,6 +281,7 @@ Now, for the options. You pass them to the wrapper after the strategy:
      the-strategy
      :cache-live-assets 2000
      :minify-css true
+     :optimize-css-structure true
      :minify-js true
      :mangle-js-names true))
 ```
@@ -296,6 +297,10 @@ Values in this example are all defaults, so it's just a verbose noop.
   assets should be frozen. `false` disables the caching.
 
 - `minify-css`: Set to `false` to turn off CSS minification.
+
+- `optimize-css-structure`: CSSO performs structural optimizations,
+  like merging blocks and removing overridden properties. Set to
+  `false` to only do basic css minification.
 
 - `minify-js`: Set to `false` to turn off JavaScript minification.
 
