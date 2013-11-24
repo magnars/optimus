@@ -3044,7 +3044,6 @@ CSSOCompressor.prototype._cleanWhitespace = function(r, left) {
     }
     if (left) {
         switch(r) {
-            case 'funktion':
             case 'braces':
             case 'uri':
                 return true;
