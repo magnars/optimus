@@ -11,21 +11,21 @@ In other words: Develop with ease. Optimize in production.
 
 ## Install
 
-Add `[optimus "0.9.1"]` to `:dependencies` in your `project.clj`.
+Add `[optimus "0.9.2"]` to `:dependencies` in your `project.clj`.
 
 ## What exactly is it optimus does for me?
 
-Depending on how you use it, optimus will:
+Depending on how you use it, optimus:
 
-- concatenate your JavaScript and CSS files into bundles.
-- minify your JavaScript with [UglifyJS 2](https://github.com/mishoo/UglifyJS2)
-- minify your CSS with [CSSO](http://bem.info/tools/optimizers/csso/)
-- add cache-busters to your static asset URLs
-- add [far future Expires headers](http://developer.yahoo.com/performance/rules.html#expires)
+- concatenates your JavaScript and CSS files into bundles.
+- minifies your JavaScript with [UglifyJS 2](https://github.com/mishoo/UglifyJS2)
+- minifies your CSS with [CSSO](http://bem.info/tools/optimizers/csso/)
+- adds cache-busters to your static asset URLs
+- adds [far future Expires headers](http://developer.yahoo.com/performance/rules.html#expires)
 
 Also, if you're using Angular.JS:
 
-- prepopulate the Angular template cache with your HTML templates
+- prepopulates the [Angular template cache](http://docs.angularjs.org/api/ng.$templateCache) with your HTML templates.
 
 ## Usage
 
