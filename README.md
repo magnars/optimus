@@ -1,4 +1,4 @@
-# optimus
+# optimus [![Build Status](https://secure.travis-ci.org/magnars/optimus.png)](http://travis-ci.org/magnars/optimus)
 
 A Ring middleware for frontend performance optimization.
 
