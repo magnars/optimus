@@ -13,7 +13,7 @@ In other words: Develop with ease. Optimize in production.
 
 Add `[optimus "0.9.2"]` to `:dependencies` in your `project.clj`.
 
-## What exactly is it optimus does for me?
+## Features
 
 Depending on how you use it, optimus:
 
@@ -94,20 +94,19 @@ Let's look at an example:
     weird things out of other jars on the class path.
 
     Notice that `angular.js` is included first, even tho it is
-    included by the regex. This how you make sure dependencies are
-    loaded first.
+    included by the regex. This way you can make sure dependencies are
+    loaded before their dependents.
 
 11. You can add individual assets that aren't part of a bundle, but
      should be optimized and served through optimus. This is useful to
-     add cache busters and
-     [far future Expires headers](http://developer.yahoo.com/performance/rules.html#expires)
-     to images served straight from your HTML.
+     add cache busters and far future Expires headers to images served
+     straight from your HTML.
 
     If you use the `optimus.assets` helpers, you don't have to list
-    all images and fonts referenced in your CSS files - those are
-    added along with the stylesheet.
+    images and fonts referenced in your CSS files - those are added
+    along with the stylesheet.
 
-12. The assets don't have to be files on disk. This example creates an
+12. Assets don't have to be files on disk. This example creates an
     asset on the path `/init.js` that is bundled along with the `app.js`
     bundle.
 
@@ -170,7 +169,7 @@ There's also some hiccup-specific sugar:
 
 ## So how does this work in development mode?
 
-The given paths are used unchanged. So given this example:
+The paths are used unchanged. So given this example:
 
 ```cl
 (-> app
@@ -290,8 +289,8 @@ Values in this example are all defaults, so it's just a verbose noop.
 
 - `cache-live-assets`: Assets can be costly to fetch, especially if
   you're looking up lots of different regexen on the class path.
-  Considering that this has to be done for every request, it can take
-  its toll on the load times in development mode.
+  Considering that this has to be done for every request in
+  development mode, it can take its toll on the load times.
 
   Tune this parameter to change for how many milliseconds the live
   assets should be frozen. `false` disables the caching.
@@ -354,7 +353,6 @@ In addition to `:path` and `:contents`, the asset map may contain:
  - `:headers` - headers to be served along with the asset.
  - `:original-path` - the path before any changes was made, like cache-busters.
  - `:outdated` - the asset won't be linked to, but is available when referenced directly.
- - `:browsers` - the asset will only be linked to for this set of browsers *(todo)*
 
 There's also the case that some assets may be binary. Some of them
 might be large. Instead of keeping those `:contents` in memory, they have
