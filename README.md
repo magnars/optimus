@@ -280,12 +280,14 @@ Now, for the options. You pass them to the wrapper after the strategy:
      get-assets
      the-strategy
      :cache-live-assets 2000
+     :minify-css true
+     :minify-js true
      :mangle-js-names true))
 ```
 
 Values in this example are all defaults, so it's just a verbose noop.
 
-- *cache-live-assets*: Assets can be costly to fetch, especially if
+- `cache-live-assets`: Assets can be costly to fetch, especially if
   you're looking up lots of different regexen on the class path.
   Considering that this has to be done for every request, it can take
   its toll on the load times in development mode.
@@ -293,7 +295,11 @@ Values in this example are all defaults, so it's just a verbose noop.
   Tune this parameter to change for how many milliseconds the live
   assets should be frozen. `false` disables the caching.
 
-- *mangle-js-names*: When minifying JavaScript, local variable names
+- `minify-css`: Set to `false` to turn off CSS minification.
+
+- `minify-js`: Set to `false` to turn off JavaScript minification.
+
+- `mangle-js-names`: When minifying JavaScript, local variable names
   are changed to be just one letter. This reduces file size, but
   disrupts some libraries that use clever reflection tricks - like
   Angular.JS. Set to `false` to keep local variable names intact.

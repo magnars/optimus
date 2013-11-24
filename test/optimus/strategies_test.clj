@@ -76,6 +76,19 @@
       {:path "/acc6196d6f45/bundles/app.js" :original-path "/bundles/app.js" :contents "var x=3;\nvar y=7;" :bundle "app.js" :headers headers}]))
 
   (fact
+   "You can opt out of minifications."
+
+   (defn get-assets []
+     [{:path "/core.js" :contents "var x = 1 + 2;"}])
+
+   (let [app (serve-optimized-assets return-request get-assets
+                                     {:minify-js false})]
+     (:optimus-assets (app {})) =>
+
+     [{:path "/core.js" :contents "var x = 1 + 2;" :outdated true}
+      {:path "/7c88f58018c5/core.js" :original-path "/core.js" :contents "var x = 1 + 2;" :headers headers}]))
+
+  (fact
    "The serve-optimized-assets strategy is useful to debug in the same
     environment as production, since everything is minified and
     optimized, but it is still live - no need to restart for every

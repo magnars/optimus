@@ -30,10 +30,15 @@
     (fn [request]
       (serve-asset-or-continue assets path->asset app request))))
 
+(defn- opt-out-with [assets toggle-key f options]
+  (if (get options toggle-key true)
+    (f assets options)
+    assets))
+
 (defn- optimize-assets [assets options]
   (-> assets
-      (minify-js-assets options)
-      (minify-css-assets options)
+      (opt-out-with :minify-js minify-js-assets options)
+      (opt-out-with :minify-css minify-css-assets options)
       (concatenate-bundles)
       (add-cache-busted-expires-headers)))
 
