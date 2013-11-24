@@ -12,10 +12,14 @@
 
 (def http-date-formatter (partial clj-time.format/unparse http-date-format))
 
+(defn- get-contents [file]
+  (or (:contents file)
+      (slurp ((:get-stream file)))))
+
 (defn- add-cache-busted-expires-header [file]
   (-> file
       (assoc :path (str "/"
-                        (subs (digest/sha-1 (:contents file)) 0 12)
+                        (subs (digest/sha-1 (get-contents file)) 0 12)
                         (:path file)))
       (assoc :original-path (original-path file))
       (assoc :headers {"Cache-Control" "max-age=315360000" ;; 3650 days

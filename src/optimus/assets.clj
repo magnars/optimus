@@ -17,13 +17,19 @@
           :contents contents}
          opts))
 
-(defn original-path [asset]
-  (or (:original-path asset)
-      (:path asset)))
-
 (defn- existing-resource [public-dir path]
   (or (io/resource (str public-dir path))
       (throw (FileNotFoundException. path))))
+
+(defn create-binary-asset [public-dir path & {:as opts}]
+  (guard-path path)
+  (let [resource (existing-resource public-dir path)]
+    (merge {:path path
+            :get-stream #(io/input-stream resource)})))
+
+(defn original-path [asset]
+  (or (:original-path asset)
+      (:path asset)))
 
 ;; load-css-asset
 
@@ -62,13 +68,19 @@
                   (replace-css-urls #(combine-paths (original-path %1) %2)))]
     (assoc asset :references (set (paths-in-css asset)))))
 
+;; load-js-asset
+
+(defn- load-js-asset [public-dir path]
+  (create-asset path (slurp (existing-resource public-dir path))))
+
 ;; load-assets
 
 (defn- load-asset [public-dir #^String path]
   (guard-path path)
-  (if (.endsWith path ".css")
-    (load-css-asset public-dir path)
-    (create-asset path (slurp (existing-resource public-dir path)))))
+  (cond
+   (.endsWith path ".css") (load-css-asset public-dir path)
+   (.endsWith path ".js") (load-js-asset public-dir path)
+   :else (create-binary-asset public-dir path)))
 
 (defn- load-asset-and-refs [public-dir path]
   (let [asset (load-asset public-dir path)]

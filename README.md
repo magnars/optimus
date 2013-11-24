@@ -345,6 +345,10 @@ In addition to `:path` and `:contents`, the asset map may contain:
  - `:outdated` - the asset won't be linked to, but is available when referenced directly.
  - `:browsers` - the asset will only be linked to for this set of browsers *(todo)*
 
+There's also the case that some assets may be binary. Some of them
+might be large. Instead of keeping those `:contents` in memory, they have
+a `:get-stream` function.
+
 Built on top of that is a bunch of operations that either help you:
 
  - Load assets to put in the list: `optimus.assets`

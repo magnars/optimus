@@ -71,11 +71,10 @@
     it for granted that any files referenced in a file loaded off the
     class path are present in the same folder structure."
 
-   (load-assets public-dir ["/main.css"]) => [{:path "/main.css"
-                                               :contents "#id { background: url('/bg.png'); }"
-                                               :references #{"/bg.png"}}
-                                              {:path "/bg.png"
-                                               :contents "binary"}]))
+   (->> (load-assets public-dir ["/main.css"])
+        (map #(select-keys % #{:path :references}))) => [{:path "/main.css"
+                                                          :references #{"/bg.png"}}
+                                                         {:path "/bg.png"}]))
 
 (with-files [["/main.css" "#id { background: url('/bg.png'); }"]]
   (fact

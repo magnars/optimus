@@ -1,7 +1,8 @@
 (ns optimus.add-cache-busted-expires-headers-test
   (:use [optimus.add-cache-busted-expires-headers]
         [midje.sweet])
-  (:require [clj-time.core :as time]))
+  (:require [clj-time.core :as time])
+  (:import [java.io ByteArrayInputStream]))
 
 (with-redefs [time/now (fn [] (time/date-time 2013 07 30))]
 
@@ -30,8 +31,8 @@
    that is there already."
 
    (->> (add-cache-busted-expires-headers [{:path "/c.js"
-                                           :original-path "/code.js"
-                                           :contents "1 + 2"}])
+                                            :original-path "/code.js"
+                                            :contents "1 + 2"}])
         (map (juxt :path :original-path)))
    => [["/c.js" "/code.js"]
        ["/f549e6e556ea/c.js" "/code.js"]])
@@ -52,10 +53,10 @@
     fixed first, along with updating URLs in the referencing files."
 
    (->> (add-cache-busted-expires-headers [{:path "/main.css" :contents "#id1 { background: url('/bg.png'); }" :references #{"/bg.png"}}
-                                           {:path "/bg.png" :contents "binary"}])
+                                           {:path "/bg.png" :get-stream #(ByteArrayInputStream. (.getBytes "binary"))}])
         (map (juxt :path :contents :references)))
 
    => [["/main.css" "#id1 { background: url('/bg.png'); }" #{"/bg.png"}]
-       ["/bg.png" "binary" nil]
+       ["/bg.png" nil nil]
        ["/0508e66b8b0d/main.css" "#id1 { background: url('/7e57cfe84314/bg.png'); }" #{"/7e57cfe84314/bg.png"}]
-       ["/7e57cfe84314/bg.png" "binary" nil]]))
+       ["/7e57cfe84314/bg.png" nil nil]]))

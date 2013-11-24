@@ -6,7 +6,8 @@
             [clojure.core.memoize :as memo]))
 
 (defn- serve-asset [asset]
-  (-> {:status 200 :body (:contents asset)}
+  (-> {:status 200 :body (or (:contents asset)
+                             ((:get-stream asset)))}
       (assoc-non-nil :headers (:headers asset))))
 
 (defn- serve-asset-or-continue [assets path->asset app request]
