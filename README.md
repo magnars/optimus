@@ -11,7 +11,7 @@ In other words: Develop with ease. Optimize in production.
 
 ## Install
 
-Add `[optimus "0.9.2"]` to `:dependencies` in your `project.clj`.
+Add `[optimus "0.9.3"]` to `:dependencies` in your `project.clj`.
 
 ## Features
 
