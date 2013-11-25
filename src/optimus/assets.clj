@@ -68,9 +68,9 @@
                   (replace-css-urls #(combine-paths (original-path %1) %2)))]
     (assoc asset :references (set (paths-in-css asset)))))
 
-;; load-js-asset
+;; load-text-asset
 
-(defn- load-js-asset [public-dir path]
+(defn- load-text-asset [public-dir path]
   (create-asset path (slurp (existing-resource public-dir path))))
 
 ;; load-assets
@@ -79,7 +79,8 @@
   (guard-path path)
   (cond
    (.endsWith path ".css") (load-css-asset public-dir path)
-   (.endsWith path ".js") (load-js-asset public-dir path)
+   (.endsWith path ".js") (load-text-asset public-dir path)
+   (.endsWith path ".html") (load-text-asset public-dir path)
    :else (create-binary-asset public-dir path)))
 
 (defn- load-asset-and-refs [public-dir path]
