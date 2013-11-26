@@ -368,6 +368,90 @@ If you want to know more, the [tests](test/optimus) are a good place
 to start reading. They go in to all the details of how optimus works
 and even has some commentary on reasoning and reasons.
 
+## Why not split optimus into a bunch of middlewares?
+
+I set out to create a suite of middlewares for frontend optimization.
+The first was Catenate, which concerned itself with concatenation into
+bundles. So I certainly agree with your point. You'd be hard pressed
+to think otherwise in the Clojure community, I think, with its focus
+on "decomplecting". The reason I gave up on that idea is two-fold:
+
+ - The different optimizations are not orthogonal.
+ - Assets aren't first class in the Ring middleware stack.
+
+Some examples:
+
+- When you bundle files together, your HTML has to reference either
+  the bundle URL (in prod) or all the individual files (in dev). There
+  has to be some sort of lookup from the bundle ID to a list of URLs,
+  and this is dependent on your asset-serving strategy.
+
+- When you add cache-busters to URLs, you need some sort of lookup
+  from the original URL to the cache-busted URL, so you can link to
+  them with a known name.
+
+In other words, both the bundle middleware and the cache-busting
+middleware either needs to own the list of assets, or it needs to rest
+on a first class asset concept in the stack.
+
+Now add the ability to serve WebP images to browsers that support it.
+Not only do you have to change the image URLs, but you also have to
+serve a different set of CSS to use these new images. So this
+middleware would have to know which CSS files reference which files,
+and rewrite them.
+
+All of these could be fixed with a well-thought out Asset concept in
+the ring middleware stack. Which is what Optimus is an attempt at. It
+adds a list of assets to the request, with enough information for the
+linking functions to figure out which versions of which files to link.
+
+But then there's the orthogonality:
+
+ - You can't add cache-busters first, and then bundle assets together,
+   since you wouldn't get cache buster URLs on your bundles.
+
+ - If you minify first, then bundle, you'll get suboptimal
+   minification results in production. If you bundle first, then
+   minify, you won't know which file is to blame for errors in
+   development.
+
+ - You should never add far-future expires headers unless the asset
+   has a cache-buster URL.
+
+So ordering matters. You can't just throw in another middleware, you
+have to order it just so-and-so. I started writing documentation for
+this in Catenate. It would say "If you're also using cache-busting
+middleware, make sure to place it after Catenate." After writing a few
+of those sentences, I came to the conclusion that they were not
+entirely separate things. Since they're so dependent on each other,
+they should live together.
+
+There's also the case of when to optimize. In production you want to
+optimize once - either as a build step, or when starting the
+application. In development you don't want any optimization (unless
+you're debugging), but you still need to create the list of assets so
+you're able to link to it. This is something all the optimization
+middlewares would have to tackle on their own - basically each layer
+freezing their optimized assets on server start, and all but the last
+one doing so in vain.
+
+Optimus solves this by creating a separate middleware stack for
+optimizations, that work on assets (not requests), and that can be
+done at different times by different asset-serving strategies.
+
+So yes, the optimizations have been split into several middlewares.
+But not middlewares for the Ring stack. They are Asset-specific
+middlewares.
+
+For instance, even tho Optimus doesn't do transpiling, building a
+transpiler to fit in the Optimus asset middleware stack is pretty
+nice. You let `:original-url` be the original `"styles.less"`, so the
+linking features can find it, replace the `:contents` with the
+compiled CSS, and serve it under the `:path` `"styles.css"`. If your
+package takes a list of assets, and returns a list of assets with all
+.less files changed like this, you can plug it in with no
+modifications to Optimus.
+
 ## How do I run the tests?
 
 #### Installing dependencies
