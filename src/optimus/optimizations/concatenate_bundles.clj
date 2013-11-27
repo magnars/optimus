@@ -1,4 +1,4 @@
-(ns optimus.concatenate-bundles
+(ns optimus.optimizations.concatenate-bundles
   (:require [clojure.set :refer [union]]
             [clojure.string :as str]
             [optimus.homeless :refer [assoc-non-nil]]))

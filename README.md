@@ -35,61 +35,66 @@ Let's look at an example:
 (ns my-app.example
   (require [optimus.prime :as optimus]
            [optimus.assets :as assets] ;; 1
-           [optimus.strategies :as strategies])) ;; 2
+           [optimus.optimizations :as optimizations] ;; 2
+           [optimus.strategies :as strategies])) ;; 3
 
-(defn get-assets [] ;; 3
-  (concat ;; 4
-   (assets/load-bundle "public" ;; 5
-                       "styles.css" ;; 6
-                       ["/styles/reset.css" ;; 7
-                        "/styles/main.css"]) ;; 8
-   (assets/load-bundles "public" ;; 9
-                        {"lib.js" ["/scripts/angular.js"
-                                   #"/scripts/.+\.js$"] ;; 10
+(defn get-assets [] ;; 4
+  (concat ;; 5
+   (assets/load-bundle "public" ;; 6
+                       "styles.css" ;; 7
+                       ["/styles/reset.css" ;; 8
+                        "/styles/main.css"]) ;; 9
+   (assets/load-bundles "public" ;; 10
+                        {"lib.js" ["/scripts/ext/angular.js"
+                                   #"/scripts/ext/.+\.js$"] ;; 11
                          "app.js" ["/scripts/controllers.js"
                                    "/scripts/directives.js"]})
-   (assets/load-assets "public" ;; 11
+   (assets/load-assets "public" ;; 12
                        ["/images/logo.png"
                         "/images/photo.jpg"])
-   [(assets/create-asset "/init.js" ;; 12
-                         (str "var contextPath = " (:context-path env))
-                         :bundle "app.js")]))
+   [{:path "/init.js" ;; 13
+     :contents (str "var contextPath = " (:context-path env))
+     :bundle "app.js"}]))
 
 (-> app
-    (optimus/wrap ;; 13
-     get-assets ;; 14
-     (case (:optimus-strategy env) ;; 15
-       :develop strategies/serve-unchanged-assets ;; 16
-       :prod strategies/serve-frozen-optimized-assets ;; 17
-       :debug strategies/serve-optimized-assets)) ;; 18
-    (ring.middleware.content-type/wrap-content-type)) ;; 19
+    (optimus/wrap ;; 14
+     get-assets ;; 15
+     (if (= :dev (:env config)) ;; 16
+       optimizations/none ;; 17
+       optimizations/all) ;; 18
+     (if (= :dev (:env config)) ;; 19
+       strategies/serve-live-assets ;; 20
+       strategies/serve-frozen-assets)) ;; 21
+    (ring.middleware.content-type/wrap-content-type)) ;; 22
 ```
 
 1. Assets are scripts, stylesheets, images, fonts and other static
    resources your webapp uses.
 
-2. You can choose different strategies for how you want to serve your
+2. You can mix and match optimizations, or go with a sane default.
+
+3. You can choose different strategies for how you want to serve your
    assets.
 
-3. Declare how to get your assets in a function.
+4. Declare how to get your assets in a function.
 
-4. It returns a list of assets.
+5. It returns a list of assets.
 
-5. The helpers in `optimus.assets` load files from a given directory
+6. The helpers in `optimus.assets` load files from a given directory
    on the classpath (normally in the `src/resources` directory). So in
    this case, the files are loaded from `src/resources/public/`.
 
-6. The name of this bundle is `styles.css`.
+7. The name of this bundle is `styles.css`.
 
-7. It takes a list of paths. These paths double as URLs to the
+8. It takes a list of paths. These paths double as URLs to the
    assets, and paths to the files in the public directory.
 
-8. The contents are concatenated together in the order specified in the
+9. The contents are concatenated together in the order specified in the
    bundle.
 
-9. You can declare several bundles at once with `load-bundles`.
+10. You can declare several bundles at once with `load-bundles`.
 
-10. You can use regexen to find multiple files without specifying each
+11. You can use regexen to find multiple files without specifying each
     individually. Make sure you're specific enough to avoid including
     weird things out of other jars on the class path.
 
@@ -97,37 +102,49 @@ Let's look at an example:
     included by the regex. This way you can make sure dependencies are
     loaded before their dependents.
 
-11. You can add individual assets that aren't part of a bundle, but
-     should be optimized and served through optimus. This is useful to
-     add cache busters and far future Expires headers to images served
-     straight from your HTML.
+12. You can add individual assets that aren't part of a bundle, but
+    should be optimized and served through optimus. This is useful to
+    add cache busters and far future Expires headers to images served
+    straight from your HTML.
 
     If you use the `optimus.assets` helpers, you don't have to list
     images and fonts referenced in your CSS files - those are added
     along with the stylesheet.
 
-12. Assets don't have to be files on disk. This example creates an
+13. Assets don't have to be files on disk. This example creates an
     asset on the path `/init.js` that is bundled along with the `app.js`
     bundle.
 
-13. Add `optimus/wrap` as a Ring middleware.
+14. Add `optimus/wrap` as a Ring middleware.
 
-14. Pass in the function that loads all your assets.
+15. Pass in the function that loads all your assets.
 
-15. Pass in your chosen strategy. Set up properly with environment
+16. Pass in the function that optimizes your assets. You can choose
+    from those in `optimus.optimizations`, or write your own asset
+    transformation functions.
+
+17. Yeah, `optimizations/none` is just an alias for `identity`.
+
+18. When you use `optimizations/all` you get everything that optimus
+    provides. But you can easily exchange this for a function that
+    executes only the transformations that you need.
+
+19. Pass in your chosen strategy. Set up properly with environment
     variables of some kind.
 
-16. In development you want the assets to be served unchanged.
+20. In development you want the assets to be served live. No need to
+    restart the app just to see changes or new files.
 
-17. In production you want the assets to be optimized and frozen.
+21. In production you want the assets to be frozen. They're loaded and
+    optimized when the application starts.
 
-18. But there's also a strategy for debugging. What if your javascript
-    doesn't minify well? How do you reproduce it? It's damn annoying
-    having to restart the server for each change. Here's a strategy
-    that optimizes just like production, but still serves fresh
-    changes without restarts.
+    Take note: You're free to serve optimized, live assets. It'll be a
+    little slow, but what if your javascript doesn't minify well? How
+    do you reproduce it? It's damn annoying having to restart the
+    server for each change. Here's a way that optimizes just like
+    production, but still serves fresh changes without restarts.
 
-19. Since Ring comes with content type middleware, optimus doesn't
+22. Since Ring comes with content type middleware, optimus doesn't
     worry about it. Just make sure to put it after optimus.
 
 #### Using the new URLs
@@ -165,6 +182,47 @@ There's also some hiccup-specific sugar:
      (optimus.hiccup/link-to-css-bundles request ["styles.css"])]
     [:body
      (optimus.hiccup/link-to-js-bundles request ["lib.js" "app.js"])]]))
+```
+
+#### Specifying the optimizations
+
+If you want to mix and match optimizations, here's how you do that:
+
+```cl
+(defn my-optimize [assets options]
+  (-> assets
+      (optimizations/minify-js-assets options)
+      (optimizations/minify-css-assets options)
+      (optimizations/concatenate-bundles)
+      (optimizations/add-cache-busted-expires-headers)))
+
+(-> app
+    (optimus/wrap
+     get-assets
+     (if (= :dev (:env config))
+       optimizations/none
+       my-optimize)
+     strategies/serve-frozen-assets))
+```
+
+Just remember that you should always add cache busters *after*
+concatenating bundles.
+
+Adding your own asset transformation functions is fair game too. In
+fact, it's encouraged. Let's say you needed to serve all assets from a
+Content Delivery Network. You could do something like this:
+
+```cl
+(defn add-cdn-url-prefix [asset]
+  (update-in asset [:path] #(str "http://cdn.example.com" %)))
+
+(defn add-cdn-url-prefix-to-assets [assets]
+  (map add-cdn-url-prefix-to-assets assets))
+
+(defn my-optimize [assets options]
+  (-> assets
+      (optimizations/all options)
+      (add-cdn-url-prefix-to-assets)))
 ```
 
 ## So how does this work in development mode?
@@ -279,9 +337,7 @@ Now, for the options. You pass them to the wrapper after the strategy:
      get-assets
      the-strategy
      :cache-live-assets 2000
-     :minify-css true
      :optimize-css-structure true
-     :minify-js true
      :mangle-js-names true))
 ```
 
@@ -295,13 +351,9 @@ Values in this example are all defaults, so it's just a verbose noop.
   Tune this parameter to change for how many milliseconds the live
   assets should be frozen. `false` disables the caching.
 
-- `minify-css`: Set to `false` to turn off CSS minification.
-
 - `optimize-css-structure`: CSSO performs structural optimizations,
   like merging blocks and removing overridden properties. Set to
   `false` to only do basic css minification.
-
-- `minify-js`: Set to `false` to turn off JavaScript minification.
 
 - `mangle-js-names`: When minifying JavaScript, local variable names
   are changed to be just one letter. This reduces file size, but

@@ -1,8 +1,5 @@
 (ns optimus.strategies
-  (:require [optimus.concatenate-bundles :refer [concatenate-bundles]]
-            [optimus.add-cache-busted-expires-headers :refer [add-cache-busted-expires-headers]]
-            [optimus.minify :refer [minify-js-assets minify-css-assets]]
-            [optimus.homeless :refer [assoc-non-nil]]
+  (:require [optimus.homeless :refer [assoc-non-nil]]
             [clojure.core.memoize :as memo]))
 
 (defn- serve-asset [asset]
@@ -15,41 +12,18 @@
     (serve-asset asset)
     (app (assoc request :optimus-assets assets))))
 
-(defn- serve-live-assets [app get-assets options]
-  (let [get-assets (if-let [ms (get options :cache-live-assets 2000)]
-                     (memo/ttl get-assets {} :ttl/threshold ms)
-                     get-assets)]
+(defn serve-live-assets [app get-assets optimize options]
+  (let [get-optimized-assets #(optimize (get-assets) options)
+        get-optimized-assets (if-let [ms (get options :cache-live-assets 2000)]
+                               (memo/ttl get-optimized-assets {} :ttl/threshold ms)
+                               get-optimized-assets)]
     (fn [request]
-      (let [assets (get-assets)
+      (let [assets (get-optimized-assets)
             path->asset (into {} (map (juxt :path identity) assets))]
         (serve-asset-or-continue assets path->asset app request)))))
 
-(defn- serve-frozen-assets [app get-assets options]
-  (let [assets (get-assets)
+(defn serve-frozen-assets [app get-assets optimize options]
+  (let [assets (optimize (get-assets) options)
         path->asset (into {} (map (juxt :path identity) assets))]
     (fn [request]
       (serve-asset-or-continue assets path->asset app request))))
-
-(defn- opt-out-with [assets toggle-key f options]
-  (if (get options toggle-key true)
-    (f assets options)
-    assets))
-
-(defn- optimize-assets [assets options]
-  (-> assets
-      (opt-out-with :minify-js minify-js-assets options)
-      (opt-out-with :minify-css minify-css-assets options)
-      (concatenate-bundles)
-      (add-cache-busted-expires-headers)))
-
-(defn serve-unchanged-assets
-  ([app get-assets] (serve-unchanged-assets app get-assets {}))
-  ([app get-assets options] (serve-live-assets app get-assets options)))
-
-(defn serve-optimized-assets
-  ([app get-assets] (serve-optimized-assets app get-assets {}))
-  ([app get-assets options] (serve-live-assets app #(optimize-assets (get-assets) options) options)))
-
-(defn serve-frozen-optimized-assets
-  ([app get-assets] (serve-frozen-optimized-assets app get-assets {}))
-  ([app get-assets options] (serve-frozen-assets app #(optimize-assets (get-assets) options) options)))

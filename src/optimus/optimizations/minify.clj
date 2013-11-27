@@ -1,4 +1,4 @@
-(ns optimus.minify
+(ns optimus.optimizations.minify
   (:require [optimus.v8 :as v8]))
 
 (defn- escape [str]

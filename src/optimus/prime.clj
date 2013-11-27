@@ -1,4 +1,4 @@
 (ns optimus.prime)
 
-(defn wrap [app get-assets strategy & {:as options}]
-  (strategy app get-assets (or options {})))
+(defn wrap [app get-assets optimize strategy & {:as options}]
+  (strategy app get-assets optimize (or options {})))

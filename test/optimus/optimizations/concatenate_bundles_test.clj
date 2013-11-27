@@ -1,5 +1,5 @@
-(ns optimus.concatenate-bundles-test
-  (:use [optimus.concatenate-bundles]
+(ns optimus.optimizations.concatenate-bundles-test
+  (:use [optimus.optimizations.concatenate-bundles]
         [midje.sweet]))
 
 (fact

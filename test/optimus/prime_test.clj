@@ -2,14 +2,17 @@
   (:use optimus.prime
         midje.sweet))
 
-(defn strategy [app get-assets options]
+(defn strategy [app get-assets optimize options]
   (fn [request]
     (app (-> request
-             (assoc :assets (get-assets))
+             (assoc :assets (optimize (get-assets)))
              (assoc :options options)))))
 
 (defn get-my-assets []
-  :my-assets)
+  [{:name "my-asset" :size 10}])
+
+(defn optimize [assets]
+  (map #(assoc % :size 1) assets))
 
 (defn my-app [request]
   (assoc request :my-app :was-here))
@@ -20,10 +23,10 @@
   middleware chaining and strategy choice."
 
  (def app (-> my-app
-              (wrap get-my-assets strategy)))
+              (wrap get-my-assets optimize strategy)))
 
  (app {:uri "/"}) => {:uri "/"
-                      :assets :my-assets
+                      :assets [{:name "my-asset" :size 1}]
                       :my-app :was-here
                       :options {}})
 
@@ -32,7 +35,7 @@
   strategy."
 
  (def app (-> my-app
-              (wrap get-my-assets strategy
+              (wrap get-my-assets optimize strategy
                     :option1 "a"
                     :option2 "b")))
 

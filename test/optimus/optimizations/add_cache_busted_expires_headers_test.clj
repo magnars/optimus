@@ -1,5 +1,5 @@
-(ns optimus.add-cache-busted-expires-headers-test
-  (:use [optimus.add-cache-busted-expires-headers]
+(ns optimus.optimizations.add-cache-busted-expires-headers-test
+  (:use [optimus.optimizations.add-cache-busted-expires-headers]
         [midje.sweet])
   (:require [clj-time.core :as time])
   (:import [java.io ByteArrayInputStream]))

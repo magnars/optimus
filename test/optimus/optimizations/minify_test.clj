@@ -1,5 +1,5 @@
-(ns optimus.minify-test
-  (:require [optimus.minify :refer :all]
+(ns optimus.optimizations.minify-test
+  (:require [optimus.optimizations.minify :refer :all]
             [midje.sweet :refer [fact => throws]]))
 
 (fact

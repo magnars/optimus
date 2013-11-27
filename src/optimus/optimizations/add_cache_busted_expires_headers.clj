@@ -1,4 +1,4 @@
-(ns optimus.add-cache-busted-expires-headers
+(ns optimus.optimizations.add-cache-busted-expires-headers
   (:require [clj-time.core :as time]
             [clj-time.format]
             [optimus.digest :as digest]
