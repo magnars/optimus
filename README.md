@@ -78,7 +78,7 @@ Let's look at an example:
 1. Assets are scripts, stylesheets, images, fonts and other static
    resources your webapp uses.
 
-2. You can mix and match optimizations, or go with a sane default.
+2. You can mix and match optimizations.
 
 3. You can choose different strategies for how you want to serve your
    assets.
