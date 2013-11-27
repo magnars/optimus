@@ -16,9 +16,9 @@
      {:path "/main.js" :contents "var y = 3 + 4;" :bundle "app.js"}]
     {})
 
-   => [{:path "/core.js" :contents "var x=3;" :outdated true}
-       {:path "/main.js" :contents "var y=7;" :outdated true}
+   => [{:path "/core.js" :contents "var x=3;" :outdated true :bundled true}
+       {:path "/main.js" :contents "var y=7;" :outdated true :bundled true}
        {:path "/bundles/app.js" :contents "var x=3;\nvar y=7;" :bundle "app.js" :outdated true}
-       {:path "/1e10b6b7ffe7/core.js" :original-path "/core.js" :contents "var x=3;" :headers headers}
-       {:path "/3984012ce8f1/main.js" :original-path "/main.js" :contents "var y=7;" :headers headers}
+       {:path "/1e10b6b7ffe7/core.js" :original-path "/core.js" :contents "var x=3;" :headers headers :bundled true}
+       {:path "/3984012ce8f1/main.js" :original-path "/main.js" :contents "var y=7;" :headers headers :bundled true}
        {:path "/acc6196d6f45/bundles/app.js" :original-path "/bundles/app.js" :contents "var x=3;\nvar y=7;" :bundle "app.js" :headers headers}]))

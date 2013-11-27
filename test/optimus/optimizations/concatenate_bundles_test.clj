@@ -12,8 +12,8 @@
 
  (concatenate-bundles [{:path "/code.js" :original-path "/code.js" :contents "1 + 2" :bundle "app.js"}
                        {:path "/more.js" :original-path "/more.js" :contents "3 + 5" :bundle "app.js"}])
- => [{:path "/code.js" :original-path "/code.js" :contents "1 + 2"}
-     {:path "/more.js" :original-path "/more.js" :contents "3 + 5"}
+ => [{:path "/code.js" :original-path "/code.js" :contents "1 + 2" :bundled true}
+     {:path "/more.js" :original-path "/more.js" :contents "3 + 5" :bundled true}
      {:path "/bundles/app.js"
       :contents "1 + 2\n3 + 5"
       :bundle "app.js"}])

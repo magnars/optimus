@@ -5,6 +5,13 @@
 
 (def public-dir "with-files-tmp")
 
+(defmacro with-tmp-dir [& body]
+  `(do
+     (.mkdirs (io/file tmp-dir))
+     (let [result# (do ~@body)]
+       (delete-file-recursively tmp-dir)
+       result#)))
+
 (defn app-that-returns-request [request]
   request)
 

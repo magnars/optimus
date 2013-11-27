@@ -217,23 +217,54 @@ concatenating bundles.
 
 Adding your own asset transformation functions is fair game too. In
 fact, it's encouraged. Let's say you need to serve all assets from a
-Content Delivery Network. You could do something like this:
+Content Delivery Network ...
+
+#### Yeah, we are using a Content Delivery Network. How does that work?
+
+To serve the files from a different host, add a `:base-url` to the assets:
 
 ```cl
-(defn add-cdn-url-prefix-to-assets [assets]
+(defn add-cdn-base-url-to-assets [assets]
   (map #(assoc % :base-url "http://cdn.example.com") assets))
 
 (defn my-optimize [assets options]
   (-> assets
       (optimizations/all options)
-      (add-cdn-url-prefix-to-assets)))
+      (add-cdn-base-url-to-assets)))
 ```
 
 This supposes that your CDN will pull assets from your app server on
-cache misses. If you need to push files to a CDN, please do bother me
-with an issue and I'll give it a go.
+cache misses. If you need to push files to a CDN, you can save them like this:
 
-## So how does this work in development mode?
+```cl
+(defn export-assets []
+  (-> (get-assets)
+      (optimizations/all options)
+      (optimus.export/save-assets "./cdn-export/")))
+```
+
+Maybe you're not planning on individual linking to bundled files, or
+let external apps link to assets by their original URLs. In which
+case, you might want to do this:
+
+```cl
+(defn export-assets []
+  (as-> (get-assets) assets
+        (optimizations/all assets options)
+        (remove :outdated assets)
+        (remove :bundled assets)
+        (optimus.export/save-assets assets "./cdn-export/")))
+```
+
+You can even add an alias to your `project.clj`:
+
+```cl
+:aliases {"export-assets" ["run" "-m" "my-app.example/export-assets"]}
+```
+
+And run `lein export-assets` from the command line.
+
+## So how does all this work in development mode?
 
 The paths are used unchanged. So given this example:
 
