@@ -130,7 +130,7 @@ Let's look at an example:
     from those in `optimus.optimizations`, or write your own asset
     transformation functions.
 
-17. Yeah, `optimizations/none` is just an alias for `identity`.
+17. Yeah, `optimizations/none` is basically a two-arity `identity`.
 
 18. When you use `optimizations/all` you get everything that optimus
     provides. But you can easily exchange this for a function that
@@ -209,7 +209,7 @@ If you want to mix and match optimizations, here's how you do that:
      (if (= :dev (:env config))
        optimizations/none
        my-optimize)
-     strategies/serve-frozen-assets))
+     the-strategy))
 ```
 
 Just remember that you should always add cache busters *after*
@@ -232,6 +232,10 @@ Content Delivery Network. You could do something like this:
       (add-cdn-url-prefix-to-assets)))
 ```
 
+This supposes that your CDN will pull assets from your app server on
+cache misses. If you need to push files to a CDN, please do bother me
+with an issue and I'll give it a go.
+
 ## So how does this work in development mode?
 
 The paths are used unchanged. So given this example:
@@ -243,7 +247,8 @@ The paths are used unchanged. So given this example:
                           ["/app/some.js"
                            "/app/cool.js"
                            "/app/code.js"])
-     strategies/serve-unchanged-assets))
+     optimizations/none
+     strategies/serve-live-assets))
 ```
 
 When you call
@@ -265,9 +270,10 @@ eg. `public/app/some.js` on the classpath.
 
 ## What about production mode?
 
-When you use the `serve-frozen-optimized-assets` strategy, all the
-contents for each bundle is read at startup. URLs are generated from
-the hash of the contents and the identifier of the bundle.
+When you use the `serve-frozen-assets` strategy, all the contents for
+each bundle is read at startup. And with `optimizations/all`, then the
+URLs are generated from the hash of the contents and the identifier of
+the bundle.
 
 So when you call `(link/bundle-urls request ["app.js"])`, it now
 returns:
@@ -341,8 +347,8 @@ Now, for the options. You pass them to the wrapper after the strategy:
 ```cl
 (-> app
     (optimus/wrap
-     get-assets
-     the-strategy
+     get-assets optimize the-strategy
+     ;; options
      :cache-live-assets 2000
      :optimize-css-structure true
      :mangle-js-names true))
