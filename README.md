@@ -248,7 +248,6 @@ If you need to push files to a CDN, you can save them like this:
 If you're not linking to bundled files individually, you can remove
 the bundled assets. And if there are no external apps that link to
 assets by their original URLs, you can remove the outdated assets.
-
 Like this:
 
 ```cl
@@ -260,13 +259,13 @@ Like this:
         (optimus.export/save-assets assets "./cdn-export/")))
 ```
 
-Add an alias to your `project.clj` for ease of use:
+You can even add an alias to your `project.clj`:
 
 ```cl
 :aliases {"export-assets" ["run" "-m" "my-app.example/export-assets"]}
 ```
 
-And run `lein export-assets` from the command line.
+And run `lein export-assets` from the command line. Handy.
 
 ## So how does all this work in development mode?
 
