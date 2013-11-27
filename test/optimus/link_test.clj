@@ -34,7 +34,7 @@
 
 (fact
  "You can link to assets that are by default served on another server,
-  by setting the :base-path property."
+  by setting the :base-url property."
 
  (let [request {:optimus-assets [{:path "/main.js"
                                   :base-url "http://cache.example.com"
