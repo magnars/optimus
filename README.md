@@ -216,15 +216,12 @@ Just remember that you should always add cache busters *after*
 concatenating bundles.
 
 Adding your own asset transformation functions is fair game too. In
-fact, it's encouraged. Let's say you needed to serve all assets from a
+fact, it's encouraged. Let's say you need to serve all assets from a
 Content Delivery Network. You could do something like this:
 
 ```cl
-(defn add-cdn-url-prefix [asset]
-  (update-in asset [:path] #(str "http://cdn.example.com" %)))
-
 (defn add-cdn-url-prefix-to-assets [assets]
-  (map add-cdn-url-prefix-to-assets assets))
+  (map #(assoc % :base-url "http://cdn.example.com") assets))
 
 (defn my-optimize [assets options]
   (-> assets
@@ -271,9 +268,9 @@ eg. `public/app/some.js` on the classpath.
 ## What about production mode?
 
 When you use the `serve-frozen-assets` strategy, all the contents for
-each bundle is read at startup. And with `optimizations/all`, then the
-URLs are generated from the hash of the contents and the identifier of
-the bundle.
+each bundle is read at startup. And with `optimizations/all` the URLs
+are generated from the hash of the contents and the identifier of the
+bundle.
 
 So when you call `(link/bundle-urls request ["app.js"])`, it now
 returns:
@@ -418,6 +415,7 @@ In addition to `:path` and `:contents`, the asset map may contain:
  - `:headers` - headers to be served along with the asset.
  - `:original-path` - the path before any changes was made, like cache-busters.
  - `:outdated` - the asset won't be linked to, but is available when referenced directly.
+ - `:base-url` - prepended to the path when linking.
 
 There's also the case that some assets may be binary. Some of them
 might be large. Instead of keeping those `:contents` in memory, they have

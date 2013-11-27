@@ -31,3 +31,15 @@
                                  {:path "/12/m.js" :bundle "app.js"}]}]
 
    (bundle-paths request ["app.js"]) => ["/12/m.js"]))
+
+(fact
+ "You can link to assets that are by default served on another server,
+  by setting the :base-path property."
+
+ (let [request {:optimus-assets [{:path "/main.js"
+                                  :base-url "http://cache.example.com"
+                                  :bundle "app.js"}]}]
+
+   (file-path request "/main.js") => "http://cache.example.com/main.js"
+   (bundle-paths request ["app.js"]) => ["http://cache.example.com/main.js"]))
+
