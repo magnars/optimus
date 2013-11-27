@@ -1,4 +1,4 @@
-(defproject optimus "0.9.3"
+(defproject optimus "0.10.0"
   :description "A Ring middleware for frontend performance optimization."
   :url "http://github.com/magnars/optimus"
   :license {:name "Eclipse Public License"

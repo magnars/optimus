@@ -11,7 +11,14 @@ In other words: Develop with ease. Optimize in production.
 
 ## Install
 
-Add `[optimus "0.9.3"]` to `:dependencies` in your `project.clj`.
+Add `[optimus "0.10.0"]` to `:dependencies` in your `project.clj`.
+
+Please note that this project uses
+[Semantic Versioning](http://semver.org/). As long as we're on a `0`
+major version, there will likely be API changes. Pay attention when
+upgrading to a new minor version. As soon as we're on a `1` major
+version, there will be no breaking changes without a major version
+increase.
 
 ## Features
 
