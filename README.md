@@ -234,7 +234,9 @@ To serve the files from a different host, add a `:base-url` to the assets:
 ```
 
 This supposes that your CDN will pull assets from your app server on
-cache misses. If you need to push files to a CDN, you can save them like this:
+cache misses.
+
+If you need to push files to a CDN, you can save them like this:
 
 ```cl
 (defn export-assets []
@@ -243,20 +245,22 @@ cache misses. If you need to push files to a CDN, you can save them like this:
       (optimus.export/save-assets "./cdn-export/")))
 ```
 
-Maybe you're not planning on individual linking to bundled files, or
-let external apps link to assets by their original URLs. In which
-case, you might want to do this:
+If you're not linking to bundled files individually, you can remove
+the bundled assets. And if there are no external apps that link to
+assets by their original URLs, you can remove the outdated assets.
+
+Like this:
 
 ```cl
 (defn export-assets []
   (as-> (get-assets) assets
         (optimizations/all assets options)
-        (remove :outdated assets)
         (remove :bundled assets)
+        (remove :outdated assets)
         (optimus.export/save-assets assets "./cdn-export/")))
 ```
 
-You can even add an alias to your `project.clj`:
+Add an alias to your `project.clj` for ease of use:
 
 ```cl
 :aliases {"export-assets" ["run" "-m" "my-app.example/export-assets"]}
