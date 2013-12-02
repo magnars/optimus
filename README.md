@@ -30,9 +30,12 @@ Depending on how you use it, optimus:
 - adds cache-busters to your static asset URLs
 - adds [far future Expires headers](http://developer.yahoo.com/performance/rules.html#expires)
 
-Also, if you're using Angular.JS:
+You might also be interested in:
 
-- prepopulates the [Angular template cache](http://docs.angularjs.org/api/ng.$templateCache) with your HTML templates.
+- [optimus-angular](http://github.com/magnars/optimus-angular) - which
+  comes with a custom asset loader that prepopulates the Angular.JS
+  template cache. It also has Optimus asset middleware that prepares
+  Angular.JS code for minification.
 
 ## Usage
 
@@ -403,36 +406,6 @@ Values in this example are all defaults, so it's just a verbose noop.
   are changed to be just one letter. This reduces file size, but
   disrupts some libraries that use clever reflection tricks - like
   Angular.JS. Set to `false` to keep local variable names intact.
-
-## I heard rumours about support for Angular templates?
-
-Yeah, you can use optimus to serve concatenated Angular.JS templates:
-
-```cl
-(defn get-assets []
-  (concat
-   (assets/load-bundles "public" my-bundles)
-   [(optimus.angular/create-template-cache
-     :path "/templates/angular.js"
-     :module "MYAPP"
-     :templates (assets/load-assets "public"
-                 ["/angular/templates/home.html"
-                  "/angular/templates/create.html"
-                  "/angular/templates/update.html"]))]))
-```
-
-This creates a file `/templates/angular.js` that inlines the templates
-and adds them to the `$templateCache`.
-
-You link to this script with:
-
-```cl
-(optimus/file-path request "/templates/angular.js")
-```
-
-Or you can add a `:bundle "app.js"` pair to the
-`create-template-cache` call, and the file will be bundled together
-with the rest of the javascript files in `/bundles/app.js`. Nifty.
 
 ## What are these assets anyway? They seem magical to me.
 
