@@ -52,15 +52,22 @@
 (defn- css-url-str [url]
   (str "url('" url "')"))
 
+(defn- is-data-url [#^String url]
+  (.startsWith url "data:"))
+
 (defn- replace-css-urls [file replacement-fn]
   (assoc-in file [:contents]
             (str/replace (:contents file) css-url-re
-                         (fn [[_ url]] (css-url-str (replacement-fn file url))))))
+                         (fn [[match url]] (if (is-data-url url)
+                                             match
+                                             (css-url-str (replacement-fn file url)))))))
 
 (defn paths-in-css [file]
   (->> file :contents
        (re-seq css-url-re)
-       (map #(combine-paths (original-path file) (second %)))))
+       (map second)
+       (remove is-data-url)
+       (map #(combine-paths (original-path file) %))))
 
 (defn- load-css-asset [public-dir path]
   (let [contents (slurp (existing-resource public-dir path))
