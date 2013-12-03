@@ -19,6 +19,11 @@
       :bundle "app.js"}])
 
 (fact
+ "Files that are not in the bundle, are left alone."
+ (concatenate-bundles [{:path "/code.js" :contents "1 + 2"}])
+ => [{:path "/code.js" :contents "1 + 2"}])
+
+(fact
  "When files are bundled together, the bundle references is a union
   of the set."
 

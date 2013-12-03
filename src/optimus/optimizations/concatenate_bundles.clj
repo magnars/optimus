@@ -11,9 +11,11 @@
         (assoc-non-nil :references (apply union (map :references assets))))))
 
 (defn- mark-as-bundled [asset]
-  (-> asset
-      (dissoc :bundle)
-      (assoc :bundled true)))
+  (if (:bundle asset)
+    (-> asset
+        (dissoc :bundle)
+        (assoc :bundled true))
+    asset))
 
 (defn concatenate-bundles [assets]
   (concat (map mark-as-bundled assets)
