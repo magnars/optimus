@@ -40,6 +40,9 @@
       pathetic/render-path
       pathetic/ensure-trailing-separator))
 
+(defn- just-the-filename [path]
+  (last (pathetic/split path)))
+
 (defn- remove-url-appendages [s]
   (first (str/split s #"[\?#]")))
 
@@ -52,13 +55,13 @@
 (defn- css-url-str [url]
   (str "url('" url "')"))
 
-(defn- is-data-url [#^String url]
+(defn- data-url? [#^String url]
   (.startsWith url "data:"))
 
 (defn- replace-css-urls [file replacement-fn]
   (assoc-in file [:contents]
             (str/replace (:contents file) css-url-re
-                         (fn [[match url]] (if (is-data-url url)
+                         (fn [[match url]] (if (data-url? url)
                                              match
                                              (css-url-str (replacement-fn file url)))))))
 
@@ -66,7 +69,7 @@
   (->> file :contents
        (re-seq css-url-re)
        (map second)
-       (remove is-data-url)
+       (remove data-url?)
        (map #(combine-paths (original-path file) %))))
 
 (defn- load-css-asset [public-dir path]
@@ -98,10 +101,14 @@
   (subs s (+ (count public-dir)
              (.indexOf s (str public-dir "/")))))
 
+(defn- emacs-file-artefact? [#^String path]
+  (.startsWith (just-the-filename path) ".#"))
+
 (defn realize-regex-paths [public-dir path]
   (if (instance? java.util.regex.Pattern path)
     (let [paths (->> (file-paths-on-class-path)
                      (filter (fn [#^String p] (.contains p public-dir)))
+                     (remove emacs-file-artefact?)
                      (map #(slice-path-to-after public-dir %))
                      (filter #(re-find path %)))]
       (if (empty? paths)

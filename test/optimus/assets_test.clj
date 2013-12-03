@@ -59,6 +59,15 @@
         (map :path)) => ["/styles/main.css"
                          "/styles/reset.css"]))
 
+(fact
+ "Emacs file artifacts are ignored by the regex matcher."
+
+ (with-files [["/app/code.js" ""]
+              ["/app/.#code.js" ""]]
+
+   (->> (load-assets public-dir [#"/app/.+\.js$"])
+        (map :path)) => ["/app/code.js"]))
+
 (with-files [["/main.css" "#id { background: url('/bg.png'); }"]
              ["/bg.png" "binary"]]
   (fact
