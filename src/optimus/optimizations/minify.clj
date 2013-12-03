@@ -1,11 +1,12 @@
 (ns optimus.optimizations.minify
-  (:require [optimus.v8 :as v8]))
+  (:require [optimus.v8 :as v8]
+            [clojure.string :as s]))
 
 (defn- escape [str]
   (-> str
-      (clojure.string/replace "\\" "\\\\")
-      (clojure.string/replace "'" "\\'")
-      (clojure.string/replace "\n" "\\n")))
+      (s/replace "\\" "\\\\")
+      (s/replace "'" "\\'")
+      (s/replace "\n" "\\n")))
 
 (defn- throw-v8-exception [#^String text path]
   (if (= (.indexOf text "ERROR: ") 0)
@@ -14,10 +15,15 @@
       (throw (Exception. (str prefix error))))
     text))
 
+(defn normalize-line-endings [str]
+  (-> str
+      (s/replace "\r\n" "\n")
+      (s/replace "\r" "\n")))
+
 (defn- js-minify-code [js options]
   (str "(function () {
     try {
-        var ast = UglifyJS.parse('" (escape js) "');
+        var ast = UglifyJS.parse('" (escape (normalize-line-endings js)) "');
         ast.figure_out_scope();
         var compressor = UglifyJS.Compressor();
         var compressed = ast.transform(compressor);
@@ -75,7 +81,7 @@ var console = {
         var process;
         var compressor = new CSSOCompressor();
         var translator = new CSSOTranslator();
-        var compressed = compressor.compress(srcToCSSP('" (escape css) "', 'stylesheet', true), " (not (get options :optimize-css-structure true)) ");
+        var compressed = compressor.compress(srcToCSSP('" (escape (normalize-line-endings css)) "', 'stylesheet', true), " (not (get options :optimize-css-structure true)) ");
         return translator.translate(cleanInfo(compressed));
     } catch (e) { return 'ERROR: ' + e.message; }
 }());"))

@@ -20,7 +20,7 @@
 
 (fact
  "Throws exception on syntax errors"
- (minify-js "var hello = ") => (throws Exception "Unexpected token: eof (undefined) (line 1, col 12)"))
+ (minify-js "var hello =") => (throws Exception "Unexpected token: eof (undefined) (line 1, col 11)"))
 
 (fact
  "Mangles names by default"
@@ -63,8 +63,8 @@
 
 (fact
  "It includes the path in exception."
- (minify-js-assets [{:path "code.js" :contents "var hello = "}])
- => (throws Exception "Exception in code.js: Unexpected token: eof (undefined) (line 1, col 12)"))
+ (minify-js-assets [{:path "code.js" :contents "var hello ="}])
+ => (throws Exception "Exception in code.js: Unexpected token: eof (undefined) (line 1, col 11)"))
 
 ;; minify CSS
 

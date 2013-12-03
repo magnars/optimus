@@ -36,3 +36,9 @@
          {:contents "#blåbærsyltetøy{padding:10px}", :outdated true, :path "/main.css", :references #{}}
          {:contents "var s=\"ĄČĘĖĮĮŠŲŪŪ\";", :headers headers, :original-path "/code.js", :path "/8c868893d878/code.js"}
          {:contents "#blåbærsyltetøy{padding:10px}", :headers headers, :original-path "/main.css", :path "/c89cdf4013a5/main.css", :references #{}}])))
+
+(fact
+ "It handles UTF-8 chars loaded off disk, and DOS line endings too."
+ (optimizations/minify-js-assets
+  (optimus.assets/load-assets "public" ["/encoding.js"]))
+ => [{:path "/encoding.js" :contents "var s=\"Klaida inicijuojant pasirašymą!\";"}])
