@@ -46,12 +46,19 @@ stripped context"
     (v8/run-script-in-context context uglify)
     context))
 
+(defn- run-script-with-error-handling [context script file-path]
+  (throw-v8-exception
+   (try
+     (v8/run-script-in-context context script)
+     (catch Exception e
+       (str "ERROR: " (.getMessage e))))
+   file-path))
+
 (defn minify-js
   ([js] (minify-js js {}))
   ([js options] (minify-js (create-uglify-context) js options))
   ([context js options]
-     (throw-v8-exception (v8/run-script-in-context context (js-minify-code js options))
-                         (:path options))))
+     (run-script-with-error-handling context (js-minify-code js options) (:path options))))
 
 (defn minify-js-asset
   [context asset options]
@@ -101,8 +108,7 @@ stripped context"
   ([css] (minify-css css {}))
   ([css options] (minify-css (create-csso-context) css options))
   ([context css options]
-     (throw-v8-exception (v8/run-script-in-context context (css-minify-code css options))
-                         (:path options))))
+     (run-script-with-error-handling context (css-minify-code css options) (:path options))))
 
 (defn minify-css-asset
   [context asset options]
