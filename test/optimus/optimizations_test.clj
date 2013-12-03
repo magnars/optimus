@@ -25,9 +25,14 @@
        {:path "/3984012ce8f1/main.js" :original-path "/main.js" :contents "var y=7;" :headers headers :bundled true}
        {:path "/acc6196d6f45/bundles/app.js" :original-path "/bundles/app.js" :contents "var x=3;\nvar y=7;" :bundle "app.js" :headers headers}])
 
-  (with-files [["/code.js" "var s = \"ĄČĘĖĮĮŠŲŪŪ\";"]]
+  (with-files [["/code.js" "var s = \"ĄČĘĖĮĮŠŲŪŪ\";"]
+               ["/main.css" "#blåbærsyltetøy { padding: 10px 10px 10px 10px; }"]]
     (fact
-     "It handles UTF-8 chars"
-     (optimizations/minify-js-assets
-      (optimus.assets/load-assets public-dir ["/code.js"]))
-     => [{:path "/code.js" :contents "var s=\"ĄČĘĖĮĮŠŲŪŪ\";"}])))
+     "It handles i18n chars."
+
+     (optimizations/all
+      (optimus.assets/load-assets public-dir ["/code.js" "/main.css"]) {})
+     => [{:contents "var s=\"ĄČĘĖĮĮŠŲŪŪ\";", :outdated true, :path "/code.js"}
+         {:contents "#blåbærsyltetøy{padding:10px}", :outdated true, :path "/main.css", :references #{}}
+         {:contents "var s=\"ĄČĘĖĮĮŠŲŪŪ\";", :headers headers, :original-path "/code.js", :path "/8c868893d878/code.js"}
+         {:contents "#blåbærsyltetøy{padding:10px}", :headers headers, :original-path "/main.css", :path "/c89cdf4013a5/main.css", :references #{}}])))
