@@ -14,6 +14,9 @@
       ["Linux" "amd64"]     ["linux/x86_64/" ".so"]
       ["Linux" "x86"]       ["linux/x86/" ".so"]
       ["Linux" "i386"]      ["linux/x86/" ".so"]
+      ["Linux" "i486"]      ["linux/x86/" ".so"]
+      ["Linux" "i586"]      ["linux/x86/" ".so"]
+      ["Linux" "i686"]      ["linux/x86/" ".so"]
       (throw (Exception. (str "Unsupported OS/archetype: " os-name " " os-arch))))))
 
 (defn load-library-from-class-path
