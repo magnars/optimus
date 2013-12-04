@@ -370,6 +370,11 @@ And then grab the cache buster URL like so:
 (link/file-path request "/images/logo.png")
 ```
 
+[Sam Ritchie](https://github.com/sritchie) has written
+[this HTML transformation](https://gist.github.com/sritchie/7794646)
+using [Enlive](https://github.com/cgrand/enlive) that rewrites all
+your image tags with no extra work. That is pretty cool!
+
 ## Can I tweak how optimus behaves?
 
 There are some options to be tuned, but if you're planning on doing
