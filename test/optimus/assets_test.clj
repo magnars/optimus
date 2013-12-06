@@ -93,6 +93,14 @@
                                                :contents "#id { background: url(data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==)}"
                                                :references #{}}]))
 
+(with-files [["/main.css" "#id { background: url(//some.site/img.png)}"]]
+  (fact
+   "External URLs are left alone."
+
+   (load-assets public-dir ["/main.css"]) => [{:path "/main.css"
+                                               :contents "#id { background: url(//some.site/img.png)}"
+                                               :references #{}}]))
+
 (with-files [["/main.css" "#id { background: url('/bg.png'); }"]]
   (fact
    "If the referenced file is not found, that too will result in a
