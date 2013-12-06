@@ -59,7 +59,7 @@
   (.startsWith url "data:"))
 
 (defn- external-url? [#^String url]
-  (.startsWith url "//"))
+  (re-matches #"^(?://|http://|https://).*" url))
 
 (defn- replace-css-urls [file replacement-fn]
   (assoc-in file [:contents]
