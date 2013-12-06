@@ -529,8 +529,8 @@ modifications to Optimus.
 
 ## Contribute
 
-Yes, please do. Please add tests for your feature, or I'll certainly
-break it later.
+Yes, please do. And add tests for your feature or fix, or I'll
+certainly break it later.
 
 #### Installing dependencies
 
