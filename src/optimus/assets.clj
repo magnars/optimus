@@ -58,10 +58,13 @@
 (defn- data-url? [#^String url]
   (.startsWith url "data:"))
 
+(defn- external-url? [#^String url]
+  (re-matches #"^(?://|http://|https://).*" url))
+
 (defn- replace-css-urls [file replacement-fn]
   (assoc-in file [:contents]
             (str/replace (:contents file) css-url-re
-                         (fn [[match url]] (if (data-url? url)
+                         (fn [[match url]] (if (or (data-url? url) (external-url? url))
                                              match
                                              (css-url-str (replacement-fn file url)))))))
 
@@ -70,6 +73,7 @@
        (re-seq css-url-re)
        (map second)
        (remove data-url?)
+       (remove external-url?)
        (map #(combine-paths (original-path file) %))))
 
 (defn- load-css-asset [public-dir path]

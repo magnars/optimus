@@ -93,6 +93,22 @@
                                                :contents "#id { background: url(data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==)}"
                                                :references #{}}]))
 
+(with-files [["/main1.css" "#id { background: url(//some.site/img.png)}"]
+             ["/main2.css" "#id { background: url(http://some.site/img.png)}"]
+             ["/main3.css" "#id { background: url(https://some.site/img.png)}"]]
+  (fact
+   "External URLs are left alone."
+
+   (load-assets public-dir ["/main1.css" "/main2.css" "/main3.css"]) => [{:path "/main1.css"
+                                                                          :contents "#id { background: url(//some.site/img.png)}"
+                                                                          :references #{}}
+                                                                         {:path "/main2.css"
+                                                                          :contents "#id { background: url(http://some.site/img.png)}"
+                                                                          :references #{}}
+                                                                         {:path "/main3.css"
+                                                                          :contents "#id { background: url(https://some.site/img.png)}"
+                                                                          :references #{}}]))
+
 (with-files [["/main.css" "#id { background: url('/bg.png'); }"]]
   (fact
    "If the referenced file is not found, that too will result in a
