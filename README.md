@@ -527,7 +527,10 @@ package takes a list of assets, and returns a list of assets with all
 .less files changed like this, you can plug it in with no
 modifications to Optimus.
 
-## How do I run the tests?
+## Contribute
+
+Yes, please do. Please add tests for your feature, or I'll certainly
+break it later.
 
 #### Installing dependencies
 
@@ -543,6 +546,15 @@ dependencies. The actual fetching is automated however.
 `lein midje :autotest` will run all the tests indefinitely. It sets up a
 watcher on the code files. If they change, only the relevant tests will be
 run again.
+
+## Contributors
+
+- [Christian Johansen](https://github.com/cjohansen) added CSS and JS
+  minification.
+- [Shaharz](https://github.com/shaharz) fixed a bug with external URLs
+  in CSS-files.
+
+Thanks!
 
 ## License
 
