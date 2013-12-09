@@ -47,8 +47,10 @@
   (first (str/split s #"[\?#]")))
 
 (defn combine-paths [container-url relative-url]
-  (pathetic/normalize (pathetic/resolve (just-the-path container-url)
-                                        (remove-url-appendages relative-url))))
+  (-> container-url
+      (just-the-path)
+      (pathetic/resolve (remove-url-appendages relative-url))
+      (pathetic/normalize)))
 
 (def css-url-re #"url\(['\"]?([^\)]+?)['\"]?\)")
 
