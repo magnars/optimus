@@ -6,6 +6,8 @@
   (:import java.io.FileNotFoundException))
 
 ;; create-asset
+(defn ^:dynamic *text-asset?* [path]
+  (or (.endsWith path ".js") (.endsWith path ".html")))
 
 (defn guard-path [#^String path]
   (when-not (.startsWith path "/")
@@ -95,8 +97,7 @@
   (guard-path path)
   (cond
    (.endsWith path ".css") (load-css-asset public-dir path)
-   (.endsWith path ".js") (load-text-asset public-dir path)
-   (.endsWith path ".html") (load-text-asset public-dir path)
+   (*text-asset?* path) (load-text-asset public-dir path)
    :else (create-binary-asset public-dir path)))
 
 (defn- load-asset-and-refs [public-dir path]
