@@ -22,7 +22,6 @@
                         (subs (digest/sha-1 (get-contents file)) 0 12)
                         (:path file)))
       (assoc :original-path (original-path file))
-      (assoc-in [:headers "Cache-Control"] "max-age=315360000")
       (assoc-in [:headers "Expires"] (http-date-formatter (time/plus (time/now)
                                                                      (time/days 3650))))))
 
