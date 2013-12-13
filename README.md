@@ -204,7 +204,8 @@ If you want to mix and match optimizations, here's how you do that:
       (optimizations/minify-js-assets options)
       (optimizations/minify-css-assets options)
       (optimizations/concatenate-bundles)
-      (optimizations/add-cache-busted-expires-headers)))
+      (optimizations/add-cache-busted-expires-headers)
+      (optimizations/add-last-modified-headers)))
 
 (-> app
     (optimus/wrap
@@ -244,7 +245,7 @@ If you need to push files to a CDN, you can save them like this:
 ```cl
 (defn export-assets []
   (-> (get-assets)
-      (optimizations/all options)
+      (my-optimize options)
       (optimus.export/save-assets "./cdn-export/")))
 ```
 
@@ -428,6 +429,7 @@ In addition to `:path` and `:contents`, the asset map may contain:
  - `:original-path` - the path before any changes was made, like cache-busters.
  - `:outdated` - the asset won't be linked to, but is available when referenced directly.
  - `:base-url` - prepended to the path when linking.
+ - `:last-modified` - when the asset was last modified, in milliseconds since epoch.
 
 There's also the case that some assets may be binary. Some of them
 might be large. Instead of keeping those `:contents` in memory, they have

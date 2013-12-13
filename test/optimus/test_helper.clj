@@ -5,6 +5,8 @@
 
 (def public-dir "with-files-tmp")
 
+(def ^:dynamic *last-modified*)
+
 (defmacro with-tmp-dir [& body]
   `(do
      (.mkdirs (io/file tmp-dir))
@@ -32,8 +34,8 @@ Raise an exception if any deletion fails unless silently is true."
 
 (defmacro with-files [files & body]
   `(do
-     (doseq [[path# contents#] ~files] (create-file-and-dirs path# contents#))
-     (let [result# (do ~@body)]
-       (delete-file-recursively tmp-dir)
-       result#)))
-
+     (binding [*last-modified* (* (.intValue (/ (System/currentTimeMillis) 1000)) 1000)]
+       (doseq [[path# contents#] ~files] (create-file-and-dirs path# contents#))
+       (let [result# (do ~@body)]
+         (delete-file-recursively tmp-dir)
+         result#))))

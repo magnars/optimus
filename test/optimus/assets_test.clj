@@ -21,8 +21,8 @@
    "You can load assets from the class path. We need a public dir to
     separate 1) where your files are located, and 2) on what path you
     want to serve them."
-   (load-assets public-dir ["/code.js" "/more.js"]) => [{:path "/code.js", :contents "var x = 3"}
-                                                        {:path "/more.js", :contents "var y = 5"}])
+   (load-assets public-dir ["/code.js" "/more.js"]) => [{:path "/code.js", :contents "var x = 3", :last-modified *last-modified*}
+                                                        {:path "/more.js", :contents "var y = 5", :last-modified *last-modified*}])
 
   (fact
    "Missing files are not tolerated."
@@ -89,9 +89,8 @@
   (fact
    "Data URLs are left alone."
 
-   (load-assets public-dir ["/main.css"]) => [{:path "/main.css"
-                                               :contents "#id { background: url(data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==)}"
-                                               :references #{}}]))
+   (-> (load-assets public-dir ["/main.css"])
+       first :contents) => "#id { background: url(data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==)}"))
 
 (with-files [["/main1.css" "#id { background: url(//some.site/img.png)}"]
              ["/main2.css" "#id { background: url(http://some.site/img.png)}"]
@@ -99,15 +98,10 @@
   (fact
    "External URLs are left alone."
 
-   (load-assets public-dir ["/main1.css" "/main2.css" "/main3.css"]) => [{:path "/main1.css"
-                                                                          :contents "#id { background: url(//some.site/img.png)}"
-                                                                          :references #{}}
-                                                                         {:path "/main2.css"
-                                                                          :contents "#id { background: url(http://some.site/img.png)}"
-                                                                          :references #{}}
-                                                                         {:path "/main3.css"
-                                                                          :contents "#id { background: url(https://some.site/img.png)}"
-                                                                          :references #{}}]))
+   (->> (load-assets public-dir ["/main1.css" "/main2.css" "/main3.css"])
+        (map (juxt :path :contents))) => [["/main1.css" "#id { background: url(//some.site/img.png)}"]
+                                          ["/main2.css" "#id { background: url(http://some.site/img.png)}"]
+                                          ["/main3.css" "#id { background: url(https://some.site/img.png)}"]]))
 
 (with-files [["/main.css" "#id { background: url('/bg.png'); }"]]
   (fact
@@ -147,31 +141,30 @@
 
    (load-bundle public-dir "app.js" ["/code.js" "/more.js"]) => [{:path "/code.js"
                                                                   :contents "1 + 2"
+                                                                  :last-modified *last-modified*
                                                                   :bundle "app.js"}
                                                                  {:path "/more.js"
                                                                   :contents "3 + 5"
+                                                                  :last-modified *last-modified*
                                                                   :bundle "app.js"}])
 
   (fact
    "Files matched with a regexp are also part of the bundle."
 
-   (set (load-bundle public-dir "app.js" [#"/.+\.js$"])) => #{{:path "/code.js"
-                                                               :contents "1 + 2"
-                                                               :bundle "app.js"}
-                                                              {:path "/more.js"
-                                                               :contents "3 + 5"
-                                                               :bundle "app.js"}})
+   (set (map :path (load-bundle public-dir "app.js" [#"/.+\.js$"])))) => #{"/code.js" "/more.js"}
 
-  (fact
-   "There's load-bundles to reduce verbosity."
+   (fact
+    "There's load-bundles to reduce verbosity."
 
-   (load-bundles public-dir {"lib.js" ["/code.js"]
-                             "app.js" ["/more.js"]}) => [{:path "/code.js"
-                                                          :contents "1 + 2"
-                                                          :bundle "lib.js"}
-                                                         {:path "/more.js"
-                                                          :contents "3 + 5"
-                                                          :bundle "app.js"}]))
+    (load-bundles public-dir {"lib.js" ["/code.js"]
+                              "app.js" ["/more.js"]}) => [{:path "/code.js"
+                                                           :contents "1 + 2"
+                                                           :last-modified *last-modified*
+                                                           :bundle "lib.js"}
+                                                          {:path "/more.js"
+                                                           :contents "3 + 5"
+                                                           :last-modified *last-modified*
+                                                           :bundle "app.js"}]))
 
 (with-files [["/main.css" "#id { background: url('/bg.png'); }"]
              ["/bg.png" "binary"]]

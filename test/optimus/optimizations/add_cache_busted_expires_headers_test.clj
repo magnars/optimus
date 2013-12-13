@@ -38,6 +38,18 @@
        ["/f549e6e556ea/c.js" "/code.js"]])
 
   (fact
+   "It shouldn't overwrite other headers that are there either."
+
+   (->> (add-cache-busted-expires-headers [{:path "/c.js"
+                                            :headers {"Last-Modified" "Fri, 28 Jul 2023 00:00:00 GMT"}
+                                            :contents "1 + 2"}])
+        (map (juxt :path :headers)))
+   => [["/c.js" {"Last-Modified" "Fri, 28 Jul 2023 00:00:00 GMT"}]
+       ["/f549e6e556ea/c.js" {"Last-Modified" "Fri, 28 Jul 2023 00:00:00 GMT"
+                              "Cache-Control" "max-age=315360000"
+                              "Expires" "Fri, 28 Jul 2023 00:00:00 GMT"}]])
+
+  (fact
    "The file paths in CSS files must be updated to include cache
     busters, so that they too can be served with far-future expires
     headers. There is a snag, tho:

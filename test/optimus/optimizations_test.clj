@@ -30,15 +30,17 @@
     (fact
      "It handles i18n chars."
 
-     (optimizations/all
-      (optimus.assets/load-assets public-dir ["/code.js" "/main.css"]) {})
-     => [{:contents "var s=\"ĄČĘĖĮĮŠŲŪŪ\";", :outdated true, :path "/code.js"}
-         {:contents "#blåbærsyltetøy{padding:10px}", :outdated true, :path "/main.css", :references #{}}
-         {:contents "var s=\"ĄČĘĖĮĮŠŲŪŪ\";", :headers headers, :original-path "/code.js", :path "/8c868893d878/code.js"}
-         {:contents "#blåbærsyltetøy{padding:10px}", :headers headers, :original-path "/main.css", :path "/c89cdf4013a5/main.css", :references #{}}])))
+     (->> (optimizations/all
+           (optimus.assets/load-assets public-dir ["/code.js" "/main.css"]) {})
+          (map (juxt :path :contents)))
+     => [["/code.js" "var s=\"ĄČĘĖĮĮŠŲŪŪ\";"]
+         ["/main.css" "#blåbærsyltetøy{padding:10px}"]
+         ["/8c868893d878/code.js" "var s=\"ĄČĘĖĮĮŠŲŪŪ\";"]
+         ["/c89cdf4013a5/main.css" "#blåbærsyltetøy{padding:10px}"]])))
 
 (fact
  "It handles UTF-8 chars loaded off disk, and DOS line endings too."
- (optimizations/minify-js-assets
-  (optimus.assets/load-assets "public" ["/encoding.js"]))
- => [{:path "/encoding.js" :contents "var s=\"Klaida inicijuojant pasirašymą!\";"}])
+ (->> (optimizations/minify-js-assets
+       (optimus.assets/load-assets "public" ["/encoding.js"]))
+      (map (juxt :path :contents)))
+ => [["/encoding.js" "var s=\"Klaida inicijuojant pasirašymą!\";"]])

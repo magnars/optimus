@@ -23,14 +23,23 @@
   (or (io/resource (str public-dir path))
       (throw (FileNotFoundException. path))))
 
-(defn create-binary-asset [public-dir path & {:as opts}]
+(defn last-modified [resource]
+  (let [url-connection (.openConnection resource)
+        modified (.getLastModified url-connection)]
+    (.close (.getInputStream url-connection))
+    modified))
+
+(defn create-binary-asset [public-dir path]
   (guard-path path)
   (let [resource (existing-resource public-dir path)]
-    (merge {:path path
-            :get-stream #(io/input-stream resource)})))
+    {:path path
+     :get-stream #(io/input-stream resource)
+     :last-modified (last-modified resource)}))
 
 (defn- load-text-asset [public-dir path]
-  (create-asset path (slurp (existing-resource public-dir path))))
+  (let [resource (existing-resource public-dir path)]
+    (create-asset path (slurp resource)
+                  :last-modified (last-modified resource))))
 
 (defn- filename-ext
   "Returns the file extension of a filename or filepath."

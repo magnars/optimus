@@ -22,9 +22,9 @@
                         (subs (digest/sha-1 (get-contents file)) 0 12)
                         (:path file)))
       (assoc :original-path (original-path file))
-      (assoc :headers {"Cache-Control" "max-age=315360000" ;; 3650 days
-                       "Expires" (http-date-formatter (time/plus (time/now)
-                                                                 (time/days 3650)))})))
+      (assoc-in [:headers "Cache-Control"] "max-age=315360000")
+      (assoc-in [:headers "Expires"] (http-date-formatter (time/plus (time/now)
+                                                                     (time/days 3650))))))
 
 (defn- by-path [path files]
   (first (filter #(= path (:path %)) files)))

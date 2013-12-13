@@ -1,5 +1,5 @@
 (ns optimus.assets.load-css
-  (:require [optimus.assets.creation :refer [load-asset create-asset existing-resource original-path]]
+  (:require [optimus.assets.creation :refer [create-asset existing-resource original-path last-modified]]
             [pathetic.core :as pathetic]
             [clojure.string :as str]))
 
@@ -46,7 +46,9 @@
        (map #(combine-paths (original-path file) %))))
 
 (defn load-css-asset [public-dir path]
-  (let [contents (slurp (existing-resource public-dir path))
-        asset (-> (create-asset path contents)
+  (let [resource (existing-resource public-dir path)
+        contents (slurp resource)
+        asset (-> (create-asset path contents
+                                :last-modified (last-modified resource))
                   (replace-css-urls #(combine-paths (original-path %1) %2)))]
     (assoc asset :references (set (paths-in-css asset)))))

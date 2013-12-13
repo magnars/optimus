@@ -34,3 +34,15 @@
  => [["/main.css" #{"/bg.png"}]
      ["/more.css" #{"/logo.png"}]
      ["/bundles/styles.css" #{"/bg.png" "/logo.png"}]])
+
+(fact
+ "Bundled files keep the newest :last-modified"
+
+ (->> (concatenate-bundles [{:path "/main.css" :contents "" :bundle "styles.css" :last-modified 1}
+                            {:path "/more.css" :contents "" :bundle "styles.css" :last-modified 2}
+                            {:path "/gone.css" :contents "" :bundle "styles.css"}])
+      (map (juxt :path :last-modified)))
+ => [["/main.css" 1]
+     ["/more.css" 2]
+     ["/gone.css" nil]
+     ["/bundles/styles.css" 2]])
