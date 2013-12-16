@@ -3,7 +3,9 @@
             [clojure.string :as str]
             [pathetic.core :as pathetic]
             [optimus.class-path :refer [file-paths-on-class-path]])
-  (:import java.io.FileNotFoundException))
+  (:import [java.io FileNotFoundException]
+           [java.net URL]
+           [java.util.zip ZipFile ZipEntry]))
 
 (defn guard-path [#^String path]
   (when-not (.startsWith path "/")
@@ -23,11 +25,29 @@
   (or (io/resource (str public-dir path))
       (throw (FileNotFoundException. path))))
 
-(defn last-modified [resource]
+(defn- file-last-modified [#^URL resource]
   (let [url-connection (.openConnection resource)
         modified (.getLastModified url-connection)]
     (.close (.getInputStream url-connection))
     modified))
+
+(defn- jar-file-last-modified [#^URL resource]
+  (let [[jar-path file-path] (-> (.getPath resource)
+                                 (subs 5)
+                                 (str/split #"!/"))]
+    (->> jar-path
+         (ZipFile.)
+         (.entries)
+         (enumeration-seq)
+         (filter (fn [#^ZipEntry e] (= file-path (.getName e))))
+         (first)
+         (.getTime))))
+
+(defn last-modified [#^URL resource]
+  (case (.getProtocol resource)
+    "jar" (jar-file-last-modified resource)
+    "file" (file-last-modified resource)
+    nil))
 
 (defn create-binary-asset [public-dir path]
   (guard-path path)

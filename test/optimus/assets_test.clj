@@ -28,6 +28,12 @@
    "Missing files are not tolerated."
    (load-assets public-dir ["/gone.js"]) => (throws FileNotFoundException "/gone.js")))
 
+(fact
+ "Files in JARs report the correct last-modified time."
+
+ (map (juxt :path :last-modified) (load-assets "optimus-test-jar" ["/blank.gif"]))
+ => [["/blank.gif" 1384517932000]])
+
 (with-files [["/styles/reset.css" ""]
              ["/styles/main.css" ""]
              ["/external/kalendae.css" ""]]
