@@ -11,7 +11,7 @@ In other words: Develop with ease. Optimize in production.
 
 ## Install
 
-Add `[optimus "0.12.7"]` to `:dependencies` in your `project.clj`.
+Add `[optimus "0.13.0"]` to `:dependencies` in your `project.clj`.
 
 Please note that this project uses
 [Semantic Versioning](http://semver.org/). As long as we're on a `0`
@@ -528,6 +528,28 @@ compiled CSS, and serve it under the `:path` `"styles.css"`. If your
 package takes a list of assets, and returns a list of assets with all
 .less files changed like this, you can plug it in with no
 modifications to Optimus.
+
+## Change log
+
+#### From 0.12 to 0.13
+
+- Add Last-Modified headers
+- Remove Cache-Control headers (superflous when serving Expires)
+- Create extension point for asset loading
+- Several bugfixes
+
+#### From 0.11 to 0.12
+
+- Move Angular.JS features into [its own project](http://github.com/magnars/optimus-angular).
+
+#### From 0.10 to 0.11
+
+- Add support for :base-path on assets for CDNs.
+- Add exporting of assets to disk. Also for CDNs.
+
+#### From 0.9 to 0.10
+
+- Split strategies and optimizations so they can vary independently.
 
 ## Contribute
 
