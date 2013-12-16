@@ -14,5 +14,6 @@
   :profiles {:dev {:dependencies [[midje "1.5.0"]]
                    :plugins [[lein-midje "3.0.0"]
                              [lein-shell "0.3.0"]]
-                   :resource-paths ["test/resources"]}}
+                   :resource-paths ["test/resources"]
+                   :source-paths ["dev"]}}
   :prep-tasks [["shell" "./build-js-sources.sh"]])
