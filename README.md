@@ -438,7 +438,8 @@ a `:get-stream` function.
 Built on top of that is a bunch of operations that either help you:
 
  - Load assets to put in the list: `optimus.assets`
- - Optimize the assets in the list somehow: `optimus.strategies`
+ - Optimize the assets in the list somehow: `optimus.optimizations`
+ - Decide how you want to serve the assets: `optimus.strategies`
  - Link to the assets: `optimus.link`
 
 If you want to know more, the [tests](test/optimus) are a good place
