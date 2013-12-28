@@ -74,3 +74,58 @@
 
  (let [app (serve-frozen-assets return-request get-assets optimize {})]
    (app {}) => {:optimus-assets [{:path "/code.js" :size 1}]}))
+
+(fact
+ "When loading the assets, the strategy guards against duplicate
+  assets by their path. Equal assets are simply collapsed to one."
+
+ (defn get-assets [] [{:path "/code.js" :contents "abc"}
+                      {:path "/code.js" :contents "abc"}])
+
+ (let [app (serve-live-assets return-request get-assets dont-optimize {})]
+   (app {}) => {:optimus-assets [{:path "/code.js" :contents "abc"}]})
+
+ (let [app (serve-frozen-assets return-request get-assets dont-optimize {})]
+   (app {}) => {:optimus-assets [{:path "/code.js" :contents "abc"}]}))
+
+(fact
+ "Duplicate assets that are not equal are not tolerated."
+
+ (defn get-assets [] [{:path "/code.js" :contents "abc"}
+                      {:path "/code.js" :contents "def"}])
+
+ (serve-frozen-assets return-request get-assets dont-optimize {})
+ => (throws Exception "Two assets have the same path \"/code.js\", but are not equal."))
+
+(fact
+ "We can't compare get-stream functions, so those will have to pass."
+
+ (defn get-assets [] [{:path "/code.js" :get-stream (fn [] "a stream")}
+                      {:path "/code.js" :get-stream (fn [] "a stream")}])
+
+ (let [app (serve-live-assets return-request get-assets dont-optimize {})]
+   (-> (app {}) :optimus-assets count) => 1))
+
+(fact
+ "Asset order is preserved."
+
+ (defn get-assets [] [{:path "/a.js" :contents ""}
+                      {:path "/b.js" :contents ""}
+                      {:path "/c.js" :contents ""}
+                      {:path "/d.js" :contents ""}
+                      {:path "/e.js" :contents ""}
+                      {:path "/f.js" :contents ""}
+                      {:path "/g.js" :contents ""}
+                      {:path "/h.js" :contents ""}
+                      {:path "/i.js" :contents ""}])
+
+ (let [app (serve-live-assets return-request get-assets dont-optimize {})]
+   (app {}) => {:optimus-assets [{:path "/a.js" :contents ""}
+                                 {:path "/b.js" :contents ""}
+                                 {:path "/c.js" :contents ""}
+                                 {:path "/d.js" :contents ""}
+                                 {:path "/e.js" :contents ""}
+                                 {:path "/f.js" :contents ""}
+                                 {:path "/g.js" :contents ""}
+                                 {:path "/h.js" :contents ""}
+                                 {:path "/i.js" :contents ""}]}))
