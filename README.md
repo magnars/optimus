@@ -75,7 +75,8 @@ Let's look at an example:
      (if (= :dev (:env config)) ;; 19
        strategies/serve-live-assets ;; 20
        strategies/serve-frozen-assets)) ;; 21
-    (ring.middleware.content-type/wrap-content-type)) ;; 22
+    (ring.middleware.content-type/wrap-content-type) ;; 22
+    (ring.middleware.not-modified/wrap-not-modified)) ;; 23
 ```
 
 1. Assets are scripts, stylesheets, images, fonts and other static
@@ -156,6 +157,9 @@ Let's look at an example:
 
 22. Since Ring comes with content type middleware, optimus doesn't
     worry about it. Just make sure to put it after optimus.
+
+23. The same goes for responding with `304 Not Modified`. Since
+    optimus adds `Last-Modified` headers, ring handles the rest.
 
 #### Using the new URLs
 
