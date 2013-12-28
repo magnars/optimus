@@ -1,4 +1,4 @@
-# optimus [![Build Status](https://secure.travis-ci.org/magnars/optimus.png)](http://travis-ci.org/magnars/optimus)
+# Optimus [![Build Status](https://secure.travis-ci.org/magnars/optimus.png)](http://travis-ci.org/magnars/optimus)
 
 A Ring middleware for frontend performance optimization.
 
@@ -22,7 +22,7 @@ increase.
 
 ## Features
 
-Depending on how you use it, optimus:
+Depending on how you use it, Optimus:
 
 - concatenates your JavaScript and CSS files into bundles.
 - minifies your JavaScript with [UglifyJS 2](https://github.com/mishoo/UglifyJS2)
@@ -114,7 +114,7 @@ Let's look at an example:
     loaded before their dependents.
 
 12. You can add individual assets that aren't part of a bundle, but
-    should be optimized and served through optimus. This is useful to
+    should be optimized and served through Optimus. This is useful to
     add cache busters and far future Expires headers to images served
     straight from your HTML.
 
@@ -136,7 +136,7 @@ Let's look at an example:
 
 17. Yeah, `optimizations/none` is basically a two-arity `identity`.
 
-18. When you use `optimizations/all` you get everything that optimus
+18. When you use `optimizations/all` you get everything that Optimus
     provides. But you can easily exchange this for a function that
     executes only the transformations that you need.
 
@@ -155,16 +155,16 @@ Let's look at an example:
     server for each change. Here's a way that optimizes just like
     production, but still serves fresh changes without restarts.
 
-22. Since Ring comes with content type middleware, optimus doesn't
-    worry about it. Just make sure to put it after optimus.
+22. Since Ring comes with content type middleware, Optimus doesn't
+    worry about it. Just make sure to put it after Optimus.
 
 23. The same goes for responding with `304 Not Modified`. Since
-    optimus adds `Last-Modified` headers, ring handles the rest.
+    Optimus adds `Last-Modified` headers, Ring handles the rest.
 
 #### Using the new URLs
 
 Since we're rewriting URLs to include cache busters, we need to access
-them through optimus.
+them through Optimus.
 
 See example in hiccup below. Notice that we use `map`, since there is
 likely more than one URL in development mode.
@@ -380,7 +380,7 @@ And then grab the cache buster URL like so:
 using [Enlive](https://github.com/cgrand/enlive) that rewrites all
 your image tags with no extra work. That is pretty cool!
 
-## Can I tweak how optimus behaves?
+## Can I tweak how Optimus behaves?
 
 There are some options to be tuned, but if you're planning on doing
 major things there's nothing wrong with writing your own strategies or
@@ -419,7 +419,7 @@ Values in this example are all defaults, so it's just a verbose noop.
 
 ## What are these assets anyway? They seem magical to me.
 
-Luckily they're just data. The most basic operation of optimus is
+Luckily they're just data. The most basic operation of Optimus is
 serving assets from a list, with this minimal structure:
 
     [{:path :contents}]
@@ -447,10 +447,10 @@ Built on top of that is a bunch of operations that either help you:
  - Link to the assets: `optimus.link`
 
 If you want to know more, the [tests](test/optimus) are a good place
-to start reading. They go in to all the details of how optimus works
+to start reading. They go in to all the details of how Optimus works
 and even has some commentary on reasoning and reasons.
 
-## Why not split optimus into a bunch of middlewares?
+## Why not split Optimus into a bunch of middlewares?
 
 I set out to create a suite of middlewares for frontend optimization.
 The first was Catenate, which concerned itself with concatenation into
@@ -483,7 +483,7 @@ middleware would have to know which CSS files reference which files,
 and rewrite them.
 
 All of these could be fixed with a well-thought out Asset concept in
-the ring middleware stack. Which is what Optimus is an attempt at. It
+the Ring middleware stack. Which is what Optimus is an attempt at. It
 adds a list of assets to the request, with enough information for the
 linking functions to figure out which versions of which files to link.
 
