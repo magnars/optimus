@@ -6,7 +6,8 @@
   (:use midje.sweet))
 
 (with-redefs [time/now (fn [] (time/date-time 2013 07 30))]
-  (def headers {"Expires" "Fri, 28 Jul 2023 00:00:00 GMT"})
+  (def headers {"Cache-Control" "max-age=315360000"
+                "Expires" "Fri, 28 Jul 2023 00:00:00 GMT"})
 
   (fact
    "This is a big integration test, for sure. It bundles bundles, it

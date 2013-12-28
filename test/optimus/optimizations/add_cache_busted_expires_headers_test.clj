@@ -22,7 +22,8 @@
        {:path "/f549e6e556ea/code.js"
         :original-path "/code.js"
         :contents "1 + 2"
-        :headers {"Expires" "Fri, 28 Jul 2023 00:00:00 GMT"}}])
+        :headers {"Cache-Control" "max-age=315360000"
+                  "Expires" "Fri, 28 Jul 2023 00:00:00 GMT"}}])
 
   (fact
    "While it's important that the :original-path property is set, so
@@ -45,6 +46,7 @@
         (map (juxt :path :headers)))
    => [["/c.js" {"Last-Modified" "Fri, 28 Jul 2023 00:00:00 GMT"}]
        ["/f549e6e556ea/c.js" {"Last-Modified" "Fri, 28 Jul 2023 00:00:00 GMT"
+                              "Cache-Control" "max-age=315360000"
                               "Expires" "Fri, 28 Jul 2023 00:00:00 GMT"}]])
 
   (fact

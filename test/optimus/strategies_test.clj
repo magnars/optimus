@@ -22,10 +22,10 @@
  "Headers are included."
 
  (defn get-assets []
-   [{:path "/more.js" :contents "3 + 4" :headers {"Expires" "Fri, 28 Jul 2023 00:00:00 GMT"}}])
+   [{:path "/more.js" :contents "3 + 4" :headers {"Cache-Control" "max-age=315360000"}}])
 
  (let [app (serve-live-assets noop get-assets dont-optimize {})]
-   (app {:uri "/more.js"}) => {:status 200 :body "3 + 4" :headers {"Expires" "Fri, 28 Jul 2023 00:00:00 GMT"}}))
+   (app {:uri "/more.js"}) => {:status 200 :body "3 + 4" :headers {"Cache-Control" "max-age=315360000"}}))
 
 (fact
  "Assets are fetched for each request. We wouldn't want to restart the
