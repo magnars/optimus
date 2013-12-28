@@ -13,8 +13,8 @@
     (app (assoc request :optimus-assets assets))))
 
 (defn- collapse-equal-assets [asset-1 asset-2]
-  (when-not (= (dissoc asset-1 :get-stream)
-               (dissoc asset-2 :get-stream))
+  (when-not (= (dissoc asset-1 :get-stream :bundle)
+               (dissoc asset-2 :get-stream :bundle))
     (throw (Exception. (str "Two assets have the same path \"" (:path asset-1) "\", but are not equal."))))
   asset-1)
 
