@@ -19,11 +19,11 @@
   asset-1)
 
 (defn- guard-against-duplicate-assets [assets]
-  (let [path->assets (group-by :path assets)]
+  (let [pb->assets (group-by (juxt :path :bundle) assets)]
     (->> assets
-         (map :path)
+         (map (juxt :path :bundle))
          (distinct)
-         (map path->assets)
+         (map pb->assets)
          (map #(reduce collapse-equal-assets %)))))
 
 (defn serve-live-assets [app get-assets optimize options]

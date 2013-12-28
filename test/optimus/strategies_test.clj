@@ -89,6 +89,16 @@
    (app {}) => {:optimus-assets [{:path "/code.js" :contents "abc"}]}))
 
 (fact
+ "Assets are allowed to be duplicated if they belong to different bundles."
+
+ (defn get-assets [] [{:path "/code.js" :contents "abc" :bundle "app1.js"}
+                      {:path "/code.js" :contents "abc" :bundle "app2.js"}])
+
+ (let [app (serve-live-assets return-request get-assets dont-optimize {})]
+   (app {}) => {:optimus-assets [{:path "/code.js" :contents "abc" :bundle "app1.js"}
+                                 {:path "/code.js" :contents "abc" :bundle "app2.js"}]}))
+
+(fact
  "Duplicate assets that are not equal are not tolerated."
 
  (defn get-assets [] [{:path "/code.js" :contents "abc"}
