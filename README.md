@@ -253,9 +253,25 @@ If you need to push files to a CDN, you can save them like this:
       (optimus.export/save-assets "./cdn-export/")))
 ```
 
-If you're not linking to bundled files individually, you can remove
-the bundled assets. And if there are no external apps that link to
-assets by their original URLs, you can remove the outdated assets.
+You can even add an alias to your `project.clj`:
+
+```cl
+:aliases {"export-assets" ["run" "-m" "my-app.example/export-assets"]}
+```
+
+And run `lein export-assets` from the command line. Handy.
+
+#### Those are a whole lot of files being exported.
+
+Yeah, two reasons for that:
+
+- Optimus supports linking to individual assets even after they're
+  bundled. If you don't want that, remove the `:bundled` assets.
+
+- Optimus supports linking to assets by their original URL. If there
+  are no external apps to need to link to your assets, remove the
+  `:outdated` assets.
+
 Like this:
 
 ```cl
@@ -266,14 +282,6 @@ Like this:
         (remove :outdated assets)
         (optimus.export/save-assets assets "./cdn-export/")))
 ```
-
-You can even add an alias to your `project.clj`:
-
-```cl
-:aliases {"export-assets" ["run" "-m" "my-app.example/export-assets"]}
-```
-
-And run `lein export-assets` from the command line. Handy.
 
 ## So how does all this work in development mode?
 
@@ -310,7 +318,7 @@ eg. `public/app/some.js` on the classpath.
 ## What about production mode?
 
 When you use the `serve-frozen-assets` strategy, all the contents for
-each bundle is read at startup. And with `optimizations/all` the URLs
+each bundle is read at startup. And with `optimizations/all`, the URLs
 are generated from the hash of the contents and the identifier of the
 bundle.
 
