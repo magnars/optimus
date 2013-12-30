@@ -112,7 +112,7 @@
   (let [paths (mapcat #(realize-regex-paths public-dir %) paths)
         assets (load-assets public-dir paths)
         path-set (set paths)
-        set-bundle-for-original-files (fn [asset] (if (contains? path-set (:path asset))
+        set-bundle-for-original-files (fn [asset] (if (contains? path-set (original-path asset))
                                                     (assoc asset :bundle bundle)
                                                     asset))]
     (map set-bundle-for-original-files assets)))
