@@ -37,7 +37,7 @@
                                              match
                                              (css-url-str (replacement-fn file url)))))))
 
-(defn paths-in-css [file]
+(defn- paths-in-css [file]
   (->> file :contents
        (re-seq css-url-re)
        (map second)
@@ -45,10 +45,12 @@
        (remove external-url?)
        (map #(combine-paths (original-path file) %))))
 
-(defn load-css-asset [public-dir path]
-  (let [resource (existing-resource public-dir path)
-        contents (slurp resource)
-        asset (-> (create-asset path contents
-                                :last-modified (last-modified resource))
+(defn create-css-asset [path contents last-modified]
+  (let [asset (-> (create-asset path contents
+                                :last-modified last-modified)
                   (replace-css-urls #(combine-paths (original-path %1) %2)))]
     (assoc asset :references (set (paths-in-css asset)))))
+
+(defn load-css-asset [public-dir path]
+  (let [resource (existing-resource public-dir path)]
+    (create-css-asset path (slurp resource) (last-modified resource))))
