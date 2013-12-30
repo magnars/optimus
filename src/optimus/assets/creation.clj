@@ -56,7 +56,7 @@
      :get-stream #(io/input-stream resource)
      :last-modified (last-modified resource)}))
 
-(defn- load-text-asset [public-dir path]
+(defn load-text-asset [public-dir path]
   (let [resource (existing-resource public-dir path)]
     (create-asset path (slurp resource)
                   :last-modified (last-modified resource))))
@@ -72,10 +72,6 @@
   [public-dir path]
   (create-binary-asset public-dir path))
 
-(defmethod load-asset "js" [public-dir path] (load-text-asset public-dir path))
-(defmethod load-asset "html" [public-dir path] (load-text-asset public-dir path))
-;; css is covered by load-css
-
 (defn- load-asset-and-refs [public-dir path]
   (let [asset (load-asset public-dir path)]
     (concat [asset] (mapcat #(load-asset-and-refs public-dir %) (:references asset)))))
@@ -88,7 +84,10 @@
   (last (pathetic/split path)))
 
 (defn- emacs-file-artefact? [#^String path]
-  (.startsWith (just-the-filename path) ".#"))
+  (let [filename (just-the-filename path)]
+    (or (.startsWith filename ".#")
+        (and (.startsWith filename "#")
+             (.endsWith filename "#")))))
 
 (defn realize-regex-paths [public-dir path]
   (if (instance? java.util.regex.Pattern path)

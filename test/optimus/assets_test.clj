@@ -69,9 +69,10 @@
  "Emacs file artifacts are ignored by the regex matcher."
 
  (with-files [["/app/code.js" ""]
+              ["/app/#code.js#" ""]
               ["/app/.#code.js" ""]]
 
-   (->> (load-assets public-dir [#"/app/.+\.js$"])
+   (->> (load-assets public-dir [#"/app/*"])
         (map :path)) => ["/app/code.js"]))
 
 (with-files [["/main.css" "#id { background: url('/bg.png'); }"]
