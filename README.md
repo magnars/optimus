@@ -468,10 +468,14 @@ bundles. So I certainly agree with your point. You'd be hard pressed
 to think otherwise in the Clojure community, I think, with its focus
 on "decomplecting". The reason I gave up on that idea is two-fold:
 
- - The different optimizations are not orthogonal.
  - Assets aren't first class in the Ring middleware stack.
+ - The different optimizations are not orthogonal.
 
-Some examples:
+I'll try to elaborate.
+
+#### First class assets
+
+Let's look at two examples:
 
 - When you bundle files together, your HTML has to reference either
   the bundle URL (in prod) or all the individual files (in dev). There
@@ -497,7 +501,9 @@ the Ring middleware stack. Which is what Optimus is an attempt at. It
 adds a list of assets to the request, with enough information for the
 linking functions to figure out which versions of which files to link.
 
-But then there's the orthogonality:
+#### Orthogonality
+
+Different transformations aren't orthogonal. Some examples:
 
  - You can't add cache-busters first, and then bundle assets together,
    since you wouldn't get cache buster URLs on your bundles.
@@ -527,6 +533,8 @@ middlewares would have to tackle on their own - basically each layer
 freezing their optimized assets on server start, and all but the last
 one doing so in vain.
 
+#### Optimus' solution
+
 Optimus solves this by creating a separate middleware stack for
 optimizations, that work on assets (not requests), and that can be
 done at different times by different asset-serving strategies.
@@ -535,14 +543,23 @@ So yes, the optimizations have been split into several middlewares.
 But not middlewares for the Ring stack. They are Asset-specific
 middlewares.
 
-For instance, even tho Optimus doesn't do transpiling, building a
-transpiler to fit in the Optimus asset middleware stack is pretty
-nice. You let `:original-url` be the original `"styles.less"`, so the
-linking features can find it, replace the `:contents` with the
-compiled CSS, and serve it under the `:path` `"styles.css"`. If your
-package takes a list of assets, and returns a list of assets with all
-.less files changed like this, you can plug it in with no
-modifications to Optimus.
+#### Optimus is open for extension
+
+Even tho Optimus itself doesn't do transpiling, building a transpiler
+to use with Optimus is pretty nice. I created
+[optimus-less](https://github.com/magnars/optimus-less) as an example
+implementation.
+
+You create a custom asset loader and plug it into Optimus'
+`load-asset` multimethod. Let `:original-url` be the original
+`"styles.less"`, so the linking features can find it, replace the
+`:contents` with the compiled CSS, and serve it under the `:path`
+`"styles.css"`.
+
+It's about
+[20 lines of code](https://github.com/magnars/optimus-less/blob/master/src/optimus_less/core.clj),
+including requires. And adding support for more transpilers require no
+changes to Optimus itself.
 
 ## Change log
 
