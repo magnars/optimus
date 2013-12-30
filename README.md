@@ -37,6 +37,9 @@ You might also be interested in:
   template cache. It also has Optimus asset middleware that prepares
   Angular.JS code for minification.
 
+- [optimus-less](https://github.com/magnars/optimus-less) - which adds
+  a custom asset loader for [LESS](http://lesscss.org/) files.
+
 ## Usage
 
 Let's look at an example:
