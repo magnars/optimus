@@ -244,9 +244,8 @@ To serve the files from a different host, add a `:base-url` to the assets:
 ```
 
 This supposes that your CDN will pull assets from your app server on
-cache misses.
-
-If you need to push files to a CDN, you can save them like this:
+cache misses. If you need to push files to the CDN, you also need to
+save them to disk. Like this:
 
 ```cl
 (defn export-assets []
@@ -271,7 +270,7 @@ Yeah, two reasons for that:
   bundled. If you don't want that, remove the `:bundled` assets.
 
 - Optimus supports linking to assets by their original URL. If there
-  are no external apps to need to link to your assets, remove the
+  are no external apps that need to link to your assets, remove the
   `:outdated` assets.
 
 Like this:
