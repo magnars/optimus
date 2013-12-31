@@ -1,6 +1,6 @@
 (ns optimus.export-test
   (:require [optimus.export :refer [save-assets]]
-            [optimus.test-helper :refer [with-tmp-dir tmp-dir]]
+            [test-with-files.core :refer [with-tmp-dir tmp-dir]]
             [clojure.java.io :as io]
             [midje.sweet :refer [fact =>]]))
 

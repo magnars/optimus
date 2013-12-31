@@ -1,6 +1,6 @@
 (ns optimus.assets-test
   (:use [optimus.assets]
-        [optimus.test-helper]
+        [test-with-files.core]
         [midje.sweet])
   (:import java.io.FileNotFoundException))
 

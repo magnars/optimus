@@ -1,7 +1,7 @@
 (ns optimus.optimizations-test
   (:require [optimus.optimizations :as optimizations]
             [optimus.assets]
-            [optimus.test-helper :refer [with-files public-dir]]
+            [test-with-files.core :refer [with-files public-dir]]
             [clj-time.core :as time])
   (:use midje.sweet))
 
