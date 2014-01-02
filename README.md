@@ -38,6 +38,10 @@ You might also be interested in:
   Angular.JS code for minification.
 - [optimus-less](https://github.com/magnars/optimus-less) - which adds
   a custom asset loader for [LESS](http://lesscss.org/) files.
+- [optimus-jsx](https://github.com/magnars/optimus-jsx) - which adds a
+  custom asset loader for
+  [React JSX](http://facebook.github.io/react/docs/jsx-in-depth.html)
+  files.
 
 ## Usage
 
@@ -613,7 +617,7 @@ Thanks!
 
 ## License
 
-Copyright © 2013 Magnar Sveen
+Copyright © 2013-2014 Magnar Sveen
 
 Distributed under the Eclipse Public License, the same as Clojure.
 
