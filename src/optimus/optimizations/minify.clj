@@ -1,5 +1,5 @@
 (ns optimus.optimizations.minify
-  (:require [optimus.v8 :as v8]
+  (:require [v8.core :as v8]
             [clojure.string :as s]))
 
 (defn- escape [str]
