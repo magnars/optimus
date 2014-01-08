@@ -19,10 +19,7 @@
       (pathetic/resolve (remove-url-appendages relative-url))
       (pathetic/normalize)))
 
-(def css-url-re #"url\(['\"]?([^\)]+?)['\"]?\)")
-
-(defn- css-url-str [url]
-  (str "url('" url "')"))
+(def css-url-re #"(?:url\(['\"]?([^\)]+?)['\"]?\)|@import ['\"](.+?)['\"])")
 
 (defn- data-url? [#^String url]
   (.startsWith url "data:"))
@@ -30,25 +27,32 @@
 (defn- external-url? [#^String url]
   (re-matches #"^(?://|http://|https://).*" url))
 
-(defn- replace-css-urls [file replacement-fn]
-  (assoc-in file [:contents]
-            (str/replace (:contents file) css-url-re
-                         (fn [[match url]] (if (or (data-url? url) (external-url? url))
-                                             match
-                                             (css-url-str (replacement-fn file url)))))))
+(defn- url-match [[match & urls]]
+  (first (remove nil? urls)))
+
+(defn- match-url-to-absolute [original-path [match :as matches]]
+  (let [url (url-match matches)]
+    (if (or (data-url? url)
+            (external-url? url))
+      match ;; leave alone
+      (str/replace match url (combine-paths original-path url)))))
+
+(defn- make-css-urls-absolute [file]
+  (->> (partial match-url-to-absolute (original-path file))
+       (str/replace (:contents file) css-url-re)
+       (assoc-in file [:contents])))
 
 (defn- paths-in-css [file]
   (->> file :contents
        (re-seq css-url-re)
-       (map second)
+       (map url-match)
        (remove data-url?)
-       (remove external-url?)
-       (map #(combine-paths (original-path file) %))))
+       (remove external-url?)))
 
 (defn create-css-asset [path contents last-modified]
   (let [asset (-> (create-asset path contents
                                 :last-modified last-modified)
-                  (replace-css-urls #(combine-paths (original-path %1) %2)))]
+                  (make-css-urls-absolute))]
     (assoc asset :references (set (paths-in-css asset)))))
 
 (defn load-css-asset [public-dir path]

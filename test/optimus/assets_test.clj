@@ -75,22 +75,38 @@
    (->> (load-assets public-dir [#"/app/*"])
         (map :path)) => ["/app/code.js"]))
 
-(with-files [["/main.css" "#id { background: url('/bg.png'); }"]
-             ["/bg.png" "binary"]]
-  (fact
-   "Loading a single asset is not supported, since loading an asset
-    might result in more than one in the list - when the loaded asset
-    in turn references more assets.
+(fact
+ "Loading a single asset is not supported, since loading an asset
+  might result in more than one in the list - when the loaded asset in
+  turn references more assets.
 
-    We need to load every referenced asset at this time, since this is
-    when we know where the files are located. In other words, we take
-    it for granted that any files referenced in a file loaded off the
-    class path are present in the same folder structure."
+  We need to load every referenced asset at this time, since this is
+  when we know where the files are located. In other words, we take it
+  for granted that any files referenced in a file loaded off the class
+  path are present in the same folder structure."
 
+ (with-files [["/main.css" "#id { background: url('/bg.png'); }"]
+              ["/bg.png" "binary"]]
    (->> (load-assets public-dir ["/main.css"])
-        (map #(select-keys % #{:path :references}))) => [{:path "/main.css"
-                                                          :references #{"/bg.png"}}
+        (map #(select-keys % #{:path :references}))) => [{:path "/main.css" :references #{"/bg.png"}}
                                                          {:path "/bg.png"}]))
+
+(fact
+ "Imports are supported, in that they are recognized as references."
+
+ (with-files [["/main.css" "@import url('other.css');"]
+              ["/other.css" "#id { background: url('bg.png'); }"]
+              ["/bg.png" "binary"]]
+   (->> (load-assets public-dir ["/main.css"])
+        (map #(select-keys % #{:path :references}))) => [{:path "/main.css" :references #{"/other.css"}}
+                                                         {:path "/other.css" :references #{"/bg.png"}}
+                                                         {:path "/bg.png"}])
+
+ (with-files [["/main.css" "@import 'other.css';"]
+              ["/other.css" "#id {}"]]
+   (->> (load-assets public-dir ["/main.css"])
+        (map #(select-keys % #{:path :references}))) => [{:path "/main.css" :references #{"/other.css"}}
+                                                         {:path "/other.css" :references #{}}]))
 
 (with-files [["/main.css" "#id { background: url(data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==)}"]]
   (fact
@@ -127,16 +143,15 @@
    (-> (load-assets public-dir ["/theme/styles/main.css"])
        first :contents) => "#id { background: url('/theme/images/bg.png'); }"))
 
-(with-files [["/query.css" "#id { background: url(\"/bg.png?query\"); }"]
-             ["/ref.css"   "#id { background: url(/bg.png#ref); }"]
-             ["/bg.png"    "binary"]]
-
-  (fact
-   "URLs can have querys and refs, but file paths can't. To find the
+(fact
+ "URLs can have querys and refs, but file paths can't. To find the
     files so we can serve them, these appendages have to be sliced off."
 
-   (-> (load-assets public-dir ["/query.css"]) first :contents) => "#id { background: url('/bg.png'); }"
-   (-> (load-assets public-dir ["/ref.css"]) first :contents) => "#id { background: url('/bg.png'); }"))
+ (with-files [["/query.css" "#id { background: url(\"/bg.png?query\"); }"]
+              ["/ref.css"   "#id { background: url(/bg.png#ref); }"]
+              ["/bg.png"    "binary"]]
+   (-> (load-assets public-dir ["/query.css"]) first :contents) => "#id { background: url(\"/bg.png\"); }"
+   (-> (load-assets public-dir ["/ref.css"]) first :contents) => "#id { background: url(/bg.png); }"))
 
 (with-files [["/code.js" "1 + 2"]
              ["/more.js" "3 + 5"]]
