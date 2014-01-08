@@ -9,10 +9,10 @@
                  [pathetic "0.5.1"]
                  [clj-time "0.5.1"]
                  [clj-v8 "0.1.5"]]
-  :profiles {:dev {:dependencies [[midje "1.5.0"]
+  :profiles {:dev {:dependencies [[midje "1.6.0"]
                                   [optimus-test-jar "0.1.0"]
                                   [test-with-files "0.1.0"]]
-                   :plugins [[lein-midje "3.0.0"]
+                   :plugins [[lein-midje "3.1.3"]
                              [lein-shell "0.3.0"]]
                    :resource-paths ["test/resources"]
                    :source-paths ["dev"]}}
