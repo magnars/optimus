@@ -1,8 +1,8 @@
 (ns optimus.optimizations.add-cache-busted-expires-headers-test
   (:use [optimus.optimizations.add-cache-busted-expires-headers]
         [midje.sweet])
-  (:require [clj-time.core :as time])
-  (:import [java.io ByteArrayInputStream]))
+  (:require [clj-time.core :as time]
+            [clojure.java.io :as io]))
 
 (with-redefs [time/now (fn [] (time/date-time 2013 07 30))]
 
@@ -65,10 +65,10 @@
     fixed first, along with updating URLs in the referencing files."
 
    (->> (add-cache-busted-expires-headers [{:path "/main.css" :contents "#id1 { background: url('/bg.png'); }" :references #{"/bg.png"}}
-                                           {:path "/bg.png" :get-stream #(ByteArrayInputStream. (.getBytes "binary"))}])
+                                           {:path "/bg.png" :resource (io/resource "blank.gif")}])
         (map (juxt :path :contents :references)))
 
    => [["/main.css" "#id1 { background: url('/bg.png'); }" #{"/bg.png"}]
        ["/bg.png" nil nil]
-       ["/0508e66b8b0d/main.css" "#id1 { background: url('/7e57cfe84314/bg.png'); }" #{"/7e57cfe84314/bg.png"}]
-       ["/7e57cfe84314/bg.png" nil nil]]))
+       ["/0238f7c06894/main.css" "#id1 { background: url('/8dad5059aff0/bg.png'); }" #{"/8dad5059aff0/bg.png"}]
+       ["/8dad5059aff0/bg.png" nil nil]]))

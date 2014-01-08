@@ -108,15 +108,6 @@
  => (throws Exception "Two assets have the same path \"/code.js\", but are not equal."))
 
 (fact
- "We can't compare get-stream functions, so those will have to pass."
-
- (defn get-assets [] [{:path "/code.js" :get-stream (fn [] "a stream")}
-                      {:path "/code.js" :get-stream (fn [] "a stream")}])
-
- (let [app (serve-live-assets return-request get-assets dont-optimize {})]
-   (-> (app {}) :optimus-assets count) => 1))
-
-(fact
  "Asset order is preserved."
 
  (defn get-assets [] [{:path "/a.js" :contents ""}

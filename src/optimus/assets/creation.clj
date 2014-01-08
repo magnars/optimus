@@ -53,7 +53,7 @@
   (guard-path path)
   (let [resource (existing-resource public-dir path)]
     {:path path
-     :get-stream #(io/input-stream resource)
+     :resource resource
      :last-modified (last-modified resource)}))
 
 (defn load-text-asset [public-dir path]

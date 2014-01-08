@@ -8,7 +8,7 @@
 (defn- save-asset-to-path [asset path]
   (if-let [contents (:contents asset)]
     (spit path contents)
-    (io/copy ((:get-stream asset))
+    (io/copy (io/input-stream (:resource asset))
              (FileOutputStream. (io/file path)))))
 
 (defn save-assets [assets target-dir]

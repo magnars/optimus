@@ -15,7 +15,7 @@
  "The same goes for binary files."
 
  (with-tmp-dir
-   (save-assets [{:path "/blank.gif" :get-stream #(io/input-stream (io/resource "blank.gif"))}] tmp-dir)
+   (save-assets [{:path "/blank.gif" :resource (io/resource "blank.gif")}] tmp-dir)
    (slurp (str tmp-dir "/blank.gif")) => (slurp (io/resource "blank.gif"))))
 
 (fact

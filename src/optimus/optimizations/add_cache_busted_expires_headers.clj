@@ -14,7 +14,7 @@
 
 (defn- get-contents [file]
   (or (:contents file)
-      (slurp ((:get-stream file)))))
+      (slurp (:resource file))))
 
 (defn- add-cache-busted-expires-header [file]
   (-> file

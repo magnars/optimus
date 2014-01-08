@@ -450,7 +450,7 @@ In addition to `:path` and `:contents`, the asset map may contain:
 
 There's also the case that some assets may be binary. Some of them
 might be large. Instead of keeping those `:contents` in memory, they have
-a `:get-stream` function.
+a `:resource` instead, which is a URL to be served as a stream.
 
 Built on top of that is a bunch of operations that either help you:
 

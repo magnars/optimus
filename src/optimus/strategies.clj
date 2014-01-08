@@ -1,10 +1,11 @@
 (ns optimus.strategies
   (:require [optimus.homeless :refer [assoc-non-nil]]
+            [clojure.java.io :as io]
             [clojure.core.memoize :as memo]))
 
 (defn- serve-asset [asset]
   (-> {:status 200 :body (or (:contents asset)
-                             ((:get-stream asset)))}
+                             (io/input-stream (:resource asset)))}
       (assoc-non-nil :headers (:headers asset))))
 
 (defn- serve-asset-or-continue [assets path->asset app request]
@@ -13,8 +14,7 @@
     (app (assoc request :optimus-assets assets))))
 
 (defn- collapse-equal-assets [asset-1 asset-2]
-  (when-not (= (dissoc asset-1 :get-stream)
-               (dissoc asset-2 :get-stream))
+  (when-not (= asset-1 asset-2)
     (throw (Exception. (str "Two assets have the same path \"" (:path asset-1) "\", but are not equal."))))
   asset-1)
 
