@@ -10,13 +10,10 @@
       pathetic/render-path
       pathetic/ensure-trailing-separator))
 
-(defn- remove-url-appendages [s]
-  (first (str/split s #"[\?#]")))
-
-(defn- combine-paths [container-url relative-url]
+(defn- to-absolute-url [container-url relative-url]
   (-> container-url
       (just-the-path)
-      (pathetic/resolve (remove-url-appendages relative-url))
+      (pathetic/resolve relative-url)
       (pathetic/normalize)))
 
 (def css-url-re #"(?:url\(['\"]?([^\)]+?)['\"]?\)|@import ['\"](.+?)['\"])")
@@ -35,17 +32,21 @@
     (if (or (data-url? url)
             (external-url? url))
       match ;; leave alone
-      (str/replace match url (combine-paths original-path url)))))
+      (str/replace match url (to-absolute-url original-path url)))))
 
 (defn- make-css-urls-absolute [file]
   (->> (partial match-url-to-absolute (original-path file))
        (str/replace (:contents file) css-url-re)
        (assoc-in file [:contents])))
 
+(defn- remove-url-appendages [s]
+  (first (str/split s #"[\?#]")))
+
 (defn- paths-in-css [file]
   (->> file :contents
        (re-seq css-url-re)
        (map url-match)
+       (map remove-url-appendages)
        (remove data-url?)
        (remove external-url?)))
 

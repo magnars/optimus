@@ -145,13 +145,19 @@
 
 (fact
  "URLs can have querys and refs, but file paths can't. To find the
-    files so we can serve them, these appendages have to be sliced off."
+  files so we can serve them, these appendages have to be sliced off.
+
+  Because they're needed for weird bugs with @font-face in certain
+  browsers tho, we need to preserve them in the actual URL."
 
  (with-files [["/query.css" "#id { background: url(\"/bg.png?query\"); }"]
               ["/ref.css"   "#id { background: url(/bg.png#ref); }"]
               ["/bg.png"    "binary"]]
-   (-> (load-assets public-dir ["/query.css"]) first :contents) => "#id { background: url(\"/bg.png\"); }"
-   (-> (load-assets public-dir ["/ref.css"]) first :contents) => "#id { background: url(/bg.png); }"))
+   (->> (load-assets public-dir ["/query.css" "/ref.css"])
+        (map (juxt :contents :references))
+        (set)) => #{["#id { background: url(\"/bg.png?query\"); }" #{"/bg.png"}]
+                    ["#id { background: url(/bg.png#ref); }" #{"/bg.png"}]
+                    [nil nil]}))
 
 (with-files [["/code.js" "1 + 2"]
              ["/more.js" "3 + 5"]]
