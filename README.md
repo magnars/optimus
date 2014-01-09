@@ -11,7 +11,7 @@ In other words: Develop with ease. Optimize in production.
 
 ## Install
 
-Add `[optimus "0.13.6"]` to `:dependencies` in your `project.clj`.
+Add `[optimus "0.14.0"]` to `:dependencies` in your `project.clj`.
 
 Please note that this project uses
 [Semantic Versioning](http://semver.org/). As long as we're on a `0`
@@ -568,12 +568,20 @@ changes to Optimus itself.
 
 ## Change log
 
+#### From 0.13 to 0.14
+
+- Support for @imports in CSS
+- Binary assets now has a `:resource` value instead of a `:get-stream` function
+- Removed inline clj-v8 now that official repo supports bundling in uberjars
+- Include both Cache-Control and Expires headers again, for Chrome's sake
+- Improved documentation and bugfixes
+
 #### From 0.12 to 0.13
 
 - Add Last-Modified headers
 - Remove Cache-Control headers (superflous when serving Expires)
 - Create extension point for asset loading
-- Several bugfixes
+- Bugfixes
 
 #### From 0.11 to 0.12
 
