@@ -72,7 +72,6 @@
 (fact (minify-css "body {\n    color: red;\n}") => "body{color:red}")
 (fact (minify-css "body {\n    color: red") => (throws Exception "Please check the validity of the CSS block starting from the line #1"))
 
-
 (fact
  "You can turn off structural optimizations."
 
@@ -82,6 +81,17 @@
  (minify-css "body { color: red; } body { font-size: 10px; }" {:optimize-css-structure false})
  => "body{color:red}body{font-size:10px}")
 
+(fact
+ "CSSO doesn't mess up percentages after rgb-colors. It used to tho.
+  Don't want any regressions."
+
+ (minify-css "body { background: -webkit-linear-gradient(bottom, rgb(209,209,209) 10%, rgb(250,250,250) 55%);}")
+ => "body{background:-webkit-linear-gradient(bottom,#d1d1d1 10%,#fafafa 55%)}")
+
+#_(fact
+ "CSSO doesn't mess up media queries." ;; well, it does now, if you have multiple and statements.
+ (minify-css "@media screen and (orientation:landscape) {#id{color:red}}") => "@media screen and (orientation:landscape){#id{color:red}}"
+ (minify-css "@import 'abc.css' screen and (min-width:7) and (max-width:9);") => "@import 'abc.css' screen and (min-width:7) and (max-width:9);")
 
 (fact
  "It minifies a list of CSS assets."

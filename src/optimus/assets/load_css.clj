@@ -21,7 +21,7 @@
 (defn- data-url? [#^String url]
   (.startsWith url "data:"))
 
-(defn- external-url? [#^String url]
+(defn external-url? [#^String url]
   (re-matches #"^(?://|http://|https://).*" url))
 
 (defn- url-match [[match & urls]]
@@ -48,13 +48,20 @@
        (map url-match)
        (map remove-url-appendages)
        (remove data-url?)
-       (remove external-url?)))
+       (remove external-url?)
+       (set)))
+
+(defn update-css-references [asset]
+  (let [paths (paths-in-css asset)]
+    (if (empty? paths)
+      (dissoc asset :references)
+      (assoc asset :references paths))))
 
 (defn create-css-asset [path contents last-modified]
-  (let [asset (-> (create-asset path contents
-                                :last-modified last-modified)
-                  (make-css-urls-absolute))]
-    (assoc asset :references (set (paths-in-css asset)))))
+  (-> (create-asset path contents
+                    :last-modified last-modified)
+      (make-css-urls-absolute)
+      (update-css-references)))
 
 (defn load-css-asset [public-dir path]
   (let [resource (existing-resource public-dir path)]

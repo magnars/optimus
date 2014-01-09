@@ -25,10 +25,11 @@ increase.
 Depending on how you use it, Optimus:
 
 - concatenates your JavaScript and CSS files into bundles.
-- minifies your JavaScript with [UglifyJS 2](https://github.com/mishoo/UglifyJS2)
-- minifies your CSS with [CSSO](http://bem.info/tools/optimizers/csso/)
 - adds cache-busters to your static asset URLs
 - adds [far future Expires headers](http://developer.yahoo.com/performance/rules.html#expires)
+- minifies your JavaScript with [UglifyJS 2](https://github.com/mishoo/UglifyJS2)
+- minifies your CSS with [CSSO](http://bem.info/tools/optimizers/csso/)
+- inlines CSS imports while preserving media queries
 
 You might also be interested in:
 
@@ -213,6 +214,7 @@ If you want to mix and match optimizations, here's how you do that:
   (-> assets
       (optimizations/minify-js-assets options)
       (optimizations/minify-css-assets options)
+      (optimizations/inline-css-imports)
       (optimizations/concatenate-bundles)
       (optimizations/add-cache-busted-expires-headers)
       (optimizations/add-last-modified-headers)))

@@ -106,7 +106,7 @@
               ["/other.css" "#id {}"]]
    (->> (load-assets public-dir ["/main.css"])
         (map #(select-keys % #{:path :references}))) => [{:path "/main.css" :references #{"/other.css"}}
-                                                         {:path "/other.css" :references #{}}]))
+                                                         {:path "/other.css"}]))
 
 (with-files [["/main.css" "#id { background: url(data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==)}"]]
   (fact
