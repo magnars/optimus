@@ -16,9 +16,9 @@ Add `[optimus "0.14.0"]` to `:dependencies` in your `project.clj`.
 Please note that this project uses
 [Semantic Versioning](http://semver.org/). As long as we're on a `0`
 major version, there will likely be API changes. Pay attention when
-upgrading to a new minor version. As soon as we're on a `1` major
-version, there will be no breaking changes without a major version
-increase.
+upgrading to a new minor version. There is a
+[change log](#change-log). As soon as we're on a `1` major version,
+there will be no breaking changes without a major version increase.
 
 ## Features
 
