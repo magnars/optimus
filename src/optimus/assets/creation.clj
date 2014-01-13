@@ -1,7 +1,7 @@
 (ns optimus.assets.creation
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
-            [pathetic.core :as pathetic]
+            [optimus.paths :refer [just-the-filename filename-ext]]
             [optimus.class-path :refer [file-paths-on-class-path]])
   (:import [java.io FileNotFoundException]
            [java.net URL]
@@ -61,11 +61,6 @@
     (create-asset path (slurp resource)
                   :last-modified (last-modified resource))))
 
-(defn- filename-ext
-  "Returns the file extension of a filename or filepath."
-  [filename]
-  (second (re-find #"\.([^./\\]+)$" filename)))
-
 (defmulti load-asset (fn [_ path] (filename-ext path)))
 
 (defmethod load-asset :default
@@ -79,9 +74,6 @@
 (defn slice-path-to-after [public-dir #^String s]
   (subs s (+ (count public-dir)
              (.indexOf s (str public-dir "/")))))
-
-(defn- just-the-filename [path]
-  (last (pathetic/split path)))
 
 (defn- emacs-file-artefact? [#^String path]
   (let [filename (just-the-filename path)]

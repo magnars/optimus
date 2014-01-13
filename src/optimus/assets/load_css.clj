@@ -1,20 +1,7 @@
 (ns optimus.assets.load-css
   (:require [optimus.assets.creation :refer [create-asset existing-resource original-path last-modified]]
-            [pathetic.core :as pathetic]
+            [optimus.paths :refer [just-the-path to-absolute-url]]
             [clojure.string :as str]))
-
-(defn- just-the-path [url]
-  (-> url
-      pathetic/parse-path
-      pathetic/up-dir
-      pathetic/render-path
-      pathetic/ensure-trailing-separator))
-
-(defn- to-absolute-url [container-url relative-url]
-  (-> container-url
-      (just-the-path)
-      (pathetic/resolve relative-url)
-      (pathetic/normalize)))
 
 (def css-url-re #"(?:url\(['\"]?([^\)]+?)['\"]?\)|@import ['\"](.+?)['\"])")
 
