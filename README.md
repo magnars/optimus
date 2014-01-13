@@ -43,6 +43,8 @@ You might also be interested in:
   custom asset loader for
   [React JSX](http://facebook.github.io/react/docs/jsx-in-depth.html)
   files.
+- [optimus-img-transform](http://github.com/magnars/optimus-img-transform) - an
+  asset middleware to transform your images' size, quality and rendering methods.
 
 ## Usage
 
