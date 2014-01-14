@@ -14,6 +14,16 @@
    (file-path request "/main.js") => "/12/m.js"))
 
 (fact
+ "You can optionally add a fallback file."
+
+ (let [request {:optimus-assets [{:path "/bg.png"}
+                                 {:path "/known.png"}]}]
+
+
+   (file-path request "/known.png" :fallback "/bg.png") => "/known.png"
+   (file-path request "/unknown.png" :fallback "/bg.png") => "/bg.png"))
+
+(fact
  "You can link to files specified by their bundle names."
 
  (let [request {:optimus-assets [{:path "/bg.png"}
@@ -42,4 +52,3 @@
 
    (file-path request "/main.js") => "http://cache.example.com/main.js"
    (bundle-paths request ["app.js"]) => ["http://cache.example.com/main.js"]))
-

@@ -6,12 +6,15 @@
     (str base (:path asset))
     (:path asset)))
 
-(defn file-path [request path]
-  (->> request :optimus-assets
-       (filter #(= path (assets/original-path %)))
-       (remove :outdated)
-       (first)
-       full-path))
+(defn file-path [request path & {:as options}]
+  (let [path (->> request :optimus-assets
+                  (filter #(= path (assets/original-path %)))
+                  (remove :outdated)
+                  (first))]
+    (if path
+      (full-path path)
+      (if-let [fallback (:fallback options)]
+        (file-path request fallback)))))
 
 (defn- bundle-paths-1 [optimus-assets bundle]
   (->> optimus-assets
