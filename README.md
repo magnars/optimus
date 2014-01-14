@@ -392,6 +392,13 @@ And then grab the cache buster URL like so:
 (link/file-path request "/images/logo.png")
 ```
 
+You can also add a fallback image, if the given one doesn't exists.
+
+```cl
+(link/file-path request (str "/images/members/" (:id member) ".png")
+                :fallback "/images/anonymous.png")
+```
+
 [Sam Ritchie](https://github.com/sritchie) has written
 [this HTML transformation](https://gist.github.com/sritchie/7794646)
 using [Enlive](https://github.com/cgrand/enlive) that rewrites all
