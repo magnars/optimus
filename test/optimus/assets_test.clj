@@ -28,11 +28,18 @@
    "Missing files are not tolerated."
    (load-assets public-dir ["/gone.js"]) => (throws FileNotFoundException "/gone.js")))
 
+(defn- plausible-timestamp? [actual-timestamp]
+  (let [upstream-timestamp 1384517932000
+        twenty-four-hours (* 24 3600 1000)]
+    (< (- upstream-timestamp twenty-four-hours)
+       actual-timestamp
+       (+ upstream-timestamp twenty-four-hours))))
+
 (fact
  "Files in JARs report the correct last-modified time."
 
  (map (juxt :path :last-modified) (load-assets "optimus-test-jar" ["/blank.gif"]))
- => [["/blank.gif" 1384517932000]])
+ => (just (just ["/blank.gif" plausible-timestamp?])))
 
 (with-files [["/styles/reset.css" ""]
              ["/styles/main.css" ""]
