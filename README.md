@@ -188,10 +188,10 @@ likely more than one URL in development mode.
    [:html
     [:head
      (map (fn [url] [:link {:rel "stylesheet" :href url}])
-          (link/bundle-urls request ["styles.css"]))]
+          (link/bundle-paths request ["styles.css"]))]
     [:body
      (map (fn [url] [:script {:src url}])
-          (link/bundle-urls request ["lib.js" "app.js"]))]]))
+          (link/bundle-paths request ["lib.js" "app.js"]))]]))
 ```
 
 There's also some hiccup-specific sugar:
@@ -310,7 +310,7 @@ The paths are used unchanged. So given this example:
 When you call
 
 ```cl
-(optimus.link/bundle-urls request ["app.js"])
+(optimus.link/bundle-paths request ["app.js"])
 ```
 
 it returns
@@ -331,7 +331,7 @@ each bundle is read at startup. And with `optimizations/all`, the URLs
 are generated from the hash of the contents and the identifier of the
 bundle.
 
-So when you call `(link/bundle-urls request ["app.js"])`, it now
+So when you call `(link/bundle-paths request ["app.js"])`, it now
 returns:
 
 ```cl
