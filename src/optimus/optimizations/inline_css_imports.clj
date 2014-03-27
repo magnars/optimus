@@ -9,7 +9,7 @@
 
 (defn- inline-import-match [asset assets [match path media]]
   (if (external-url? path)
-    (throw (Exception. "Import of external URL http://external.css in /main.css is strongly adviced against. It's a performance killer. In fact, there's no option to allow this. Use a link in your HTML instead. Open an issue if you really, really need it."))
+    (throw (Exception. (str "Import of external URL " path " in " (:path asset) " is strongly adviced against. It's a performance killer. In fact, there's no option to allow this. Use a link in your HTML instead. Open an issue if you really, really need it.")))
     (let [contents (:contents (by-path path assets))]
       (if (empty? media)
         contents
