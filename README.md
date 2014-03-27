@@ -11,7 +11,7 @@ In other words: Develop with ease. Optimize in production.
 
 ## Install
 
-Add `[optimus "0.14.2"]` to `:dependencies` in your `project.clj`.
+Add `[optimus "0.14.3"]` to `:dependencies` in your `project.clj`.
 
 Please note that this project uses
 [Semantic Versioning](http://semver.org/). As long as we're on a `0`
