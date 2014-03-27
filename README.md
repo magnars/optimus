@@ -474,6 +474,24 @@ If you want to know more, the [tests](test/optimus) are a good place
 to start reading. They go in to all the details of how Optimus works
 and even has some commentary on reasoning and reasons.
 
+## Are there any working examples to look at?
+
+Take a look at these:
+
+ - [August Lilleaas](http://augustl.com) wrote
+   [a blog](http://augustl.com/blog/2014/jdk8_react_rendering_on_server/)
+   about using React on the server with JDK8. In
+   [the example code](https://github.com/augustl/react-nashorn-example),
+   he uses Optimus for frontend optimization.
+
+ - The [sinonjs.org](http://sinonjs.org) site is a static website
+   written with [Stasis](https://github.com/magnars/stasis), and it
+   too uses Optimus for frontend optimization. Here's the
+   [sinon-docs repo](https://github.com/sinonjs/sinon-docs).
+
+Are you using Optimus in an open-source project? Please do let me
+know, and I'll add it to the list.
+
 ## Why not split Optimus into a bunch of middlewares?
 
 I set out to create a suite of middlewares for frontend optimization.
