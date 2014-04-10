@@ -52,10 +52,10 @@ Let's look at an example:
 
 ```clj
 (ns my-app.example
-  (require [optimus.prime :as optimus]
-           [optimus.assets :as assets] ;; 1
-           [optimus.optimizations :as optimizations] ;; 2
-           [optimus.strategies :as strategies])) ;; 3
+  (:require [optimus.prime :as optimus]
+            [optimus.assets :as assets] ;; 1
+            [optimus.optimizations :as optimizations] ;; 2
+            [optimus.strategies :as strategies])) ;; 3
 
 (defn get-assets [] ;; 4
   (concat ;; 5
@@ -180,7 +180,7 @@ likely more than one URL in development mode.
 
 ```cl
 (ns my-app.view
-  (require [optimus.link :as link]))
+  (:require [optimus.link :as link]))
 
 (defn my-page
   [request]
