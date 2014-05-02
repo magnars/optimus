@@ -2,9 +2,9 @@
   (:require [optimus.assets.creation :refer [load-asset]]
             [optimus.assets.load-css]))
 
-(defmethod load-asset "js"   [public-dir path] (optimus.assets.creation/load-text-asset public-dir path))
-(defmethod load-asset "html" [public-dir path] (optimus.assets.creation/load-text-asset public-dir path))
-(defmethod load-asset "css"  [public-dir path] (optimus.assets.load-css/load-css-asset public-dir path))
+(defmethod load-asset "js"   [public-dir path resource] (optimus.assets.creation/load-text-asset public-dir path resource))
+(defmethod load-asset "html" [public-dir path resource] (optimus.assets.creation/load-text-asset public-dir path resource))
+(defmethod load-asset "css"  [public-dir path resource] (optimus.assets.load-css/load-css-asset public-dir path resource))
 
 (def create-asset optimus.assets.creation/create-asset)
 (def load-assets optimus.assets.creation/load-assets)
