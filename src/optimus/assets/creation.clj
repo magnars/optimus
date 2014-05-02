@@ -2,7 +2,7 @@
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
             [optimus.paths :refer [just-the-filename filename-ext]]
-            [optimus.class-path :refer [file-paths-on-class-path]])
+            [optimus.class-path :refer [resource-urls]])
   (:import [java.io FileNotFoundException]
            [java.net URL]
            [java.util.zip ZipFile ZipEntry]))
@@ -49,27 +49,24 @@
     "file" (file-last-modified resource)
     nil))
 
-(defn create-binary-asset [public-dir path]
+(defn create-binary-asset [public-dir path resource]
   (guard-path path)
-  (let [resource (existing-resource public-dir path)]
-    {:path path
-     :resource resource
-     :last-modified (last-modified resource)}))
+  {:path path
+   :resource resource
+   :last-modified (last-modified resource)})
 
-(defn load-text-asset [public-dir path]
-  (let [resource (existing-resource public-dir path)]
-    (create-asset path (slurp resource)
-                  :last-modified (last-modified resource))))
+(defn load-text-asset [public-dir path resource]
+  (create-asset
+    path (slurp resource)
+    :last-modified (last-modified resource)))
 
-(defmulti load-asset (fn [_ path] (filename-ext path)))
+(defmulti load-asset
+  (fn [_ ^String path ^URL resource]
+    (filename-ext path)))
 
 (defmethod load-asset :default
-  [public-dir path]
-  (create-binary-asset public-dir path))
-
-(defn- load-asset-and-refs [public-dir path]
-  (let [asset (load-asset public-dir path)]
-    (concat [asset] (mapcat #(load-asset-and-refs public-dir %) (:references asset)))))
+  [public-dir path resource]
+  (create-binary-asset public-dir path resource))
 
 (defn slice-path-to-after [public-dir #^String s]
   (subs s (+ (count public-dir)
@@ -81,26 +78,39 @@
         (and (.startsWith filename "#")
              (.endsWith filename "#")))))
 
-(defn realize-regex-paths [public-dir path]
-  (if (instance? java.util.regex.Pattern path)
-    (let [paths (->> (file-paths-on-class-path)
-                     (filter (fn [#^String p] (.contains p public-dir)))
-                     (remove emacs-file-artefact?)
-                     (map #(slice-path-to-after public-dir %))
-                     (filter #(re-find path %)))]
-      (if (empty? paths)
-        (throw (Exception. (str "No files matched regex " path)))
-        paths))
-    [path]))
+(defn resource-urls-by-pattern
+  [directory-path pattern]
+  (let [pattern? (instance? java.util.regex.Pattern pattern)
+        p? (comp
+             (if pattern?
+               #(when (and (not (emacs-file-artefact? %))
+                           (re-find pattern %))
+                  %)
+               #{pattern})
+             #(slice-path-to-after directory-path %))
+        urls (resource-urls directory-path p?)]
+    (when (empty? urls)
+      (if pattern?
+        (throw (Exception. (format "No files matched regex %s" pattern)))
+        (throw (FileNotFoundException. pattern))))
+    urls))
 
-(defn load-assets [public-dir paths]
-  (->> paths
-       (mapcat #(realize-regex-paths public-dir %))
-       (mapcat #(load-asset-and-refs public-dir %))
-       (distinct)))
+(defn- -load-assets
+  [public-dir paths already-loaded-assets]
+  (if (empty? paths)
+    already-loaded-assets
+    (let [urls (mapcat #(resource-urls-by-pattern public-dir %) paths)
+          new-assets (mapv #(apply load-asset public-dir %) urls)
+          references (mapcat :references new-assets)
+          all-assets (concat already-loaded-assets new-assets)]
+      (recur public-dir references all-assets))))
+
+(defn load-assets
+  [public-dir paths]
+  (distinct (-load-assets public-dir paths nil)))
 
 (defn load-bundle [public-dir bundle paths]
-  (let [paths (mapcat #(realize-regex-paths public-dir %) paths)
+  (let [paths (mapcat #(keys (resource-urls-by-pattern public-dir %)) paths)
         assets (load-assets public-dir paths)
         path-set (set paths)
         set-bundle-for-original-files (fn [asset] (if (contains? path-set (original-path asset))
