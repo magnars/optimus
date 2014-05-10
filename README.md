@@ -39,6 +39,8 @@ You might also be interested in:
   Angular.JS code for minification.
 - [optimus-less](https://github.com/magnars/optimus-less) - which adds
   a custom asset loader for [LESS](http://lesscss.org/) files.
+- [optimus-sass](https://github.com/DomKM/optimus-sass) - which adds
+  a custom asset loader for [Sass/SCSS](http://sass-lang.com/) files.
 - [optimus-jsx](https://github.com/magnars/optimus-jsx) - which adds a
   custom asset loader for
   [React JSX](http://facebook.github.io/react/docs/jsx-in-depth.html)
