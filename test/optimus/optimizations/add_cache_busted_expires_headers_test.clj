@@ -71,4 +71,16 @@
    => [["/main.css" "#id1 { background: url('/bg.png'); }" #{"/bg.png"}]
        ["/bg.png" nil nil]
        ["/0238f7c06894/main.css" "#id1 { background: url('/8dad5059aff0/bg.png'); }" #{"/8dad5059aff0/bg.png"}]
-       ["/8dad5059aff0/bg.png" nil nil]]))
+       ["/8dad5059aff0/bg.png" nil nil]])
+
+  (fact
+    "Cache busters should be added to the end of a path (right before the
+    filename) rather than the beginning. This is so the root paths are still
+    stable and predictable. For example, if a site keeps static files under
+    `/static`, cache-busted files will still be under `/static`."
+
+    (->> (add-cache-busted-expires-headers [{:path "/static/img/bg.png" :resource (io/resource "blank.gif")}])
+         (remove :outdated)
+         (map :path))
+
+    => ["/static/img/8dad5059aff0/bg.png"]))
