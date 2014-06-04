@@ -23,7 +23,7 @@
        {:path "/bundles/app.js" :contents "var x=3;\nvar y=7;" :bundle "app.js" :outdated true}
        {:path "/1e10b6b7ffe7/core.js" :original-path "/core.js" :contents "var x=3;" :headers headers :bundled true}
        {:path "/3984012ce8f1/main.js" :original-path "/main.js" :contents "var y=7;" :headers headers :bundled true}
-       {:path "/acc6196d6f45/bundles/app.js" :original-path "/bundles/app.js" :contents "var x=3;\nvar y=7;" :bundle "app.js" :headers headers}])
+       {:path "/bundles/acc6196d6f45/app.js" :original-path "/bundles/app.js" :contents "var x=3;\nvar y=7;" :bundle "app.js" :headers headers}])
 
   (with-files [["/code.js" "var s = \"ĄČĘĖĮĮŠŲŪŪ\";"]
                ["/main.css" "#blåbærsyltetøy { padding: 10px 10px 10px 10px; }"]]

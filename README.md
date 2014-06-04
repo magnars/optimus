@@ -337,7 +337,7 @@ So when you call `(link/bundle-paths request ["app.js"])`, it now
 returns:
 
 ```cl
-["/d131dd02c5e6eec4/bundles/app.js"]
+["/bundles/d131dd02c5e6/app.js"]
 ```
 
 and the middleware handles this URL by returning the concatenated
@@ -372,7 +372,7 @@ Well, they have no way of knowing the cache buster hash, of course.
 Luckily the files are still available on their original URLs.
 
 When you're serving optimized assets, the bundles are also available. For
-instance: `/d131dd02c5e6eec4/bundles/app.js` can also be accessed on
+instance: `/bundles/d131dd02c5e6/app.js` can also be accessed on
 `/bundles/app.js`.
 
 *Please note:* **You have to make extra sure these URLs are not served

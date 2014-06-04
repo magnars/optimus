@@ -2,6 +2,7 @@
   (:require [clj-time.core :as time]
             [clj-time.format]
             [optimus.digest :as digest]
+            [optimus.paths :as paths]
             [optimus.assets :refer [original-path]]
             [optimus.homeless :refer [assoc-non-nil]]
             [clojure.string :as str]
@@ -18,9 +19,10 @@
 
 (defn- add-cache-busted-expires-header [file]
   (-> file
-      (assoc :path (str "/"
+      (assoc :path (str (paths/just-the-path (:path file))
                         (subs (digest/sha-1 (get-contents file)) 0 12)
-                        (:path file)))
+                        \/
+                        (paths/just-the-filename (:path file))))
       (assoc :original-path (original-path file))
       (assoc-in [:headers "Cache-Control"] "max-age=315360000")
       (assoc-in [:headers "Expires"] (http-date-formatter (time/plus (time/now)
