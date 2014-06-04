@@ -11,12 +11,12 @@ In other words: Develop with ease. Optimize in production.
 
 ## Install
 
-Add `[optimus "0.14.4"]` to `:dependencies` in your `project.clj`.
+Add `[optimus "0.15.0"]` to `:dependencies` in your `project.clj`.
 
 Please note that this project uses
 [Semantic Versioning](http://semver.org/). As long as we're on a `0`
 major version, there will likely be API changes. Pay attention when
-upgrading to a new minor version. There is a
+upgrading to a new minor version. Read the
 [change log](#change-log). As soon as we're on a `1` major version,
 there will be no breaking changes without a major version increase.
 
@@ -597,6 +597,14 @@ changes to Optimus itself.
 
 ## Change log
 
+#### From 0.14 to 0.15
+
+- Add cache-busting hash to end of path instead of beginning. (Francis Avila)
+
+  This is so the root paths are still stable and predictable. For example, if a
+  site keeps static files under `/static`, cache-busted files will still be
+  under `/static`.
+
 #### From 0.13 to 0.14
 
 - Support for @imports in CSS
@@ -651,6 +659,8 @@ run again.
   minification.
 - [Shaharz](https://github.com/shaharz) fixed a bug with external URLs
   in CSS-files.
+- [Francis Avila](https://github.com/favila) improved placement of cache busters
+  in URLs.
 
 Thanks!
 
