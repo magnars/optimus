@@ -1,12 +1,12 @@
 (ns optimus.optimizations.minify
-  (:require [v8.core :as v8]
-            [clojure.string :as s]))
+  (:require [clojure.string :as str]
+            [v8.core :as v8]))
 
 (defn- escape [str]
   (-> str
-      (s/replace "\\" "\\\\")
-      (s/replace "'" "\\'")
-      (s/replace "\n" "\\n")))
+      (str/replace "\\" "\\\\")
+      (str/replace "'" "\\'")
+      (str/replace "\n" "\\n")))
 
 (defn- throw-v8-exception [#^String text path]
   (if (= (.indexOf text "ERROR: ") 0)
@@ -17,8 +17,8 @@
 
 (defn normalize-line-endings [str]
   (-> str
-      (s/replace "\r\n" "\n")
-      (s/replace "\r" "\n")))
+      (str/replace "\r\n" "\n")
+      (str/replace "\r" "\n")))
 
 (defn- js-minify-code [js options]
   (str "(function () {
@@ -38,7 +38,7 @@
 
 (def uglify
   "The UglifyJS source code, free of dependencies and runnable in a
-stripped context"
+  stripped context"
   (slurp (clojure.java.io/resource "uglify.js")))
 
 (defn create-uglify-context []
@@ -58,7 +58,7 @@ stripped context"
   ([js] (minify-js js {}))
   ([js options] (minify-js (create-uglify-context) js options))
   ([context js options]
-     (run-script-with-error-handling context (js-minify-code js options) (:path options))))
+   (run-script-with-error-handling context (js-minify-code js options) (:path options))))
 
 (defn minify-js-asset
   [context asset options]
@@ -70,8 +70,8 @@ stripped context"
 (defn minify-js-assets
   ([assets] (minify-js-assets assets {}))
   ([assets options]
-     (let [context (create-uglify-context)]
-       (map #(minify-js-asset context % options) assets))))
+   (let [context (create-uglify-context)]
+     (map #(minify-js-asset context % options) assets))))
 
 ;; minify CSS
 
@@ -95,7 +95,7 @@ var console = {
 
 (def csso
   "The CSSO source code, free of dependencies and runnable in a
-stripped context"
+  stripped context"
   (slurp (clojure.java.io/resource "csso.js")))
 
 (defn create-csso-context []
@@ -104,11 +104,21 @@ stripped context"
     (v8/run-script-in-context context csso)
     context))
 
+(defn looks-like-already-minified [css]
+  "CSS files with a single line over 5000 characters is considered already
+   minified, and skipped. This avoid issues with huge bootstrap.css files
+   and its ilk."
+  (->> css
+       (str/split-lines)
+       (some (fn [^String s] (> (.length s) 5000)))))
+
 (defn minify-css
   ([css] (minify-css css {}))
   ([css options] (minify-css (create-csso-context) css options))
   ([context css options]
-     (run-script-with-error-handling context (css-minify-code css options) (:path options))))
+   (if (looks-like-already-minified css)
+     css
+     (run-script-with-error-handling context (css-minify-code css options) (:path options)))))
 
 (defn minify-css-asset
   [context asset options]
@@ -120,5 +130,5 @@ stripped context"
 (defn minify-css-assets
   ([assets] (minify-css-assets assets {}))
   ([assets options]
-     (let [context (create-csso-context)]
-       (map #(minify-css-asset context % options) assets))))
+   (let [context (create-csso-context)]
+     (map #(minify-css-asset context % options) assets))))

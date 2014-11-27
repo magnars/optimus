@@ -88,6 +88,12 @@
  (minify-css "body { background: -webkit-linear-gradient(bottom, rgb(209,209,209) 10%, rgb(250,250,250) 55%);}")
  => "body{background:-webkit-linear-gradient(bottom,#d1d1d1 10%,#fafafa 55%)}")
 
+(fact
+ "It skips minification of css files with very long one-liners. It's a decent
+  heuristic that it's already minified."
+ (let [css (str "/* comment */\nbody {" (apply str (repeat 500 "color:red;")) "}")]
+   (minify-css css) => css))
+
 #_(fact
  "CSSO doesn't mess up media queries." ;; well, it does now, if you have multiple and statements.
  (minify-css "@media screen and (orientation:landscape) {#id{color:red}}") => "@media screen and (orientation:landscape){#id{color:red}}"
