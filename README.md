@@ -11,7 +11,7 @@ In other words: Develop with ease. Optimize in production.
 
 ## Install
 
-Add `[optimus "0.15.0"]` to `:dependencies` in your `project.clj`.
+Add `[optimus "0.15.1"]` to `:dependencies` in your `project.clj`.
 
 Please note that this project uses
 [Semantic Versioning](http://semver.org/). As long as we're on a `0`
@@ -597,6 +597,10 @@ including requires. And adding support for more transpilers require no
 changes to Optimus itself.
 
 ## Change log
+
+- CSS files with a single line over 5000 characters is considered already
+  minified, and skipped. This avoid issues with huge bootstrap.css files
+  and its ilk.
 
 #### From 0.14 to 0.15
 
