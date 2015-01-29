@@ -419,10 +419,9 @@ Now, for the options. You pass them to the wrapper after the strategy:
 (-> app
     (optimus/wrap
      get-assets optimize the-strategy
-     ;; options
-     :cache-live-assets 2000
-     :optimize-css-structure true
-     :mangle-js-names true))
+     {:cache-live-assets 2000
+      :optimize-css-structure true
+      :mangle-js-names true}))
 ```
 
 Values in this example are all defaults, so it's just a verbose noop.

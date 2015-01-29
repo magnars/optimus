@@ -36,8 +36,8 @@
 
  (def app (-> my-app
               (wrap get-my-assets optimize strategy
-                    :option1 "a"
-                    :option2 "b")))
+                    {:option1 "a"
+                     :option2 "b"})))
 
  (:options (app {:uri "/"})) => {:option1 "a"
                                  :option2 "b"})
