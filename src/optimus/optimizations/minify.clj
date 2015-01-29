@@ -85,36 +85,46 @@ var console = {
 
 (function () {
     try {
-        var process;
-        var compressor = new CSSOCompressor();
-        var translator = new CSSOTranslator();
-        var compressed = compressor.compress(srcToCSSP('" (escape (normalize-line-endings css)) "', 'stylesheet', true), " (not (get options :optimize-css-structure true)) ");
-        return translator.translate(cleanInfo(compressed));
+        var CleanCSS = require('clean-css');
+        var source = '" (escape (normalize-line-endings css)) "';
+        var options = {
+            processImport: false,
+            aggressiveMerging: " (:css-aggressive-merging options true) ",
+            advanced: " (:css-advanced-optimizations options true) ",
+            keepBreaks: " (:css-keep-breaks options false) ",
+            keepSpecialComments: '" (:css-keep-special-comments options "*") "',
+            compatibility: '" (:css-compatibility options "*") "'
+        };
+        var minified = new CleanCSS(options).minify(source).styles;
+        return minified;
     } catch (e) { return 'ERROR: ' + e.message; }
 }());"))
 
-(def csso
-  "The CSSO source code, free of dependencies and runnable in a
+(def clean-css
+  "The clean-css source code, free of dependencies and runnable in a
   stripped context"
-  (slurp (clojure.java.io/resource "csso.js")))
+  (slurp (clojure.java.io/resource "clean-css.js")))
 
-(defn create-csso-context []
-  "Minify CSS with the bundled CSSO version"
+(defn create-clean-css-context
+  "Minify CSS with the bundled clean-css version"
+  []
   (let [context (v8/create-context)]
-    (v8/run-script-in-context context csso)
+    (v8/run-script-in-context context "var window = { XMLHttpRequest: {} };")
+    (v8/run-script-in-context context clean-css)
     context))
 
-(defn looks-like-already-minified [css]
+(defn looks-like-already-minified
   "CSS files with a single line over 5000 characters is considered already
-   minified, and skipped. This avoid issues with huge bootstrap.css files
-   and its ilk."
+  minified, and skipped. This avoid issues with huge bootstrap.css files
+  and its ilk."
+  [css]
   (->> css
        (str/split-lines)
        (some (fn [^String s] (> (.length s) 5000)))))
 
 (defn minify-css
   ([css] (minify-css css {}))
-  ([css options] (minify-css (create-csso-context) css options))
+  ([css options] (minify-css (create-clean-css-context) css options))
   ([context css options]
    (if (looks-like-already-minified css)
      css
@@ -130,5 +140,5 @@ var console = {
 (defn minify-css-assets
   ([assets] (minify-css-assets assets {}))
   ([assets options]
-   (let [context (create-csso-context)]
+   (let [context (create-clean-css-context)]
      (map #(minify-css-asset context % options) assets))))

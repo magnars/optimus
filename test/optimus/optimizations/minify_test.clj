@@ -70,20 +70,53 @@
 
 (fact (minify-css "body { color: red; }") => "body{color:red}")
 (fact (minify-css "body {\n    color: red;\n}") => "body{color:red}")
-(fact (minify-css "body {\n    color: red") => (throws Exception "Please check the validity of the CSS block starting from the line #1"))
+
+(comment ;; clean-css doesn't throw exceptions for mangled CSS - see https://github.com/jakubpawlowicz/clean-css/issues/449
+  (fact (minify-css "body {\n    color: red") => (throws Exception "Please check the validity of the CSS block starting from the line #1"))
+
+  (fact
+   "It includes the path in exception."
+   (minify-css-assets [{:path "styles.css" :contents "body {\n    color: red"}])
+   => (throws Exception "Exception in styles.css: Please check the validity of the CSS block starting from the line #1")))
 
 (fact
- "You can turn off structural optimizations."
+ "You can turn off advanced optimizations."
 
- (minify-css "body { color: red; } body { font-size: 10px; }")
- => "body{color:red;font-size:10px}"
+ (minify-css "body { padding: 10px 10px; }")
+ => "body{padding:10px}"
 
- (minify-css "body { color: red; } body { font-size: 10px; }" {:optimize-css-structure false})
- => "body{color:red}body{font-size:10px}")
+ (minify-css "body { padding: 10px 10px; }" {:css-advanced-optimizations false})
+ => "body{padding:10px 10px}")
 
 (fact
- "CSSO doesn't mess up percentages after rgb-colors. It used to tho.
-  Don't want any regressions."
+ "You can turn off aggressive merging."
+
+ (minify-css "a{display:inline-block;color:red;display:-moz-block}")
+ => "a{color:red;display:-moz-block}"
+
+ (minify-css "a{display:inline-block;color:red;display:-moz-block}" {:css-aggressive-merging false})
+ => "a{display:inline-block;color:red;display:-moz-block}")
+
+(fact
+ "You can keep line-breaks."
+
+ (minify-css "body{color:red}\nhtml{color:#00f}") => "body{color:red}html{color:#00f}"
+ (minify-css "body{color:red}\nhtml{color:#00f}" {:css-keep-breaks true}) => "body{color:red}\nhtml{color:#00f}")
+
+(fact
+ "You can control special comments."
+
+ (minify-css "/*! comment */\nbody{color:red}") => "/*! comment */body{color:red}"
+ (minify-css "/*! comment */\nbody{color:red}" {:css-keep-special-comments 0}) => "body{color:red}")
+
+(fact
+ "You can control compatibility mode."
+
+ (minify-css "body{margin:0px 0rem}") => "body{margin:0}"
+ (minify-css "body{margin:0px 0rem}" {:css-compatibility "ie7"}) => "body{margin:0 0rem}")
+
+(fact
+ "It doesn't mess up percentages after rgb-colors."
 
  (minify-css "body { background: -webkit-linear-gradient(bottom, rgb(209,209,209) 10%, rgb(250,250,250) 55%);}")
  => "body{background:-webkit-linear-gradient(bottom,#d1d1d1 10%,#fafafa 55%)}")
@@ -94,8 +127,8 @@
  (let [css (str "/* comment */\nbody {" (apply str (repeat 500 "color:red;")) "}")]
    (minify-css css) => css))
 
-#_(fact
- "CSSO doesn't mess up media queries." ;; well, it does now, if you have multiple and statements.
+(fact
+ "It doesn't mess up media queries."
  (minify-css "@media screen and (orientation:landscape) {#id{color:red}}") => "@media screen and (orientation:landscape){#id{color:red}}"
  (minify-css "@import 'abc.css' screen and (min-width:7) and (max-width:9);") => "@import 'abc.css' screen and (min-width:7) and (max-width:9);")
 
@@ -112,8 +145,3 @@
                      {:path "styles.css" :contents "#id { margin: 0; }"}])
  => [{:path "code.js" :contents "var a = 2 + 3;"}
      {:path "styles.css" :contents "#id{margin:0}"}])
-
-(fact
- "It includes the path in exception."
- (minify-css-assets [{:path "styles.css" :contents "body {\n    color: red"}])
- => (throws Exception "Exception in styles.css: Please check the validity of the CSS block starting from the line #1"))
