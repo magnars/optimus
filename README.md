@@ -9,9 +9,29 @@ It serves your static assets:
 
 In other words: Develop with ease. Optimize in production.
 
+### Breaking changes in 0.16.0
+
+- **Optimus now uses clean-css instead of CSSO for minification.**
+
+  CSSO was abandoned along with quite a few bugs.
+  [clean-css](https://github.com/jakubpawlowicz/clean-css) is faster, has fewer
+  bugs, a comprehensive test suite, and is under active development.
+
+  See [the new customization options for clean-css](#can-i-tweak-how-optimus-behaves)
+
+- **Passing options to optimus.prime/wrap now uses a regular map**
+
+  It used to take syntactic sugar varargs, but this actually makes it harder to
+  use in practice. You now just pass in a map of options like a normal person. :)
+
+- **Options are now grouped**
+
+  The old `{:mangle-js-names true}` is now `{:uglify-js {:mangle-names true}}`.
+  In the same fashion, the new options for clean-css is bundled under `{:clean-css {...}}`
+
 ## Install
 
-Add `[optimus "0.15.1"]` to `:dependencies` in your `project.clj`.
+Add `[optimus "0.16.0"]` to `:dependencies` in your `project.clj`.
 
 Please note that this project uses
 [Semantic Versioning](http://semver.org/). As long as we're on a `0`
@@ -420,13 +440,17 @@ Now, for the options. You pass them to the wrapper after the strategy:
     (optimus/wrap
      get-assets optimize the-strategy
      {:cache-live-assets 2000
-      :optimize-css-structure true
-      :mangle-js-names true}))
+      :uglify-js {:mangle-names true}
+      :clean-css {:aggressive-merging true
+                  :advanced-optimizations true
+                  :keep-line-breaks false
+                  :keep-special-comments "*"
+                  :compatibility "*"}}))
 ```
 
 Values in this example are all defaults, so it's just a verbose noop.
 
-- `cache-live-assets`: Assets can be costly to fetch, especially if
+- `:cache-live-assets` - Assets can be costly to fetch, especially if
   you're looking up lots of different regexen on the class path.
   Considering that this has to be done for every request in
   development mode, it can take its toll on the load times.
@@ -434,14 +458,20 @@ Values in this example are all defaults, so it's just a verbose noop.
   Tune this parameter to change for how many milliseconds the live
   assets should be frozen. `false` disables the caching.
 
-- `optimize-css-structure`: CSSO performs structural optimizations,
-  like merging blocks and removing overridden properties. Set to
-  `false` to only do basic css minification.
+#### `:uglify-js`
 
-- `mangle-js-names`: When minifying JavaScript, local variable names
-  are changed to be just one letter. This reduces file size, but
-  disrupts some libraries that use clever reflection tricks - like
-  Angular.JS. Set to `false` to keep local variable names intact.
+- `:mangle-names` - When minifying JavaScript, local variable names
+  are changed to be just one letter. This reduces file size, but disrupts some
+  libraries that use clever reflection tricks - like Angular.JS. Set to `false`
+  to keep local variable names intact.
+
+#### `:clean-css`
+
+- `:aggressive-merging` - set to false to disable aggressive merging of properties.
+- `:advanced-optimizations` - set to false to disable advanced optimizations; selector & property merging, reduction, etc.
+- `:keep-line-breaks` - set to true to keep line breaks.
+- `:keep-special-comments` - `"*"` for keeping all (default), `1` for keeping first one only, `0` for removing all
+- `:compatibility` - enables compatibility mode, [see clean-css docs for examples](https://github.com/jakubpawlowicz/clean-css#how-to-set-compatibility-mode)
 
 ## What are these assets anyway? They seem magical to me.
 
@@ -596,6 +626,26 @@ including requires. And adding support for more transpilers require no
 changes to Optimus itself.
 
 ## Change log
+
+#### From 0.15 to 0.16
+
+- **Optimus now uses clean-css instead of CSSO for minification.**
+
+  CSSO was abandoned along with quite a few bugs.
+  [clean-css](https://github.com/jakubpawlowicz/clean-css) is faster, has fewer
+  bugs, a comprehensive test suite, and is under active development.
+
+  See [the new customization options for clean-css](#can-i-tweak-how-optimus-behaves)
+
+- **Passing options to optimus.prime/wrap now uses a regular map**
+
+  It used to take syntactic sugar varargs, but this actually makes it harder to
+  use in practice. You now just pass in a map of options like a normal person. :)
+
+- **Options are now grouped**
+
+  The old `{:mangle-js-names true}` is now `{:uglify-js {:mangle-names true}}`.
+  In the same fashion, the new options for clean-css is bundled under `{:clean-css {...}}`
 
 - CSS files with a single line over 5000 characters is considered already
   minified, and skipped. This avoid issues with huge bootstrap.css files
