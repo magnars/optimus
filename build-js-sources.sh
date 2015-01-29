@@ -14,6 +14,10 @@ if [ ! -d "node_modules/browserify" ]; then
     npm install browserify
 fi
 
+if [ ! -d "node_modules/clean-css" ]; then
+    npm install clean-css
+fi
+
 if [ ! -f "resources/clean-css.js" ]; then
     ./node_modules/.bin/browserify -r clean-css -o resources/clean-css.js
 fi
