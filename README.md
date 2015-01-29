@@ -48,7 +48,7 @@ Depending on how you use it, Optimus:
 - adds cache-busters to your static asset URLs
 - adds [far future Expires headers](http://developer.yahoo.com/performance/rules.html#expires)
 - minifies your JavaScript with [UglifyJS 2](https://github.com/mishoo/UglifyJS2)
-- minifies your CSS with [CSSO](http://bem.info/tools/optimizers/csso/)
+- minifies your CSS with [clean-css](https://github.com/jakubpawlowicz/clean-css)
 - inlines CSS imports while preserving media queries
 
 You might also be interested in:
