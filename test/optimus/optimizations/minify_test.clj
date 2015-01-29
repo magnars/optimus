@@ -29,7 +29,7 @@
 
 (fact
  "Disable name mangling"
- (minify-js "var hmm = (function () { var yoyoyo = 2; return yoyoyo; }());" {:mangle-js-names false})
+ (minify-js "var hmm = (function () { var yoyoyo = 2; return yoyoyo; }());" {:uglify-js {:mangle-names false}})
  => "var hmm=function(){var yoyoyo=2;return yoyoyo}();")
 
 (fact
@@ -57,7 +57,7 @@
  "It passes options along."
  (minify-js-assets [{:path "unmangled.js"
                      :contents "var hmm = (function () { var yoyoyo = 2; return yoyoyo; }());"}]
-                   {:mangle-js-names false})
+                   {:uglify-js {:mangle-names false}})
  => [{:path "unmangled.js"
       :contents "var hmm=function(){var yoyoyo=2;return yoyoyo}();"}])
 
@@ -85,7 +85,7 @@
  (minify-css "body { padding: 10px 10px; }")
  => "body{padding:10px}"
 
- (minify-css "body { padding: 10px 10px; }" {:css-advanced-optimizations false})
+ (minify-css "body { padding: 10px 10px; }" {:clean-css {:advanced-optimizations false}})
  => "body{padding:10px 10px}")
 
 (fact
@@ -94,26 +94,26 @@
  (minify-css "a{display:inline-block;color:red;display:-moz-block}")
  => "a{color:red;display:-moz-block}"
 
- (minify-css "a{display:inline-block;color:red;display:-moz-block}" {:css-aggressive-merging false})
+ (minify-css "a{display:inline-block;color:red;display:-moz-block}" {:clean-css {:aggressive-merging false}})
  => "a{display:inline-block;color:red;display:-moz-block}")
 
 (fact
  "You can keep line-breaks."
 
  (minify-css "body{color:red}\nhtml{color:#00f}") => "body{color:red}html{color:#00f}"
- (minify-css "body{color:red}\nhtml{color:#00f}" {:css-keep-breaks true}) => "body{color:red}\nhtml{color:#00f}")
+ (minify-css "body{color:red}\nhtml{color:#00f}" {:clean-css {:keep-line-breaks true}}) => "body{color:red}\nhtml{color:#00f}")
 
 (fact
  "You can control special comments."
 
  (minify-css "/*! comment */\nbody{color:red}") => "/*! comment */body{color:red}"
- (minify-css "/*! comment */\nbody{color:red}" {:css-keep-special-comments 0}) => "body{color:red}")
+ (minify-css "/*! comment */\nbody{color:red}" {:clean-css {:keep-special-comments 0}}) => "body{color:red}")
 
 (fact
  "You can control compatibility mode."
 
  (minify-css "body{margin:0px 0rem}") => "body{margin:0}"
- (minify-css "body{margin:0px 0rem}" {:css-compatibility "ie7"}) => "body{margin:0 0rem}")
+ (minify-css "body{margin:0px 0rem}" {:clean-css {:compatibility "ie7"}}) => "body{margin:0 0rem}")
 
 (fact
  "It doesn't mess up percentages after rgb-colors."

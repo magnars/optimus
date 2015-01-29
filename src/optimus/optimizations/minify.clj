@@ -29,7 +29,7 @@
         var compressed = ast.transform(compressor);
         compressed.figure_out_scope();
         compressed.compute_char_frequency();"
-        (if (get options :mangle-js-names true) "compressed.mangle_names();" "")
+        (if (get options :mangle-names true) "compressed.mangle_names();" "")
         "var stream = UglifyJS.OutputStream();
         compressed.print(stream);
         return stream.toString();
@@ -58,7 +58,7 @@
   ([js] (minify-js js {}))
   ([js options] (minify-js (create-uglify-context) js options))
   ([context js options]
-   (run-script-with-error-handling context (js-minify-code js options) (:path options))))
+   (run-script-with-error-handling context (js-minify-code js (:uglify-js options)) (:path options))))
 
 (defn minify-js-asset
   [context asset options]
@@ -89,11 +89,11 @@ var console = {
         var source = '" (escape (normalize-line-endings css)) "';
         var options = {
             processImport: false,
-            aggressiveMerging: " (:css-aggressive-merging options true) ",
-            advanced: " (:css-advanced-optimizations options true) ",
-            keepBreaks: " (:css-keep-breaks options false) ",
-            keepSpecialComments: '" (:css-keep-special-comments options "*") "',
-            compatibility: '" (:css-compatibility options "*") "'
+            aggressiveMerging: " (:aggressive-merging options true) ",
+            advanced: " (:advanced-optimizations options true) ",
+            keepBreaks: " (:keep-line-breaks options false) ",
+            keepSpecialComments: '" (:keep-special-comments options "*") "',
+            compatibility: '" (:compatibility options "*") "'
         };
         var minified = new CleanCSS(options).minify(source).styles;
         return minified;
@@ -128,7 +128,7 @@ var console = {
   ([context css options]
    (if (looks-like-already-minified css)
      css
-     (run-script-with-error-handling context (css-minify-code css options) (:path options)))))
+     (run-script-with-error-handling context (css-minify-code css (:clean-css options)) (:path options)))))
 
 (defn minify-css-asset
   [context asset options]
