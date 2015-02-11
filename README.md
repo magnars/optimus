@@ -9,7 +9,20 @@ It serves your static assets:
 
 In other words: Develop with ease. Optimize in production.
 
-### Breaking changes in 0.16.0
+### Breaking changes
+
+#### 0.17.0
+
+- **The optimus.hiccup namespace is removed in favor of optimus.html**
+
+  The old `optimus.hiccup/link-to-css-bundles` created hiccup data structures,
+  which is a mistake. It's specific to one rendering method, and Hiccup works
+  just as well (or better) with strings.
+
+  If you were using `optimus.hiccup`, just replace it will `optimus.html` and
+  all is well.
+
+#### 0.16.0
 
 - **Optimus now uses clean-css instead of CSSO for minification.**
 
@@ -31,7 +44,7 @@ In other words: Develop with ease. Optimize in production.
 
 ## Install
 
-Add `[optimus "0.16.0"]` to `:dependencies` in your `project.clj`.
+Add `[optimus "0.17.0"]` to `:dependencies` in your `project.clj`.
 
 Please note that this project uses
 [Semantic Versioning](http://semver.org/). As long as we're on a `0`
@@ -39,6 +52,11 @@ major version, there will likely be API changes. Pay attention when
 upgrading to a new minor version. Read the
 [change log](#change-log). As soon as we're on a `1` major version,
 there will be no breaking changes without a major version increase.
+
+#### Why isn't Optimus 1.0 yet?
+
+We're using clj-v8 to run JavaScript, which doesn't work on Windows or
+CentOS/RHEL 5. The plan is to replace clj-v8 with Nashorn, and then release 1.0.
 
 ## Features
 
@@ -629,6 +647,17 @@ including requires. And adding support for more transpilers require no
 changes to Optimus itself.
 
 ## Change log
+
+#### From 0.16 to 0.17
+
+- **The optimus.hiccup namespace is removed in favor of optimus.html**
+
+  The old `optimus.hiccup/link-to-css-bundles` created hiccup data structures,
+  which is a mistake. It's specific to one rendering method, and Hiccup works
+  just as well (or better) with strings.
+
+  If you were using `optimus.hiccup`, just replace it will `optimus.html` and
+  all is well.
 
 #### From 0.15 to 0.16
 
