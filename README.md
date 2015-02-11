@@ -198,8 +198,8 @@ Let's look at an example:
 Since we're rewriting URLs to include cache busters, we need to access
 them through Optimus.
 
-See example in hiccup below. Notice that we use `map`, since there is
-likely more than one URL in development mode.
+Notice that we use `map`, since there is likely more than one URL in development
+mode.
 
 ```cl
 (ns my-app.view
@@ -217,7 +217,7 @@ likely more than one URL in development mode.
           (link/bundle-paths request ["lib.js" "app.js"]))]]))
 ```
 
-There's also some hiccup-specific sugar:
+There's even some sugar available:
 
 ```cl
 (defn my-page
@@ -225,10 +225,13 @@ There's also some hiccup-specific sugar:
   (hiccup.core/html
    [:html
     [:head
-     (optimus.hiccup/link-to-css-bundles request ["styles.css"])]
+     (optimus.html/link-to-css-bundles request ["styles.css"])]
     [:body
-     (optimus.hiccup/link-to-js-bundles request ["lib.js" "app.js"])]]))
+     (optimus.html/link-to-js-bundles request ["lib.js" "app.js"])]]))
 ```
+
+These `link-to-*-bundles` will return a string of HTML that includes several
+script/link tags in development, and a single tag in production.
 
 #### Specifying the optimizations
 
