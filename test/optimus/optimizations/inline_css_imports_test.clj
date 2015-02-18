@@ -34,6 +34,18 @@
      {:path "/other.css" :contents ".class {}"}])
 
 (fact
+ "The newest :last-modified is used."
+ (inline-css-imports [{:path "/main.css" :contents "@import '/other.css'; #id {}" :references #{"/other.css"} :last-modified 1}
+                      {:path "/other.css" :contents ".class {}" :last-modified 2}])
+ => [{:path "/main.css" :contents ".class {} #id {}" :last-modified 2}
+     {:path "/other.css" :contents ".class {}" :last-modified 2}]
+
+ (inline-css-imports [{:path "/main.css" :contents "@import '/other.css'; #id {}" :references #{"/other.css"} :last-modified 3}
+                      {:path "/other.css" :contents ".class {}" :last-modified 2}])
+ => [{:path "/main.css" :contents ".class {} #id {}" :last-modified 3}
+     {:path "/other.css" :contents ".class {}" :last-modified 2}])
+
+(fact
  "External URLs for @imports are not tolerated. It's disastrous for frontend performance."
 
  (inline-css-imports [{:path "/main.css" :contents "@import 'http://external.css';"}])

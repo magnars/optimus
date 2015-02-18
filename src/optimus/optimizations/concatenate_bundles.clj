@@ -1,11 +1,7 @@
 (ns optimus.optimizations.concatenate-bundles
   (:require [clojure.set :refer [union]]
             [clojure.string :as str]
-            [optimus.homeless :refer [assoc-non-nil]]))
-
-(defn- max? [vals]
-  (when (seq vals)
-    (apply max vals)))
+            [optimus.homeless :refer [assoc-non-nil max?]]))
 
 (defn- concatenate-bundle [[name assets]]
   (when name
