@@ -1,7 +1,8 @@
 (ns optimus.strategies
   (:require [optimus.homeless :refer [assoc-non-nil]]
             [clojure.java.io :as io]
-            [clojure.core.memoize :as memo]))
+            [clojure.core.memoize :as memo]
+            [juxt.dirwatch :refer (watch-dir)]))
 
 (defn- serve-asset [asset]
   (-> {:status 200 :body (or (:contents asset)
@@ -33,6 +34,20 @@
                                get-optimized-assets)]
     (fn [request]
       (let [assets (get-optimized-assets)
+            path->asset (into {} (map (juxt :path identity) assets))]
+        (serve-asset-or-continue assets path->asset app request)))))
+
+(defn serve-live-assets-watchdir [app get-assets optimize options]
+  (let [get-optimized-assets #(optimize (guard-against-duplicate-assets (get-assets)) options)
+        memoized-get-optimized-assets (memo/memo get-optimized-assets)]
+    (watch-dir (fn [change]
+                 (if-not (.isDirectory (:file change))
+                   (do
+                     (memo/memo-clear! memoized-get-optimized-assets)
+                     (memoized-get-optimized-assets))))
+               (clojure.java.io/file "resources"))
+    (fn [request]
+      (let [assets (memoized-get-optimized-assets)
             path->asset (into {} (map (juxt :path identity) assets))]
         (serve-asset-or-continue assets path->asset app request)))))
 
