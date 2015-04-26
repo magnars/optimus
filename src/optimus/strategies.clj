@@ -37,17 +37,16 @@
             path->asset (into {} (map (juxt :path identity) assets))]
         (serve-asset-or-continue assets path->asset app request)))))
 
-(defn serve-live-assets-watchdir [app get-assets optimize options]
+(defn serve-live-assets-autorefresh [app get-assets optimize options]
   (let [get-optimized-assets #(optimize (guard-against-duplicate-assets (get-assets)) options)
-        memoized-get-optimized-assets (memo/memo get-optimized-assets)]
-    (watch-dir (fn [change]
-                 (if-not (.isDirectory (:file change))
-                   (do
-                     (memo/memo-clear! memoized-get-optimized-assets)
-                     (memoized-get-optimized-assets))))
-               (clojure.java.io/file "resources"))
+        assets-dir (clojure.java.io/file (get options :assets-dir "resources"))
+        assets-cache (atom (get-optimized-assets))
+        on-assets-changed (fn [change]
+                            (if-not (.isDirectory (:file change))
+                              (reset! assets-cache (get-optimized-assets))))]
+    (watch-dir on-assets-changed assets-dir)
     (fn [request]
-      (let [assets (memoized-get-optimized-assets)
+      (let [assets @assets-cache
             path->asset (into {} (map (juxt :path identity) assets))]
         (serve-asset-or-continue assets path->asset app request)))))
 
