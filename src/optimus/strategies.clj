@@ -1,8 +1,7 @@
 (ns optimus.strategies
   (:require [optimus.homeless :refer [assoc-non-nil jdk-version]]
             [clojure.java.io :as io]
-            [clojure.core.memoize :as memo]
-            [juxt.dirwatch :refer (watch-dir)]))
+            [clojure.core.memoize :as memo]))
 
 (defn- serve-asset [asset]
   (-> {:status 200 :body (or (:contents asset)
@@ -36,6 +35,9 @@
       (let [assets (get-optimized-assets)
             path->asset (into {} (map (juxt :path identity) assets))]
         (serve-asset-or-continue assets path->asset app request)))))
+
+(if (>= (jdk-version) 1.7)
+  (use '[juxt.dirwatch :only [watch-dir]]))
 
 (defn serve-live-assets-autorefresh [app get-assets optimize options]
   (if (< (jdk-version) 1.7)

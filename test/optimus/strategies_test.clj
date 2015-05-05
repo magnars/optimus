@@ -2,8 +2,7 @@
   (:use [optimus.strategies]
         [test-with-files.core]
         [midje.sweet]
-        [optimus.homeless])
-  (:require [juxt.dirwatch :refer (watch-dir)]))
+        [optimus.homeless]))
 
 (defn noop [_])
 (defn return-request [req] req)
@@ -134,7 +133,10 @@
                                  {:path "/h.js" :contents ""}
                                  {:path "/i.js" :contents ""}]}))
 
-(if (< (jdk-version) 1.7)
+(if (>= (jdk-version) 1.7)
+  (use '[juxt.dirwatch :only [watch-dir]]))
+
+(if (>= (jdk-version) 1.7)
   (fact
    "serve-live-assets-autorefresh caches assets and refreshes the cache when files are changed"
 
