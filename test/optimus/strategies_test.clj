@@ -1,7 +1,8 @@
 (ns optimus.strategies-test
   (:use [optimus.strategies]
         [test-with-files.core]
-        [midje.sweet])
+        [midje.sweet]
+        [optimus.homeless])
   (:require [juxt.dirwatch :refer (watch-dir)]))
 
 (defn noop [_])
@@ -133,34 +134,35 @@
                                  {:path "/h.js" :contents ""}
                                  {:path "/i.js" :contents ""}]}))
 
-(fact
- "serve-live-assets-autorefresh caches assets and refreshes the cache when files are changed"
+(if (< (jdk-version) 1.7)
+  (fact
+   "serve-live-assets-autorefresh caches assets and refreshes the cache when files are changed"
 
- (let [file-path "/code.js"
-       full-file-path (str tmp-dir file-path)
-       watchdir-callback (atom nil)
-       watchdir-path (atom nil)]
+   (let [file-path "/code.js"
+         full-file-path (str tmp-dir file-path)
+         watchdir-callback (atom nil)
+         watchdir-path (atom nil)]
 
-   (defn get-assets []
-     [{:path file-path :contents (slurp full-file-path)}])
+     (defn get-assets []
+       [{:path file-path :contents (slurp full-file-path)}])
 
-   (defn notify-about-file-change []
-     (@watchdir-callback {:file (clojure.java.io/file full-file-path)}))
+     (defn notify-about-file-change []
+       (@watchdir-callback {:file (clojure.java.io/file full-file-path)}))
 
-   (with-files [[file-path "abc"]]
-     (with-redefs [watch-dir (fn [callback path]
-                               (reset! watchdir-callback callback)
-                               (reset! watchdir-path path))]
+     (with-files [[file-path "abc"]]
+       (with-redefs [watch-dir (fn [callback path]
+                                 (reset! watchdir-callback callback)
+                                 (reset! watchdir-path path))]
 
-       (let [app (serve-live-assets-autorefresh noop get-assets dont-optimize {:assets-dir tmp-dir})]
-         @watchdir-path => (clojure.java.io/file tmp-dir) ;; we are watching a directory passed via options
-         (app {:uri "/code.js"}) => {:status 200 :body "abc"}
-         (spit full-file-path "def")
-         (app {:uri "/code.js"}) => {:status 200 :body "abc"} ;; still cached
-         (notify-about-file-change)
-         (app {:uri "/code.js"}) => {:status 200 :body "def"})
+         (let [app (serve-live-assets-autorefresh noop get-assets dont-optimize {:assets-dir tmp-dir})]
+           @watchdir-path => (clojure.java.io/file tmp-dir) ;; we are watching a directory passed via options
+           (app {:uri "/code.js"}) => {:status 200 :body "abc"}
+           (spit full-file-path "def")
+           (app {:uri "/code.js"}) => {:status 200 :body "abc"} ;; still cached
+           (notify-about-file-change)
+           (app {:uri "/code.js"}) => {:status 200 :body "def"})
 
-       (fact
-        "resources directory is watched when :assets-dir option is not specified"
-        (let [app (serve-live-assets-autorefresh noop get-assets dont-optimize {})]
-          @watchdir-path => (clojure.java.io/file "resources")))))))
+         (fact
+          "resources directory is watched when :assets-dir option is not specified"
+          (let [app (serve-live-assets-autorefresh noop get-assets dont-optimize {})]
+            @watchdir-path => (clojure.java.io/file "resources"))))))))
