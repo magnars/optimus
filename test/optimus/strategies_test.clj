@@ -134,7 +134,8 @@
                                  {:path "/i.js" :contents ""}]}))
 
 (if (>= (jdk-version) 1.7)
-  (use '[juxt.dirwatch :only [watch-dir]]))
+  (use '[juxt.dirwatch :only [watch-dir]])
+  (defn watch-dir [callback path]))
 
 (if (>= (jdk-version) 1.7)
   (fact
