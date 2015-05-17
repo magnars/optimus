@@ -494,6 +494,24 @@ Values in this example are all defaults, so it's just a verbose noop.
 - `:keep-special-comments` - `"*"` for keeping all (default), `1` for keeping first one only, `0` for removing all
 - `:compatibility` - enables compatibility mode, [see clean-css docs for examples](https://github.com/jakubpawlowicz/clean-css#how-to-set-compatibility-mode)
 
+## Automatic compilation when assets source files change
+
+Sometimes in development mode serving live assets may be too slow even with caching
+(for example if you're looking up lots of regexen on the class path).
+In this case you can use `serve-live-assets-autorefresh` strategy.
+This strategy will watch for changes in assets source files and
+recompile assets in the background whenever it's needed.
+Compiled assets are then cached until the next change in the source files.
+By default it assumes that assets sources are located in `resources` directory,
+but it can be customized with `:assets-dir` config option.
+
+```cl
+(-> app
+    (optimus/wrap
+     get-assets optimize serve-live-assets-autorefresh
+     {:assets-dir "resources/public"}))
+```
+
 ## What are these assets anyway? They seem magical to me.
 
 Luckily they're just data. The most basic operation of Optimus is
