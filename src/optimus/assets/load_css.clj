@@ -11,14 +11,21 @@
 (defn external-url? [#^String url]
   (re-matches #"^(?://|http://|https://).*" url))
 
+(defn behavior-url? [#^String url]
+  (.startsWith url "#"))
+
+(defn leave-url-alone? [url]
+  (or (data-url? url)
+      (external-url? url)
+      (behavior-url? url)))
+
 (defn- url-match [[match & urls]]
   (first (remove nil? urls)))
 
 (defn- match-url-to-absolute [original-path [match :as matches]]
   (let [url (url-match matches)]
-    (if (or (data-url? url)
-            (external-url? url))
-      match ;; leave alone
+    (if (leave-url-alone? url)
+      match
       (str/replace match url (to-absolute-url original-path url)))))
 
 (defn- make-css-urls-absolute [file]
@@ -33,9 +40,9 @@
   (->> file :contents
        (re-seq css-url-re)
        (map url-match)
+       (remove behavior-url?)
        (map remove-url-appendages)
-       (remove data-url?)
-       (remove external-url?)
+       (remove leave-url-alone?)
        (set)))
 
 (defn update-css-references [asset]

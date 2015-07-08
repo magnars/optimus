@@ -1,6 +1,6 @@
 (ns optimus.digest
   (:require [clojure.data.codec.base64 :as b64])
-  (import java.security.MessageDigest))
+  (:import java.security.MessageDigest))
 
 (def ^:private byte->hex-str
   (comp

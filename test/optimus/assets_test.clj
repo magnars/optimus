@@ -122,6 +122,13 @@
    (-> (load-assets public-dir ["/main.css"])
        first :contents) => "#id { background: url(data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==)}"))
 
+(with-files [["/main.css" "#id { behavior: url(#default#VML); }"]]
+  (fact
+   "Behavior URLs are left alone."
+
+   (-> (load-assets public-dir ["/main.css"])
+       first :contents) => "#id { behavior: url(#default#VML); }"))
+
 (with-files [["/main1.css" "#id { background: url(//some.site/img.png)}"]
              ["/main2.css" "#id { background: url(http://some.site/img.png)}"]
              ["/main3.css" "#id { background: url(https://some.site/img.png)}"]]
