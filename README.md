@@ -44,7 +44,7 @@ In other words: Develop with ease. Optimize in production.
 
 ## Install
 
-Add `[optimus "0.17.1"]` to `:dependencies` in your `project.clj`.
+Add `[optimus "0.17.2"]` to `:dependencies` in your `project.clj`.
 
 Please note that this project uses
 [Semantic Versioning](http://semver.org/). As long as we're on a `0`
@@ -647,6 +647,9 @@ including requires. And adding support for more transpilers require no
 changes to Optimus itself.
 
 ## Change log
+
+- CSS files now adopt the newest modification time of its imports
+- Now doesn't fail when given outdated MicroSoft behavior CSS.
 
 #### From 0.16 to 0.17
 
