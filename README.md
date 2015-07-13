@@ -44,7 +44,7 @@ In other words: Develop with ease. Optimize in production.
 
 ## Install
 
-Add `[optimus "0.17.2"]` to `:dependencies` in your `project.clj`.
+Add `[optimus "0.18.0"]` to `:dependencies` in your `project.clj`.
 
 Please note that this project uses
 [Semantic Versioning](http://semver.org/). As long as we're on a `0`
@@ -666,6 +666,11 @@ changes to Optimus itself.
 
 ## Change log
 
+#### From 0.17 to 0.18
+
+- A new strategy `serve-live-assets-autorefresh` is available. It watches for
+  changes in assets source files and recompiles assets in the background
+  whenever it's needed.
 - CSS files now adopt the newest modification time of its imports
 - Now doesn't fail when given outdated MicroSoft behavior CSS.
 
@@ -768,6 +773,7 @@ run again.
   in CSS-files.
 - [Francis Avila](https://github.com/favila) improved placement of cache busters
   in URLs.
+- [Anton Onyshchenko](https://github.com/env0der) added the `serve-live-assets-autorefresh` strategy.
 
 Thanks!
 
