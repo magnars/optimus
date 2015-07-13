@@ -1,5 +1,5 @@
 (ns optimus.strategies
-  (:require [optimus.homeless :refer [assoc-non-nil]]
+  (:require [optimus.homeless :refer [assoc-non-nil jdk-version]]
             [clojure.java.io :as io]
             [clojure.core.memoize :as memo]))
 
@@ -35,6 +35,27 @@
       (let [assets (get-optimized-assets)
             path->asset (into {} (map (juxt :path identity) assets))]
         (serve-asset-or-continue assets path->asset app request)))))
+
+(if (>= (jdk-version) 1.7)
+  (use '[juxt.dirwatch :only [watch-dir]]))
+
+(if (>= (jdk-version) 1.7)
+  (defn serve-live-assets-autorefresh [app get-assets optimize options]
+    (let [get-optimized-assets #(optimize (guard-against-duplicate-assets (get-assets)) options)
+          assets-dir (clojure.java.io/file (get options :assets-dir "resources"))
+          assets-cache (atom (get-optimized-assets))
+          on-assets-changed (fn [change]
+                              (if-not (.isDirectory (:file change))
+                                (reset! assets-cache (get-optimized-assets))))]
+      (@(resolve 'watch-dir) on-assets-changed assets-dir)
+      (fn [request]
+        (let [assets @assets-cache
+              path->asset (into {} (map (juxt :path identity) assets))]
+          (serve-asset-or-continue assets path->asset app request)))))
+  (defn serve-live-assets-autorefresh [app get-assets optimize options]
+    (throw (Exception. ("This strategy is not supported on JDK version < 1.7")))))
+
+
 
 (defn serve-frozen-assets [app get-assets optimize options]
   (let [assets (optimize (guard-against-duplicate-assets (get-assets)) options)

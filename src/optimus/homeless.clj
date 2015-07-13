@@ -8,3 +8,6 @@
 (defn max? [vals]
   (when (seq vals)
     (apply max vals)))
+
+(defn jdk-version []
+  (read-string (System/getProperty "java.specification.version")))
