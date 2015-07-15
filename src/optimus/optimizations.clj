@@ -3,14 +3,20 @@
             [optimus.optimizations.concatenate-bundles]
             [optimus.optimizations.minify]
             [optimus.optimizations.add-last-modified-headers]
-            [optimus.optimizations.inline-css-imports]))
+            [optimus.optimizations.inline-css-imports]
+            [potemkin :refer [import-vars]]))
 
-(def minify-js-assets optimus.optimizations.minify/minify-js-assets)
-(def minify-css-assets optimus.optimizations.minify/minify-css-assets)
-(def concatenate-bundles optimus.optimizations.concatenate-bundles/concatenate-bundles)
-(def add-cache-busted-expires-headers optimus.optimizations.add-cache-busted-expires-headers/add-cache-busted-expires-headers)
-(def add-last-modified-headers optimus.optimizations.add-last-modified-headers/add-last-modified-headers)
-(def inline-css-imports optimus.optimizations.inline-css-imports/inline-css-imports)
+(import-vars [optimus.optimizations.minify
+              minify-js-assets
+              minify-css-assets]
+             [optimus.optimizations.concatenate-bundles
+              concatenate-bundles]
+             [optimus.optimizations.add-cache-busted-expires-headers
+              add-cache-busted-expires-headers]
+             [optimus.optimizations.add-last-modified-headers
+              add-last-modified-headers]
+             [optimus.optimizations.inline-css-imports
+              inline-css-imports])
 
 (defn all [assets options]
   (-> assets
