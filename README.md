@@ -44,7 +44,7 @@ In other words: Develop with ease. Optimize in production.
 
 ## Install
 
-Add `[optimus "0.18.2"]` to `:dependencies` in your `project.clj`.
+Add `[optimus "0.18.3"]` to `:dependencies` in your `project.clj`.
 
 Please note that this project uses
 [Semantic Versioning](http://semver.org/). As long as we're on a `0`
@@ -665,6 +665,9 @@ including requires. And adding support for more transpilers require no
 changes to Optimus itself.
 
 ## Change log
+
+- We now designate specific versions of our JavaScript dependencies, avoiding
+  random breakage when these packages change.
 
 #### From 0.17 to 0.18
 
