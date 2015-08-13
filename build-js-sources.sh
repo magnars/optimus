@@ -3,7 +3,7 @@
 mkdir -p resources
 
 if [ ! -d "node_modules/uglify-js" ]; then
-    npm install uglify-js
+    npm install uglify-js@2.4.24
 fi
 
 if [ ! -f "resources/uglify.js" ]; then
@@ -11,11 +11,11 @@ if [ ! -f "resources/uglify.js" ]; then
 fi
 
 if [ ! -d "node_modules/browserify" ]; then
-    npm install browserify
+    npm install browserify@10.2.6
 fi
 
 if [ ! -d "node_modules/clean-css" ]; then
-    npm install clean-css
+    npm install clean-css@3.0.7
 fi
 
 if [ ! -f "resources/clean-css.js" ]; then
