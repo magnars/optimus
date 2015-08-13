@@ -1,12 +1,12 @@
 (ns optimus.optimizations.add-cache-busted-expires-headers
   (:require [clj-time.core :as time]
             [clj-time.format]
-            [optimus.digest :as digest]
-            [optimus.paths :as paths]
-            [optimus.assets :refer [original-path]]
-            [optimus.homeless :refer [assoc-non-nil]]
+            [clojure.set :refer [intersection difference]]
             [clojure.string :as str]
-            [clojure.set :refer [intersection difference]]))
+            [optimus.assets :refer [original-path]]
+            [optimus.digest :as digest]
+            [optimus.homeless :refer [assoc-non-nil]]
+            [optimus.paths :as paths]))
 
 (def http-date-format
   (clj-time.format/formatter "EEE, dd MMM yyyy HH:mm:ss 'GMT'"))
@@ -31,11 +31,15 @@
 (defn- by-path [path files]
   (first (filter #(= path (:path %)) files)))
 
+(defn inverse-string-length [^String s]
+  (- (.length s)))
+
 (defn- replace-referenced-url [file old new]
   (update-in file [:contents] #(str/replace % old new)))
 
 (defn- replace-referenced-urls [file old->new]
-  (reduce #(replace-referenced-url %1 %2 (old->new %2)) file (:references file)))
+  (reduce #(replace-referenced-url %1 %2 (old->new %2)) file
+          (sort-by inverse-string-length (:references file))))
 
 (defn- replace-referenced-urls-with-new-ones [file files]
   (if-let [references (:references file)]
