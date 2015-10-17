@@ -1,6 +1,6 @@
 (ns optimus.optimizations.minify
   (:require [clojure.string :as str]
-            [v8.core :as v8]))
+            [optimus.js :as js]))
 
 (defn- escape [str]
   (-> str
@@ -18,11 +18,11 @@
        (some (fn [^String s] (> (.length s) 5000)))))
 
 (defmacro with-context
-  "Calls v8/cleanup-context on an already created context
+  "Calls js/cleanup-engine on an already created context
 
 usage:
 
-(with-context [ctx (v8/create-context)]
+(with-context [ctx (js/get-engine)]
    body)
 "
   [[lname ctx] & body]
@@ -30,9 +30,9 @@ usage:
      (try
        ~@body
        (finally
-         (v8/cleanup-context ~lname)))))
+         (js/cleanup-engine ~lname)))))
 
-(defn- throw-v8-exception [#^String text path]
+(defn- throw-engine-exception [#^String text path]
   (if (= (.indexOf text "ERROR: ") 0)
     (let [prefix (when path (str "Exception in " path ": "))
           error (clojure.core/subs text 7)]
@@ -66,14 +66,14 @@ usage:
   (slurp (clojure.java.io/resource "uglify.js")))
 
 (defn create-uglify-context []
-  (let [context (v8/create-context)]
-    (v8/run-script-in-context context uglify)
-    context))
+  (let [engine (js/get-engine)]
+    (.eval engine uglify)
+    engine))
 
 (defn- run-script-with-error-handling [context script file-path]
-  (throw-v8-exception
+  (throw-engine-exception
    (try
-     (v8/run-script-in-context context script)
+     (.eval context script)
      (catch Exception e
        (str "ERROR: " (.getMessage e))))
    file-path))
@@ -136,10 +136,10 @@ var console = {
 (defn create-clean-css-context
   "Minify CSS with the bundled clean-css version"
   []
-  (let [context (v8/create-context)]
-    (v8/run-script-in-context context "var window = { XMLHttpRequest: {} };")
-    (v8/run-script-in-context context clean-css)
-    context))
+  (let [engine (js/get-engine)]
+    (.eval engine "var window = { XMLHttpRequest: {} };")
+    (.eval engine clean-css)
+    engine))
 
 (defn minify-css
   ([css] (minify-css css {}))
