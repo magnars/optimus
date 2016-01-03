@@ -8,6 +8,21 @@
       (str/replace "'" "\\'")
       (str/replace "\n" "\\n")))
 
+(defmacro with-context
+  "Calls v8/cleanup-context on an already created context
+
+usage:
+
+(with-context [ctx (v8/create-context)]
+   body)
+"
+  [[lname ctx] & body]
+  `(let [~lname ~ctx]
+     (try
+       ~@body
+       (finally
+         (v8/cleanup-context ~lname)))))
+
 (defn- throw-v8-exception [#^String text path]
   (if (= (.indexOf text "ERROR: ") 0)
     (let [prefix (when path (str "Exception in " path ": "))
@@ -56,7 +71,9 @@
 
 (defn minify-js
   ([js] (minify-js js {}))
-  ([js options] (minify-js (create-uglify-context) js options))
+  ([js options]
+   (with-context [context (create-uglify-context)]
+     (minify-js context js options)))
   ([context js options]
    (run-script-with-error-handling context (js-minify-code js (:uglify-js options)) (:path options))))
 
@@ -70,8 +87,8 @@
 (defn minify-js-assets
   ([assets] (minify-js-assets assets {}))
   ([assets options]
-   (let [context (create-uglify-context)]
-     (map #(minify-js-asset context % options) assets))))
+   (with-context [context (create-uglify-context)]
+     (doall (map #(minify-js-asset context % options) assets)))))
 
 ;; minify CSS
 
@@ -124,7 +141,9 @@ var console = {
 
 (defn minify-css
   ([css] (minify-css css {}))
-  ([css options] (minify-css (create-clean-css-context) css options))
+  ([css options]
+   (with-context [context (create-clean-css-context)]
+     (minify-css context css options)))
   ([context css options]
    (if (looks-like-already-minified css)
      css
@@ -140,5 +159,5 @@ var console = {
 (defn minify-css-assets
   ([assets] (minify-css-assets assets {}))
   ([assets options]
-   (let [context (create-clean-css-context)]
-     (map #(minify-css-asset context % options) assets))))
+   (with-context [context (create-clean-css-context)]
+     (doall (map #(minify-css-asset context % options) assets)))))
