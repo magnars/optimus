@@ -44,7 +44,7 @@ In other words: Develop with ease. Optimize in production.
 
 ## Install
 
-Add `[optimus "0.18.3"]` to `:dependencies` in your `project.clj`.
+Add `[optimus "0.18.4"]` to `:dependencies` in your `project.clj`.
 
 Please note that this project uses
 [Semantic Versioning](http://semver.org/). As long as we're on a `0`
@@ -666,6 +666,8 @@ changes to Optimus itself.
 
 ## Change log
 
+- Avoid memory leak via clj-v8 contexts (Allen Rohner)
+
 - We now designate specific versions of our JavaScript dependencies, avoiding
   random breakage when these packages change.
 
@@ -777,6 +779,7 @@ run again.
 - [Francis Avila](https://github.com/favila) improved placement of cache busters
   in URLs.
 - [Anton Onyshchenko](https://github.com/env0der) added the `serve-live-assets-autorefresh` strategy.
+- [Allen Rohner](https://github.com/arohner) fixed a memory leak.
 
 Thanks!
 
