@@ -184,7 +184,7 @@ Let's look at an example:
     from those in `optimus.optimizations`, or write your own asset
     transformation functions.
 
-17. Yeah, `optimizations/none` is basically a two-arity `identity`.
+17. `optimizations/none` does nothing and returns your assets unharmed.
 
 18. When you use `optimizations/all` you get everything that Optimus
     provides. But you can easily exchange this for a function that
