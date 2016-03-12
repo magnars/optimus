@@ -302,7 +302,7 @@ save them to disk. Like this:
 ```cl
 (defn export-assets []
   (-> (get-assets)
-      (my-optimize options)
+      (my-optimize (get-optimisation-options))
       (optimus.export/save-assets "./cdn-export/")))
 ```
 
