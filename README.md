@@ -9,55 +9,6 @@ It serves your static assets:
 
 In other words: Develop with ease. Optimize in production.
 
-### Breaking changes
-
-#### 0.17.0
-
-- **The optimus.hiccup namespace is removed in favor of optimus.html**
-
-  The old `optimus.hiccup/link-to-css-bundles` created hiccup data structures,
-  which is a mistake. It's specific to one rendering method, and Hiccup works
-  just as well (or better) with strings.
-
-  If you were using `optimus.hiccup`, just replace it will `optimus.html` and
-  all is well.
-
-#### 0.16.0
-
-- **Optimus now uses clean-css instead of CSSO for minification.**
-
-  CSSO was abandoned along with quite a few bugs.
-  [clean-css](https://github.com/jakubpawlowicz/clean-css) is faster, has fewer
-  bugs, a comprehensive test suite, and is under active development.
-
-  See [the new customization options for clean-css](#can-i-tweak-how-optimus-behaves)
-
-- **Passing options to optimus.prime/wrap now uses a regular map**
-
-  It used to take syntactic sugar varargs, but this actually makes it harder to
-  use in practice. You now just pass in a map of options like a normal person. :)
-
-- **Options are now grouped**
-
-  The old `{:mangle-js-names true}` is now `{:uglify-js {:mangle-names true}}`.
-  In the same fashion, the new options for clean-css is bundled under `{:clean-css {...}}`
-
-## Install
-
-Add `[optimus "0.18.4"]` to `:dependencies` in your `project.clj`.
-
-Please note that this project uses
-[Semantic Versioning](http://semver.org/). As long as we're on a `0`
-major version, there will likely be API changes. Pay attention when
-upgrading to a new minor version. Read the
-[change log](#change-log). As soon as we're on a `1` major version,
-there will be no breaking changes without a major version increase.
-
-#### Why isn't Optimus 1.0 yet?
-
-We're using clj-v8 to run JavaScript, which doesn't work on Windows or
-CentOS/RHEL 5. The plan is to replace clj-v8 with Nashorn, and then release 1.0.
-
 ## Features
 
 Depending on how you use it, Optimus:
@@ -86,6 +37,25 @@ You might also be interested in:
   files.
 - [optimus-img-transform](http://github.com/magnars/optimus-img-transform) - an
   asset middleware to transform your images' size, quality and rendering methods.
+
+## Install
+
+Add `[optimus "0.18.4"]` to `:dependencies` in your `project.clj`.
+
+Please note that this project uses
+[Semantic Versioning](http://semver.org/). As long as we're on a `0`
+major version, there will likely be API changes. Pay attention when
+upgrading to a new minor version. Read the
+[change log](#change-log). As soon as we're on a `1` major version,
+there will be no breaking changes without a major version increase.
+
+There were breaking changes in `0.16` and `0.17`. If you're upgrading, you might
+want to [read more about them](breaking-changes.md).
+
+#### Why isn't Optimus 1.0 yet?
+
+We're using clj-v8 to run JavaScript, which doesn't work on Windows or
+CentOS/RHEL 5. The plan is to replace clj-v8 with Nashorn, and then release 1.0.
 
 ## Usage
 
@@ -665,6 +635,11 @@ including requires. And adding support for more transpilers require no
 changes to Optimus itself.
 
 ## Change log
+
+There were breaking changes in `0.16` and `0.17`. If you're upgrading, you might
+want to [read more about them](breaking-changes.md).
+
+#### From 0.18 to 0.18.4
 
 - Avoid memory leak via clj-v8 contexts (Allen Rohner)
 
