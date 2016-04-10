@@ -112,8 +112,8 @@ Let's look at an example:
 5. It returns a list of assets.
 
 6. The helpers in `optimus.assets` load files from a given directory
-   on the classpath (normally in the `src/resources` directory). So in
-   this case, the files are loaded from `src/resources/public/`.
+   on the classpath (normally in the `resources` directory). So in
+   this case, the files are loaded from `resources/public/`.
 
 7. The name of this bundle is `styles.css`.
 
@@ -518,6 +518,12 @@ and even has some commentary on reasoning and reasons.
 ## Are there any working examples to look at?
 
 Take a look at these:
+
+ - The [emacsrocks.com](http://emacsrocks.com) and
+   [parens-of-the-dead.com](http://www.parens-of-the-dead.com/) websites both
+   use Optimus to optimize their assets. Source
+   [here](https://github.com/magnars/emacsrocks.com) and
+   [here](https://github.com/magnars/www.parens-of-the-dead.com).
 
  - [August Lilleaas](http://augustl.com) wrote
    [a blog](http://augustl.com/blog/2014/jdk8_react_rendering_on_server/)
