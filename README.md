@@ -40,7 +40,7 @@ You might also be interested in:
 
 ## Install
 
-Add `[optimus "0.18.4"]` to `:dependencies` in your `project.clj`.
+Add `[optimus "0.18.5"]` to `:dependencies` in your `project.clj`.
 
 Please note that this project uses
 [Semantic Versioning](http://semver.org/). As long as we're on a `0`
@@ -645,7 +645,10 @@ changes to Optimus itself.
 There were breaking changes in `0.16` and `0.17`. If you're upgrading, you might
 want to [read more about them](breaking-changes.md).
 
-#### From 0.18 to 0.18.4
+#### From 0.18 to 0.18.5
+
+- Like CSS before, JS-files with a single line over 5000 characters are now
+  considered already minified, and skipped.
 
 - Avoid memory leak via clj-v8 contexts (Allen Rohner)
 
