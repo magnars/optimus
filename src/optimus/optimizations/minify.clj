@@ -8,6 +8,15 @@
       (str/replace "'" "\\'")
       (str/replace "\n" "\\n")))
 
+(defn looks-like-already-minified
+  "Files with a single line over 5000 characters are considered already
+  minified, and skipped. This avoid issues with huge bootstrap.css files
+  and its ilk."
+  [contents]
+  (->> contents
+       (str/split-lines)
+       (some (fn [^String s] (> (.length s) 5000)))))
+
 (defmacro with-context
   "Calls v8/cleanup-context on an already created context
 
@@ -75,7 +84,9 @@ usage:
    (with-context [context (create-uglify-context)]
      (minify-js context js options)))
   ([context js options]
-   (run-script-with-error-handling context (js-minify-code js (:uglify-js options)) (:path options))))
+   (if (looks-like-already-minified js)
+     js
+     (run-script-with-error-handling context (js-minify-code js (:uglify-js options)) (:path options)))))
 
 (defn minify-js-asset
   [context asset options]
@@ -129,15 +140,6 @@ var console = {
     (v8/run-script-in-context context "var window = { XMLHttpRequest: {} };")
     (v8/run-script-in-context context clean-css)
     context))
-
-(defn looks-like-already-minified
-  "CSS files with a single line over 5000 characters is considered already
-  minified, and skipped. This avoid issues with huge bootstrap.css files
-  and its ilk."
-  [css]
-  (->> css
-       (str/split-lines)
-       (some (fn [^String s] (> (.length s) 5000)))))
 
 (defn minify-css
   ([css] (minify-css css {}))
