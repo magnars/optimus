@@ -1,6 +1,6 @@
 (ns optimus.js-test
   (:require [optimus.js :refer :all]
-            [midje.sweet :refer [fact => throws]]))
+            [midje.sweet :refer [fact => throws anything]]))
 
 (fact
  "Gets a default JSR-223 script engine (potentially influenced by environ)"
@@ -16,7 +16,7 @@
 
 (fact
  "Can manually cleanup a V8 script engine"
- (cleanup-engine (get-engine "clj-v8")) => nil)
+ (cleanup-engine (get-engine "clj-v8")) => anything)
 
 (fact
  "Can evaluate trivial JS code in clj-v8 script engine"
@@ -32,7 +32,7 @@
 
 (fact
  "Can manually cleanup the default engine (potentially influenced by environ)"
- (cleanup-engine (get-engine)) => nil)
+ (cleanup-engine (get-engine)) => anything)
 
 (fact
  "Can evaluate trivial JS code in clj-v8 script engine (potentially influenced by environ)"

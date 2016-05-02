@@ -16,13 +16,35 @@
 (defmethod cleanup-engine "clj-v8"
   [engine]
   ;; Explicitly clean up V8 ScriptEngine instances, if we don't want to wait for GC to get around to finalize().
-  (.cleanup engine))
+  (.cleanup engine)
+  engine)
 
 (defmethod cleanup-engine :default
   [engine]
   ;; Do nothing as Nashorn ScriptEngine or other instances should be cleaned up by GC.
-  nil)
+  engine)
 
+
+(defmulti init-engine
+  "Initialize the bare engine with any implementation-specific patches etc."
+  #(-> % .getFactory .getNames first))
+
+(defmethod init-engine "nashorn"
+  [engine]
+  (.eval engine "
+    (function(){
+      var nashorn_splice = Array.prototype.splice;
+      Array.prototype.splice = function() {
+      if (arguments.length === 1) {
+       return nashorn_splice.call(this, arguments[0], this.length);
+      } else {
+       return nashorn_splice.apply(this, arguments);
+     }}})();")
+  engine)
+
+(defmethod init-engine :default
+  [engine]
+  engine)
 
 (defn get-engine
   "Return an instance of a javax.script.ScriptEngine implementation class,
@@ -32,8 +54,9 @@
    Note: if engine-name is supplied but not found by javax.script.ScriptEngineManager,
    an exception is raised."
   ([engine-name]
-     (or (.getEngineByName engines engine-name)
-         (throw (Exception. (str "JS script engine " engine-name " could not be loaded.")))))
+     (if-let [engine (.getEngineByName engines engine-name)]
+       (init-engine engine)
+       (throw (Exception. (str "JS script engine " engine-name " could not be loaded.")))))
   ([]
      (get-engine (or (env :optimus-js-engine)
                      default-engine-name))))

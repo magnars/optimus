@@ -65,10 +65,12 @@ usage:
   stripped context"
   (slurp (clojure.java.io/resource "uglify.js")))
 
-(defn create-uglify-context []
-  (let [engine (js/get-engine)]
-    (.eval engine uglify)
-    engine))
+(defn create-uglify-context
+  ([]
+     (create-uglify-context (js/get-engine)))
+  ([engine]
+     (.eval engine uglify)
+     engine))
 
 (defn- run-script-with-error-handling [context script file-path]
   (throw-engine-exception
@@ -103,6 +105,9 @@ usage:
 
 ;; minify CSS
 
+(defn prepare-css-source [css]
+  (escape (normalize-line-endings css)))
+
 (defn- css-minify-code [css options]
   (str "
 var console = {
@@ -135,11 +140,12 @@ var console = {
 
 (defn create-clean-css-context
   "Minify CSS with the bundled clean-css version"
-  []
-  (let [engine (js/get-engine)]
-    (.eval engine "var window = { XMLHttpRequest: {} };")
-    (.eval engine clean-css)
-    engine))
+  ([]
+     (create-clean-css-context (js/get-engine)))
+  ([engine]
+     (.eval engine "var window = { XMLHttpRequest: {} };")
+     (.eval engine clean-css)
+     engine))
 
 (defn minify-css
   ([css] (minify-css css {}))
