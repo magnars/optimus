@@ -145,3 +145,8 @@
                      {:path "styles.css" :contents "#id { margin: 0; }"}])
  => [{:path "code.js" :contents "var a = 2 + 3;"}
      {:path "styles.css" :contents "#id{margin:0}"}])
+
+
+(fact
+ "It correctly minifies several rules for the same selector."
+ (minify-css (create-clean-css-context) "table,div {border:0} table {margin:0}" {}) => "div,table{border:0}table{margin:0}")
