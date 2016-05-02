@@ -5,3 +5,7 @@ jdk:
   - openjdk6
   - openjdk7
   - oraclejdk7
+  - oraclejdk8
+env:
+  - OPTIMUS_JS_ENGINE=nashorn,clj-v8
+  - OPTIMUS_JS_ENGINE=clj-v8,nashorn

@@ -6,6 +6,12 @@
 
 (def default-engine-name "clj-v8")
 
+(defn read-engine-names-str
+  [names-str]
+  (->> (clojure.string/split names-str #",")
+       (map clojure.string/trim)
+       (filter (complement empty?))))
+
 (def engines (ScriptEngineManager.))
 
 (defmulti cleanup-engine
@@ -46,17 +52,34 @@
   [engine]
   engine)
 
+(defn- get-engine-by-name-safely
+  [engines name]
+  (try
+    (.getEngineByName engines name)
+    (catch Exception e nil)))
+
 (defn get-engine
   "Return an instance of a javax.script.ScriptEngine implementation class,
-   selected according to engine-name, or environ's optimus-js-engine variable,
+   selected according to names-str, or environ's optimus-js-engine variable,
    or the built-in default engine, respectively.
 
-   Note: if engine-name is supplied but not found by javax.script.ScriptEngineManager,
-   an exception is raised."
-  ([engine-name]
-     (if-let [engine (.getEngineByName engines engine-name)]
-       (init-engine engine)
-       (throw (Exception. (str "JS script engine " engine-name " could not be loaded.")))))
+   names-str must be a comma-separated string of one or more engine names
+   that javax.script.ScriptEngineManager may recognise, in decreasing order
+   of preference from left to right.
+
+   Note: if names-str is supplied but no matching engine is found by
+   javax.script.ScriptEngineManager, an exception is raised."
+  ([names-str]
+     (let [engine-names (read-engine-names-str names-str)]
+       (if (empty? engine-names)
+         (throw (Exception. "No engine name(s) given."))
+         (if-let [engine (->> engine-names
+                              (map (partial get-engine-by-name-safely engines))
+                              (filter (complement nil?))
+                              first)]
+           (init-engine engine)
+           (throw (Exception. (apply str "No JS script engine could be loaded from: "
+                                     (interpose ", " engine-names))))))))
   ([]
      (get-engine (or (env :optimus-js-engine)
                      default-engine-name))))

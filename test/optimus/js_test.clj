@@ -12,7 +12,11 @@
 
 (fact
  "Throws an exception when asked for an invalid script engine"
- (get-engine "/invalid/") => (throws Exception "JS script engine /invalid/ could not be loaded."))
+ (get-engine "/invalid/") => (throws Exception "No JS script engine could be loaded from: /invalid/"))
+
+(fact
+ "Throws an exception when asked for multiple invalid script engines"
+ (get-engine "/invalid1/,/invalid2/") => (throws Exception "No JS script engine could be loaded from: /invalid1/, /invalid2/"))
 
 (fact
  "Can manually cleanup a V8 script engine"
@@ -39,3 +43,11 @@
  (let [engine (get-engine)]
    (.eval engine "var a = 1")
    (.eval engine "a")) => 1)
+
+(fact
+ "Reads a string list of engine names correctly"
+ (read-engine-names-str "") => []
+ (read-engine-names-str "clj-v8") => ["clj-v8"]
+ (read-engine-names-str "clj-v8,, ,") => ["clj-v8"]
+ (read-engine-names-str "nashorn,clj-v8") => ["nashorn", "clj-v8"]
+ (read-engine-names-str "nashorn, clj-v8") => ["nashorn", "clj-v8"])
