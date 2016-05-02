@@ -1,11 +1,11 @@
 language: clojure
 lein: lein2
 script: lein2 midje
-jdk:
-  - openjdk6
-  - openjdk7
-  - oraclejdk7
-  - oraclejdk8
-env:
-  - OPTIMUS_JS_ENGINE=nashorn,clj-v8
-  - OPTIMUS_JS_ENGINE=clj-v8,nashorn
+matrix:
+  include:
+    - jdk: openjdk6
+    - jdk: openjdk7
+    - jdk: oraclejdk7
+    - jdk: oraclejdk8
+    - jdk: oraclejdk8
+      env: OPTIMUS_JS_ENGINE=nashorn
