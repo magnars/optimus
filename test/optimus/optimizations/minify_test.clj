@@ -145,13 +145,3 @@
                      {:path "styles.css" :contents "#id { margin: 0; }"}])
  => [{:path "code.js" :contents "var a = 2 + 3;"}
      {:path "styles.css" :contents "#id{margin:0}"}])
-
-
-
-(fact
- "It correctly minifies several rules for the same selector, on clj-v8."
- (minify-css (create-clean-css-context (optimus.js/get-engine "clj-v8")) "table,div {border:0} table {margin:0}" {}) => "div,table{border:0}table{margin:0}")
-
-(fact
- "It correctly minifies several rules for the same selector, on nashorn."
- (minify-css (create-clean-css-context (optimus.js/get-engine "nashorn")) "table,div {border:0} table {margin:0}" {}) => "div,table{border:0}table{margin:0}")
