@@ -40,7 +40,7 @@ You might also be interested in:
 
 ## Install
 
-Add `[optimus "0.18.5"]` to `:dependencies` in your `project.clj`.
+Add `[optimus "0.19.0"]` to `:dependencies` in your `project.clj`.
 
 Please note that this project uses
 [Semantic Versioning](http://semver.org/). As long as we're on a `0`
@@ -49,8 +49,8 @@ upgrading to a new minor version. Read the
 [change log](#change-log). As soon as we're on a `1` major version,
 there will be no breaking changes without a major version increase.
 
-There were breaking changes in `0.16` and `0.17`. If you're upgrading, you might
-want to [read more about them](breaking-changes.md).
+There were breaking changes in `0.16`, `0.17` and `0.19`. If you're upgrading,
+you might want to [read more about them](breaking-changes.md).
 
 #### Why isn't Optimus 1.0 yet?
 
@@ -642,8 +642,13 @@ changes to Optimus itself.
 
 ## Change log
 
-There were breaking changes in `0.16` and `0.17`. If you're upgrading, you might
-want to [read more about them](breaking-changes.md).
+There were breaking changes in `0.16`, `0.17` and `0.19`. If you're upgrading,
+you might want to [read more about them](breaking-changes.md).
+
+#### From 0.18.5 to 0.19
+
+- We have updated to Clojure 1.8.0 and now require JDK 1.7 or higher.
+- Fixed loading issues with `serve-live-assets-autorefresh`
 
 #### From 0.18 to 0.18.5
 

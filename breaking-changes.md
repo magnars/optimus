@@ -1,5 +1,11 @@
 ## Breaking changes
 
+### 0.19.0
+
+- **We have updated to Clojure 1.8.0 and now require JDK 1.7 or higher.**
+
+  This let us fix loading issues with `serve-live-assets-autorefresh`.
+
 ### 0.17.0
 
 - **The optimus.hiccup namespace is removed in favor of optimus.html**
