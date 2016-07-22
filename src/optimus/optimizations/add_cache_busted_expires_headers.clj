@@ -1,7 +1,7 @@
 (ns optimus.optimizations.add-cache-busted-expires-headers
   (:require [clj-time.core :as time]
             [clj-time.format]
-            [clojure.set :refer [intersection difference]]
+            [clojure.set :as set]
             [clojure.string :as str]
             [optimus.assets :refer [original-path]]
             [optimus.digest :as digest]
@@ -58,11 +58,11 @@
 
     ;; 2. are there files referenced by this file that aren't fixed yet?
     (let [next (by-path (first to-replace) files)
-          remaining-references (intersection to-replace (:references next))]
+          remaining-references (set/intersection to-replace (set (:references next)))]
 
       ;;    -> then take those first
       (if (seq remaining-references)
-        (recur (concat remaining-references (difference to-replace remaining-references))
+        (recur (concat remaining-references (set/difference to-replace remaining-references))
                files)
 
         ;; 3. otherwise update all references in this file, and fix it too.
