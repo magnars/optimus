@@ -4,8 +4,9 @@
            [java.util.zip ZipFile ZipEntry]))
 
 (defn class-path-elements []
-  (->> (s/split (System/getProperty "java.class.path" ".") #":")
-       (remove (fn [#^String s] (.contains s "/.m2/")))))
+  (->> (s/split (System/getProperty "java.class.path" ".") (if (= (System/lineSeparator) "\r\n") #";" #":"))
+       (map #(s/replace % "\\" "/"))
+       (remove (fn [#^String s] (.contains s "/.m2/")) )))
 ;; there are major performance improvements to be gained by not
 ;; traversing the entirety of the class path when running locally and
 ;; picking up files from the class path for every request. Since
@@ -15,7 +16,7 @@
 (defn get-file-paths [#^File file]
   (if (.isDirectory file)
     (mapcat get-file-paths (.listFiles file))
-    [(.getCanonicalPath file)]))
+    [(s/replace (.getCanonicalPath file) "\\" "/")]))
 
 (defn get-jar-paths [jar]
   (->> jar
