@@ -22,6 +22,10 @@ Depending on how you use it, Optimus:
 
 You might also be interested in:
 
+- [optimus-autoprefixer](https://github.com/magnars/optimus-autoprefixer) - an
+  asset middleware which uses
+  [autoprefixer](https://github.com/postcss/autoprefixer) to add vendor prefixes
+  to CSS files.
 - [optimus-angular](http://github.com/magnars/optimus-angular) - which
   comes with a custom asset loader that prepopulates the Angular.JS
   template cache. It also has Optimus asset middleware that prepares
