@@ -8,7 +8,7 @@
                  [org.clojure/data.codec "0.1.0"]
                  [pathetic "0.5.1"]
                  [clj-time "0.12.0"]
-                 [clj-v8 "0.1.5"]
+                 [magnars/clj-v8 "0.1.6"]
                  [juxt/dirwatch "0.2.3"]
                  [potemkin "0.4.3"]]
   :profiles {:dev {:dependencies [[midje "1.8.3"]
