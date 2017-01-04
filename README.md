@@ -44,7 +44,7 @@ You might also be interested in:
 
 ## Install
 
-Add `[optimus "0.19.0"]` to `:dependencies` in your `project.clj`.
+Add `[optimus "0.19.1"]` to `:dependencies` in your `project.clj`.
 
 Please note that this project uses
 [Semantic Versioning](http://semver.org/). As long as we're on a `0`
@@ -648,6 +648,11 @@ changes to Optimus itself.
 
 There were breaking changes in `0.16`, `0.17` and `0.19`. If you're upgrading,
 you might want to [read more about them](breaking-changes.md).
+
+#### From 0.19.0 to master
+
+- Use a fixed version of clj-v8 that does not crash when starting two processes
+  using it at the same time.
 
 #### From 0.18.5 to 0.19
 
