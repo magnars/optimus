@@ -3,6 +3,7 @@
             [clj-time.format]
             [clojure.set :as set]
             [clojure.string :as str]
+            [cemerick.url :as url]
             [optimus.assets :refer [original-path]]
             [optimus.digest :as digest]
             [optimus.homeless :refer [assoc-non-nil]]
@@ -31,6 +32,10 @@
 (defn- by-path [path files]
   (first (filter #(= path (:path %)) files)))
 
+(defn new-path [{:keys [base-url path]}]
+  (cond->> path
+    base-url (str (:path (url/url base-url)))))
+
 (defn inverse-string-length [^String s]
   (- (.length s)))
 
@@ -43,7 +48,7 @@
 
 (defn- replace-referenced-urls-with-new-ones [file files]
   (if-let [references (:references file)]
-    (let [orig->curr (into {} (map (juxt original-path :path) files))]
+    (let [orig->curr (into {} (map (juxt original-path new-path) files))]
       (-> file
           (replace-referenced-urls orig->curr)
           (assoc :references (set (replace orig->curr references)))))
