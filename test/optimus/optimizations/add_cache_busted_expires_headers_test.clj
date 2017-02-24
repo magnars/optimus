@@ -90,16 +90,31 @@
  extension makes for a natural ending delimiter, but that goes out the window
  with the 'woff' and 'woff2' file formats."
 
- (->> (add-cache-busted-expires-headers (map #(assoc % :base-url "http://my-cdn.com/rel-path")
-                                             [{:path "/main.css"
-                                               :contents "#id1 { background: url('/fonts/font.woff'); } #id2 { background: url('/fonts/font.woff2'); }"
-                                               :references ["/fonts/font.woff" "/fonts/font.woff2"]}
-                                              {:path "/fonts/font.woff" :contents "abc"}
-                                              {:path "/fonts/font.woff2" :contents "def"}]))
+ (->> (add-cache-busted-expires-headers [{:path "/main.css"
+                                          :contents "#id1 { background: url('/fonts/font.woff'); } #id2 { background: url('/fonts/font.woff2'); }"
+                                          :references ["/fonts/font.woff" "/fonts/font.woff2"]}
+                                         {:path "/fonts/font.woff" :contents "abc"}
+                                         {:path "/fonts/font.woff2" :contents "def"}])
       (remove :outdated)
       (map (juxt :path :contents :references)))
 
- => [["/03fbf9e22876/main.css" "#id1 { background: url('/rel-path/fonts/a9993e364706/font.woff'); } #id2 { background: url('/rel-path/fonts/589c22335a38/font.woff2'); }"
-      #{"/rel-path/fonts/589c22335a38/font.woff2" "/rel-path/fonts/a9993e364706/font.woff"}]
+ => [["/b7df986a7dd7/main.css" "#id1 { background: url('/fonts/a9993e364706/font.woff'); } #id2 { background: url('/fonts/589c22335a38/font.woff2'); }"
+      #{"/fonts/589c22335a38/font.woff2" "/fonts/a9993e364706/font.woff"}]
+     ["/fonts/a9993e364706/font.woff" "abc" nil]
+     ["/fonts/589c22335a38/font.woff2" "def" nil]])
+
+(fact
+ "When the base-url has a path, we need to add the relative path
+  to each reference of the file so that it can be loaded correctly."
+ (->> (add-cache-busted-expires-headers [{:path "/main.css"
+                                          :contents "#id1 { background: url('/fonts/font.woff'); } #id2 { background: url('/fonts/font.woff2'); }"
+                                          :references ["/fonts/font.woff" "/fonts/font.woff2"]}
+                                         {:path "/fonts/font.woff" :contents "abc" :base-url "http://my-cdn.com/rel-path"}
+                                         {:path "/fonts/font.woff2" :contents "def"}])
+      (remove :outdated)
+      (map (juxt :path :contents :references)))
+
+ => [["/d5cd3eb0054e/main.css" "#id1 { background: url('/rel-path/fonts/a9993e364706/font.woff'); } #id2 { background: url('/fonts/589c22335a38/font.woff2'); }"
+      #{"/fonts/589c22335a38/font.woff2" "/rel-path/fonts/a9993e364706/font.woff"}]
      ["/fonts/a9993e364706/font.woff" "abc" nil]
      ["/fonts/589c22335a38/font.woff2" "def" nil]])
