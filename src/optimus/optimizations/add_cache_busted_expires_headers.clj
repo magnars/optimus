@@ -32,7 +32,7 @@
 (defn- by-path [path files]
   (first (filter #(= path (:path %)) files)))
 
-(defn new-path [{:keys [base-url path]}]
+(defn add-base-url-prefix [{:keys [base-url path]}]
   (cond->> path
     base-url (str (:path (url/url base-url)))))
 
@@ -48,7 +48,7 @@
 
 (defn- replace-referenced-urls-with-new-ones [file files]
   (if-let [references (:references file)]
-    (let [orig->curr (into {} (map (juxt original-path new-path) files))]
+    (let [orig->curr (into {} (map (juxt original-path add-base-url-prefix) files))]
       (-> file
           (replace-referenced-urls orig->curr)
           (assoc :references (set (replace orig->curr references)))))
