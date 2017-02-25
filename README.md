@@ -44,7 +44,7 @@ You might also be interested in:
 
 ## Install
 
-Add `[optimus "0.19.1"]` to `:dependencies` in your `project.clj`.
+Add `[optimus "0.19.2"]` to `:dependencies` in your `project.clj`.
 
 Please note that this project uses
 [Semantic Versioning](http://semver.org/). As long as we're on a `0`
@@ -653,6 +653,7 @@ you might want to [read more about them](breaking-changes.md).
 
 - Use a fixed version of clj-v8 that does not crash when starting two processes
   using it at the same time.
+- Fixed an issue with files referenced in CSS files when using `:base-url`. (Luke Snape)
 
 #### From 0.18.5 to 0.19
 
@@ -778,6 +779,7 @@ run again.
   in URLs.
 - [Anton Onyshchenko](https://github.com/env0der) added the `serve-live-assets-autorefresh` strategy.
 - [Allen Rohner](https://github.com/arohner) fixed a memory leak.
+- [Luke Snape](https://github.com/lsnape) fixed an issue with files referenced in CSS files when using `:base-url`.
 
 Thanks!
 
