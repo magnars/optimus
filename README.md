@@ -255,21 +255,6 @@ Adding your own asset transformation functions is fair game too. In
 fact, it's encouraged. Let's say you need to serve all assets from a
 Content Delivery Network ...
 
-#### Serving bundles under a custom URL prefix
-
-`optimizations/concatenate-bundles` generates a bundled asset with the
-`"/bundle"` prefix. If you need to serve assets with a different prefix, provide
-the `:bundle-url-prefix` config option to either `optimizations/all` or
-`optimizations/concatenate-bundles`:
-
-```cl
-(-> app
-    (optimus/wrap
-     get-assets
-     (optimizations/all {:bundle-url-prefix "/assets/bundles"})
-     the-strategy))
-```
-
 #### Yeah, we are using a Content Delivery Network. How does that work?
 
 To serve the files from a different host, add a `:base-url` to the assets:
