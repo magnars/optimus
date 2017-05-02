@@ -23,7 +23,7 @@
       (minify-js-assets options)
       (minify-css-assets options)
       (inline-css-imports)
-      (concatenate-bundles)
+      (concatenate-bundles options)
       (add-cache-busted-expires-headers)
       (add-last-modified-headers)))
 
