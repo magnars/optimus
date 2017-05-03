@@ -44,7 +44,7 @@ You might also be interested in:
 
 ## Install
 
-Add `[optimus "0.19.2"]` to `:dependencies` in your `project.clj`.
+Add `[optimus "0.19.3"]` to `:dependencies` in your `project.clj`.
 
 Please note that this project uses
 [Semantic Versioning](http://semver.org/). As long as we're on a `0`
@@ -787,7 +787,7 @@ run again.
 ## Contributors
 
 - [Christian Johansen](https://github.com/cjohansen) added CSS and JS
-  minification.
+  minification, and more.
 - [Shaharz](https://github.com/shaharz) fixed a bug with external URLs
   in CSS-files.
 - [Francis Avila](https://github.com/favila) improved placement of cache busters
@@ -800,7 +800,7 @@ Thanks!
 
 ## License
 
-Copyright © 2013-2014 Magnar Sveen
+Copyright © Magnar Sveen, since 2013
 
 Distributed under the Eclipse Public License, the same as Clojure.
 
