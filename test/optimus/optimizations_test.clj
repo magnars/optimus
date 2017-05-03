@@ -1,8 +1,8 @@
 (ns optimus.optimizations-test
-  (:require [optimus.optimizations :as optimizations]
+  (:require [clj-time.core :as time]
             [optimus.assets]
-            [test-with-files.core :refer [with-files public-dir]]
-            [clj-time.core :as time])
+            [optimus.optimizations :as optimizations]
+            [test-with-files.core :refer [with-files public-dir]])
   (:use midje.sweet))
 
 (with-redefs [time/now (fn [] (time/date-time 2013 07 30))]
@@ -44,3 +44,14 @@
        (optimus.assets/load-assets "public" ["/encoding.js"]))
       (map (juxt :path :contents)))
  => [["/encoding.js" "var s=\"Klaida inicijuojant pasirašymą!\";"]])
+
+(fact
+ "It allows configuring the concat bundle prefix"
+ (->> (optimizations/all
+       [{:path "/core.js" :contents "var x = 1 + 2;" :bundle "app.js"}]
+       {:bundle-url-prefix "/assets/bundles"})
+      (map :path))
+ => ["/core.js"
+     "/assets/bundles/app.js"
+     "/1e10b6b7ffe7/core.js"
+     "/assets/bundles/1e10b6b7ffe7/app.js"])

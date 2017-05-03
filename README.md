@@ -310,6 +310,21 @@ Like this:
         (optimus.export/save-assets assets "./cdn-export/")))
 ```
 
+#### Serving bundles under a custom URL prefix
+
+`optimizations/concatenate-bundles` generates a bundled asset with the
+`"/bundle"` prefix. If you need to serve assets with a different prefix, provide
+the `:bundle-url-prefix` config option to either `optimizations/all` or
+`optimizations/concatenate-bundles`:
+
+```cl
+(-> app
+    (optimus/wrap
+     get-assets
+     (optimizations/all {:bundle-url-prefix "/assets/bundles"})
+     the-strategy))
+```
+
 ## So how does all this work in development mode?
 
 The paths are used unchanged. So given this example:

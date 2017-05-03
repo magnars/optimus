@@ -1,6 +1,6 @@
 (ns optimus.optimizations.concatenate-bundles-test
-  (:use [optimus.optimizations.concatenate-bundles]
-        [midje.sweet]))
+  (:use [midje.sweet]
+        [optimus.optimizations.concatenate-bundles]))
 
 (fact
  "When files are bundled together, we still keep the original ones.
@@ -46,3 +46,12 @@
      ["/more.css" 2]
      ["/gone.css" nil]
      ["/bundles/styles.css" 2]])
+
+(fact
+ "Bundle files under a custom URL prefix"
+
+ (->> (concatenate-bundles [{:path "/main.css" :contents "" :bundle "styles.css"}]
+                           {:bundle-url-prefix "/assets"})
+      (map :path))
+ => ["/main.css"
+     "/assets/styles.css"])
