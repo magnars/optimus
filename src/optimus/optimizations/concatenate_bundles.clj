@@ -18,6 +18,8 @@
     (-> {:path (str prefix "/" name)
          :contents (str/join "\n" (map :contents assets))
          :bundle name}
+        (assoc-non-nil :context-path (-> assets first :context-path))
+        (assoc-non-nil :base-url (-> assets first :base-url))
         (assoc-non-nil :references (apply union (map :references assets)))
         (assoc-non-nil :last-modified (max? (keep :last-modified assets))))))
 
