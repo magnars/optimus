@@ -57,6 +57,15 @@
      "/assets/styles.css"])
 
 (fact
+ "Bundles live under the same context path as its sources"
+
+ (->> (concatenate-bundles [{:path "/main.css" :contents "" :bundle "styles.css" :context-path "/test"}]
+                           {:bundle-url-prefix "/assets"})
+      (map #(select-keys % [:context-path :path])))
+ => [{:context-path "/test" :path "/main.css"}
+     {:context-path "/test" :path "/assets/styles.css"}])
+
+(fact
  "Throws when bundling assets with different context-paths"
 
  (concatenate-bundles [{:path "/main.css" :contents "" :bundle "styles.css" :context-path "/test"}
