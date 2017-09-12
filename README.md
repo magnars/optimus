@@ -44,7 +44,7 @@ You might also be interested in:
 
 ## Install
 
-Add `[optimus "0.19.3"]` to `:dependencies` in your `project.clj`.
+Add `[optimus "0.20.0"]` to `:dependencies` in your `project.clj`.
 
 Please note that this project uses
 [Semantic Versioning](http://semver.org/). As long as we're on a `0`
@@ -290,10 +290,10 @@ And run `lein export-assets` from the command line. Handy.
 
 #### Hey, I'm serving my app from a sub-directory, how can I avoid referencing it everywhere?
 
-Locally, your app is known as `http://localhost:3000/`, but in production it
-will share the limelight with others like it, so it'll go live at
-`http://limelight.com/app/`. Wouldn't it be nice if you could do that without
-adding the extra folder and referencing it everywhere? Well, now you can!
+Locally, your app is known as `http://localhost:3000/`, but sometimes in
+production it must share the limelight with others like it. Maybe it'll go live
+at `http://limelight.com/myapp/`. Wouldn't it be nice if you could do that without
+adding the extra folder and referencing it everywhere?
 
 To serve the files from a directory/context path add a `:context-path` to the
 assets:
@@ -687,13 +687,13 @@ changes to Optimus itself.
 There were breaking changes in `0.16`, `0.17` and `0.19`. If you're upgrading,
 you might want to [read more about them](breaking-changes.md).
 
-#### From 0.19.0 to master
+#### From 0.19.0 to 0.20
 
 - Use a fixed version of clj-v8 that does not crash when starting two processes
   using it at the same time.
 - Fixed an issue with files referenced in CSS files when using `:base-url`. (Luke Snape)
-- Added support for custom `:bundle-url-prefix`
-- Added support for `:context-path` per asset
+- Added support for custom `:bundle-url-prefix` (Christian Johansen)
+- Added support for `:context-path` per asset (Christian Johansen)
 
 #### From 0.18.5 to 0.19
 
