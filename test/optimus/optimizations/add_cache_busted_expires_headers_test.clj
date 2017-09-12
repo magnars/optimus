@@ -1,6 +1,6 @@
 (ns optimus.optimizations.add-cache-busted-expires-headers-test
-  (:use [optimus.optimizations.add-cache-busted-expires-headers]
-        [midje.sweet])
+  (:use [midje.sweet]
+        [optimus.optimizations.add-cache-busted-expires-headers])
   (:require [clj-time.core :as time]
             [clojure.java.io :as io]))
 
@@ -116,5 +116,36 @@
 
  => [["/d5cd3eb0054e/main.css" "#id1 { background: url('/rel-path/fonts/a9993e364706/font.woff'); } #id2 { background: url('/fonts/589c22335a38/font.woff2'); }"
       #{"/fonts/589c22335a38/font.woff2" "/rel-path/fonts/a9993e364706/font.woff"}]
+     ["/fonts/a9993e364706/font.woff" "abc" nil]
+     ["/fonts/589c22335a38/font.woff2" "def" nil]])
+
+(fact
+ "The context-path is added to each reference of the file so that it loads correctly."
+ (->> (add-cache-busted-expires-headers [{:path "/main.css"
+                                          :contents "#id1 { background: url('/fonts/font.woff'); } #id2 { background: url('/fonts/font.woff2'); }"
+                                          :references ["/fonts/font.woff" "/fonts/font.woff2"]}
+                                         {:path "/fonts/font.woff" :contents "abc" :context-path "/rel-path"}
+                                         {:path "/fonts/font.woff2" :contents "def"}])
+      (remove :outdated)
+      (map (juxt :path :contents :references)))
+
+ => [["/d5cd3eb0054e/main.css" "#id1 { background: url('/rel-path/fonts/a9993e364706/font.woff'); } #id2 { background: url('/fonts/589c22335a38/font.woff2'); }"
+      #{"/fonts/589c22335a38/font.woff2" "/rel-path/fonts/a9993e364706/font.woff"}]
+     ["/fonts/a9993e364706/font.woff" "abc" nil]
+     ["/fonts/589c22335a38/font.woff2" "def" nil]])
+
+(fact
+ "The context-path and base-url paths are combined for each reference of the
+ file so that it loads correctly."
+ (->> (add-cache-busted-expires-headers [{:path "/main.css"
+                                          :contents "#id1 { background: url('/fonts/font.woff'); } #id2 { background: url('/fonts/font.woff2'); }"
+                                          :references ["/fonts/font.woff" "/fonts/font.woff2"]}
+                                         {:path "/fonts/font.woff" :contents "abc" :base-url "http://cdn.com/path" :context-path "/rel-path"}
+                                         {:path "/fonts/font.woff2" :contents "def"}])
+      (remove :outdated)
+      (map (juxt :path :contents :references)))
+
+ => [["/51efd2fc7329/main.css" "#id1 { background: url('/path/rel-path/fonts/a9993e364706/font.woff'); } #id2 { background: url('/fonts/589c22335a38/font.woff2'); }"
+      #{"/fonts/589c22335a38/font.woff2" "/path/rel-path/fonts/a9993e364706/font.woff"}]
      ["/fonts/a9993e364706/font.woff" "abc" nil]
      ["/fonts/589c22335a38/font.woff2" "def" nil]])

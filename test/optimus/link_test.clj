@@ -1,6 +1,6 @@
 (ns optimus.link-test
-  (:use [optimus.link]
-        [midje.sweet]))
+  (:use [midje.sweet]
+        [optimus.link]))
 
 (fact
  "You can link to a specific file by its original path. Outdated files
@@ -52,3 +52,25 @@
 
    (file-path request "/main.js") => "http://cache.example.com/main.js"
    (bundle-paths request ["app.js"]) => ["http://cache.example.com/main.js"]))
+
+(fact
+ "You can link to assets that are served from a web server directory,
+  by setting the :context-path property."
+
+ (let [request {:optimus-assets [{:path "/main.js"
+                                  :context-path "/somewhere"
+                                  :bundle "app.js"}]}]
+
+   (file-path request "/main.js") => "/somewhere/main.js"
+   (bundle-paths request ["app.js"]) => ["/somewhere/main.js"]))
+
+(fact
+ "You can combine the :base-url and :context-path properties."
+
+ (let [request {:optimus-assets [{:path "/main.js"
+                                  :base-url "http://example.com"
+                                  :context-path "/somewhere"
+                                  :bundle "app.js"}]}]
+
+   (file-path request "/main.js") => "http://example.com/somewhere/main.js"
+   (bundle-paths request ["app.js"]) => ["http://example.com/somewhere/main.js"]))
