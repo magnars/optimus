@@ -669,6 +669,7 @@ you might want to [read more about them](breaking-changes.md).
 - Use a fixed version of clj-v8 that does not crash when starting two processes
   using it at the same time.
 - Fixed an issue with files referenced in CSS files when using `:base-url`. (Luke Snape)
+- Added support for custom `:bundle-url-prefix`
 
 #### From 0.18.5 to 0.19
 
