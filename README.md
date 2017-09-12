@@ -308,11 +308,11 @@ assets:
       (optimizations/all options)))
 ```
 
-(Note that you need to add context paths *before* optimizing assets, otherwise
-absolute references in CSS files will not include the context path).
-
 Now your links to your assets (including those in CSS files) will reference
 assets with the context path + the file path.
+
+(Note that you need to add context paths *before* optimizing assets, otherwise
+absolute references in CSS files will not include the context path).
 
 #### Those are a whole lot of files being exported.
 
