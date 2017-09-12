@@ -288,6 +288,29 @@ You can even add an alias to your `project.clj`:
 
 And run `lein export-assets` from the command line. Handy.
 
+#### Hey, I'm serving my app from a sub-directory, how can I avoid referencing it everywhere?
+
+Locally, your app is known as `http://localhost:3000/`, but in production it
+will share the limelight with others like it, so it'll go live at
+`http://limelight.com/app/`. Wouldn't it be nice if you could do that without
+adding the extra folder and referencing it everywhere? Well, now you can!
+
+To serve the files from a directory/context path add a `:context-path` to the
+assets:
+
+```cl
+(defn add-context-path-to-assets [assets]
+  (map #(assoc % :context-path "/myapp/") assets))
+
+(defn my-optimize [assets options]
+  (-> assets
+      (optimizations/all options)
+      (add-context-path-to-assets)))
+```
+
+Now your links to your assets (including those in CSS files) will reference
+assets with the context path + the file path.
+
 #### Those are a whole lot of files being exported.
 
 Yeah, two reasons for that:
@@ -670,6 +693,7 @@ you might want to [read more about them](breaking-changes.md).
   using it at the same time.
 - Fixed an issue with files referenced in CSS files when using `:base-url`. (Luke Snape)
 - Added support for custom `:bundle-url-prefix`
+- Added support for `:context-path` per asset
 
 #### From 0.18.5 to 0.19
 

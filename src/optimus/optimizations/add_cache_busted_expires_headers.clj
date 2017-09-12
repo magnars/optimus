@@ -1,9 +1,9 @@
 (ns optimus.optimizations.add-cache-busted-expires-headers
-  (:require [clj-time.core :as time]
+  (:require [cemerick.url :as url]
+            [clj-time.core :as time]
             [clj-time.format]
             [clojure.set :as set]
             [clojure.string :as str]
-            [cemerick.url :as url]
             [optimus.assets :refer [original-path]]
             [optimus.digest :as digest]
             [optimus.homeless :refer [assoc-non-nil]]
@@ -32,8 +32,9 @@
 (defn- by-path [path files]
   (first (filter #(= path (:path %)) files)))
 
-(defn add-base-url-prefix [{:keys [base-url path]}]
+(defn qualify-url [{:keys [base-url context-path path]}]
   (cond->> path
+    context-path (str context-path)
     base-url (str (:path (url/url base-url)))))
 
 (defn inverse-string-length [^String s]
@@ -48,7 +49,7 @@
 
 (defn- replace-referenced-urls-with-new-ones [file files]
   (if-let [references (:references file)]
-    (let [orig->curr (into {} (map (juxt original-path add-base-url-prefix) files))]
+    (let [orig->curr (into {} (map (juxt original-path qualify-url) files))]
       (-> file
           (replace-referenced-urls orig->curr)
           (assoc :references (set (replace orig->curr references)))))

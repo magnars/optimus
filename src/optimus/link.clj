@@ -1,10 +1,8 @@
 (ns optimus.link
   (:require [optimus.assets :as assets]))
 
-(defn full-path [asset]
-  (if-let [base (:base-url asset)]
-    (str base (:path asset))
-    (:path asset)))
+(defn full-path [{:keys [base-url context-path path]}]
+  (str base-url context-path path))
 
 (defn file-path [request path & {:as options}]
   (let [path (->> request :optimus-assets

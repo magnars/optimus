@@ -165,3 +165,36 @@
         "resources directory is watched when :assets-dir option is not specified"
         (let [app (serve-live-assets-autorefresh noop get-assets dont-optimize {})]
           @watchdir-path => (clojure.java.io/file "resources")))))))
+
+(fact
+ "serve-live-assets serves the assets :contents when the request :uri
+  matches the :context-path and :path."
+
+ (defn get-assets []
+   [{:path "/code.js" :context-path "/somewhere" :contents "1 + 2"}])
+
+ (let [app (serve-live-assets noop get-assets dont-optimize {})]
+   (app {:uri "/code.js"}) => nil
+   (app {:uri "/somewhere/code.js"}) => {:status 200 :body "1 + 2"}))
+
+(fact
+ "serve-live-assets-autorefresh serves the assets :contents when the
+  request :uri matches the :context-path and :path."
+
+ (defn get-assets []
+   [{:path "/code.js" :context-path "/somewhere" :contents "1 + 2"}])
+
+ (let [app (serve-live-assets-autorefresh noop get-assets dont-optimize {})]
+   (app {:uri "/code.js"}) => nil
+   (app {:uri "/somewhere/code.js"}) => {:status 200 :body "1 + 2"}))
+
+(fact
+ "serve-frozen-assets serves the assets :contents when the request :uri
+  matches the :context-path and :path."
+
+ (defn get-assets []
+   [{:path "/code.js" :context-path "/somewhere" :contents "1 + 2"}])
+
+ (let [app (serve-frozen-assets noop get-assets dont-optimize {})]
+   (app {:uri "/code.js"}) => nil
+   (app {:uri "/somewhere/code.js"}) => {:status 200 :body "1 + 2"}))
