@@ -55,3 +55,19 @@
       (map :path))
  => ["/main.css"
      "/assets/styles.css"])
+
+(fact
+ "Throws when bundling assets with different context-paths"
+
+ (concatenate-bundles [{:path "/main.css" :contents "" :bundle "styles.css" :context-path "/test"}
+                       {:path "/other.css" :contents "" :bundle "styles.css" :context-path "/lol"}]
+                      {:bundle-url-prefix "/assets"})
+ => (throws Exception))
+
+(fact
+ "Throws when bundling assets with different base-urls"
+
+ (concatenate-bundles [{:path "/main.css" :contents "" :bundle "styles.css" :base-url "http://cdn"}
+                       {:path "/other.css" :contents "" :bundle "styles.css" :base-url "http://cdn2"}]
+                      {:bundle-url-prefix "/assets"})
+ => (throws Exception))

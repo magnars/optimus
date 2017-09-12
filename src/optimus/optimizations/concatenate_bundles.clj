@@ -3,7 +3,17 @@
             [clojure.string :as str]
             [optimus.homeless :refer [assoc-non-nil max?]]))
 
+(defn- verify-unique-qualifiers [assets qualifier]
+  (let [xs (into #{} (map qualifier assets))]
+    (when (< 1 (count xs))
+      (throw (ex-info (format "Cannot bundle assets with different %ss: %s"
+                              (name qualifier)
+                              (str/join " " (map #(if (nil? %) "nil" (str "\"" % "\"")) (sort xs))))
+                      {:assets assets})))))
+
 (defn- concatenate-bundle [prefix [name assets]]
+  (verify-unique-qualifiers assets :context-path)
+  (verify-unique-qualifiers assets :base-url)
   (when name
     (-> {:path (str prefix "/" name)
          :contents (str/join "\n" (map :contents assets))
