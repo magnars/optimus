@@ -1,9 +1,9 @@
 (ns optimus.assets.load-css
-  (:require [optimus.assets.creation :refer [create-asset existing-resource original-path last-modified]]
-            [optimus.paths :refer [just-the-path to-absolute-url]]
-            [clojure.string :as str]))
+  (:require [clojure.string :as str]
+            [optimus.assets.creation :refer [create-asset existing-resource original-path last-modified]]
+            [optimus.paths :refer [just-the-path to-absolute-url]]))
 
-(def css-url-re #"(?:url\(['\"]?([^\)]+?)['\"]?\)|@import ['\"](.+?)['\"])")
+(def css-url-re #"(?:url\( *['\"]?([^\)]+?)['\"]?\)|@import ['\"](.+?)['\"] *)")
 
 (defn- data-url? [#^String url]
   (.startsWith url "data:"))

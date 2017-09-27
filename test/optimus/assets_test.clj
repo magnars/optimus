@@ -1,7 +1,7 @@
 (ns optimus.assets-test
-  (:use [optimus.assets]
-        [test-with-files.core]
-        [midje.sweet])
+  (:use [midje.sweet]
+        [optimus.assets]
+        [test-with-files.core])
   (:import java.io.FileNotFoundException))
 
 (fact
@@ -121,6 +121,13 @@
 
    (-> (load-assets public-dir ["/main.css"])
        first :contents) => "#id { background: url(data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==)}"))
+
+(with-files [["/main.css" "#id { background: url( data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw== )}"]]
+  (fact
+   "Data URLs with spaces are left alone too."
+
+   (-> (load-assets public-dir ["/main.css"])
+       first :contents) => "#id { background: url( data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw== )}"))
 
 (with-files [["/main.css" "#id { behavior: url(#default#VML); }"]]
   (fact
