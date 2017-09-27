@@ -44,7 +44,7 @@ You might also be interested in:
 
 ## Install
 
-Add `[optimus "0.20.0"]` to `:dependencies` in your `project.clj`.
+Add `[optimus "0.20.1"]` to `:dependencies` in your `project.clj`.
 
 Please note that this project uses
 [Semantic Versioning](http://semver.org/). As long as we're on a `0`
@@ -689,6 +689,10 @@ changes to Optimus itself.
 
 There were breaking changes in `0.16`, `0.17` and `0.19`. If you're upgrading,
 you might want to [read more about them](breaking-changes.md).
+
+#### From 0.20.0 to 0.20.1
+
+- Allow for spaces in url( ... ) in CSS
 
 #### From 0.19.0 to 0.20
 
