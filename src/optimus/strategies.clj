@@ -2,6 +2,7 @@
   (:require [clojure.core.memoize :as memo]
             [clojure.java.io :as io]
             [juxt.dirwatch :refer [watch-dir]]
+            [optimus.asset :as asset]
             [optimus.homeless :refer [assoc-non-nil jdk-version]]))
 
 (defn- serve-asset [asset]
@@ -27,9 +28,6 @@
          (map pb->assets)
          (map #(reduce collapse-equal-assets %)))))
 
-(defn- asset-path [{:keys [context-path path]}]
-  (str context-path path))
-
 (defn serve-live-assets [app get-assets optimize options]
   (let [get-optimized-assets #(optimize (guard-against-duplicate-assets (get-assets)) options)
         get-optimized-assets (if-let [ms (get options :cache-live-assets 2000)]
@@ -37,7 +35,7 @@
                                get-optimized-assets)]
     (fn [request]
       (let [assets (get-optimized-assets)
-            path->asset (into {} (map (juxt asset-path identity) assets))]
+            path->asset (into {} (map (juxt asset/path identity) assets))]
         (serve-asset-or-continue assets path->asset app request)))))
 
 (defn serve-live-assets-autorefresh [app get-assets optimize options]
@@ -50,11 +48,11 @@
     (watch-dir on-assets-changed assets-dir)
     (fn [request]
       (let [assets @assets-cache
-            path->asset (into {} (map (juxt asset-path identity) assets))]
+            path->asset (into {} (map (juxt asset/path identity) assets))]
         (serve-asset-or-continue assets path->asset app request)))))
 
 (defn serve-frozen-assets [app get-assets optimize options]
   (let [assets (optimize (guard-against-duplicate-assets (get-assets)) options)
-        path->asset (into {} (map (juxt asset-path identity) assets))]
+        path->asset (into {} (map (juxt asset/path identity) assets))]
     (fn [request]
       (serve-asset-or-continue assets path->asset app request))))
