@@ -29,7 +29,7 @@
   (let [url-connection (.openConnection resource)
         modified (.getLastModified url-connection)]
     (.close (.getInputStream url-connection))
-    modified))
+    (* (.intValue (/ modified 1000)) 1000)))
 
 (defn- jar-file-last-modified [#^URL resource]
   (let [[jar-path file-path] (-> (.getPath resource)
