@@ -1,6 +1,23 @@
 language: clojure
+os: linux
+env:
+  global:
+    - GRAVIS="https://raw.githubusercontent.com/DanySK/Gravis-CI/daea4db201fad0cca9493386f51aad51a14789ea/"
+  matrix:
+    - JDK="adopt@1.8.0-222"
+    - JDK="openjdk@1.11.0"
+    - JDK="openjdk@1.13.0"
+matrix:
+  include:
+    - env: JDK="openjdk@1.9.0-4"
+      before_install:
+        - curl "${GRAVIS}.install-jdk-travis.sh" --output ~/.install-jdk-travis.sh
+        - source ~/.install-jdk-travis.sh
+        - rm "${JAVA_HOME}/lib/security/cacerts"
+        - ln -s /etc/ssl/certs/java/cacerts "${JAVA_HOME}/lib/security/cacerts"
+before_install:
+  - curl "${GRAVIS}.install-jdk-travis.sh" --output ~/.install-jdk-travis.sh
+  - source ~/.install-jdk-travis.sh
 lein: lein
 script: lein midje
 jdk:
-  - openjdk7
-  - oraclejdk7
