@@ -1,12 +1,25 @@
 (ns optimus.optimizations.minify
-  (:require [clojure.string :as str]
-            [v8.core :as v8]))
+  (:require
+    [clojure.string :as str]
+    [clojure.java.data :as java.data]
+    [optimus.js :as js]))
 
 (defn- escape [str]
   (-> str
       (str/replace "\\" "\\\\")
       (str/replace "'" "\\'")
       (str/replace "\n" "\\n")))
+
+(defmacro with-engine
+  [[lname engine] & body]
+  `(let [~lname ~engine]
+     (try
+       ~@body
+       (finally
+         (when (instance? java.lang.AutoCloseable ~lname)
+           (try
+             (.close ~lname)
+             (finally nil)))))))
 
 (defn looks-like-already-minified
   "Files with a single line over 5000 characters are considered already
@@ -17,34 +30,13 @@
        (str/split-lines)
        (some (fn [^String s] (> (.length s) 5000)))))
 
-(defmacro with-context
-  "Calls v8/cleanup-context on an already created context
-
-usage:
-
-(with-context [ctx (v8/create-context)]
-   body)
-"
-  [[lname ctx] & body]
-  `(let [~lname ~ctx]
-     (try
-       ~@body
-       (finally
-         (v8/cleanup-context ~lname)))))
-
-(defn- throw-v8-exception [#^String text path]
-  (if (= (.indexOf text "ERROR: ") 0)
-    (let [prefix (when path (str "Exception in " path ": "))
-          error (clojure.core/subs text 7)]
-      (throw (Exception. (str prefix error))))
-    text))
-
 (defn normalize-line-endings [str]
   (-> str
       (str/replace "\r\n" "\n")
       (str/replace "\r" "\n")))
 
-(defn- js-minify-code [js options]
+(defn- js-minification-code
+  [js options]
   (str "(function () {
     try {
         var ast = UglifyJS.parse('" (escape (normalize-line-endings js)) "');
@@ -57,53 +49,77 @@ usage:
         "var stream = UglifyJS.OutputStream();
         compressed.print(stream);
         return stream.toString();
-    } catch (e) { return 'ERROR: ' + e.message + ' (line ' + e.line + ', col ' + e.col + ')'; }
+    } catch (e) { /*return 'ERROR: ' + e.message + ' (line ' + e.line + ', col ' + e.col + ')';*/ return {\"type\": \"js-error\", \"msg\": e.message, \"line\": e.line, \"col\": e.col}; }
 }());"))
 
-(def uglify
+(def ^String uglify
   "The UglifyJS source code, free of dependencies and runnable in a
   stripped context"
   (slurp (clojure.java.io/resource "uglify.js")))
 
-(defn create-uglify-context []
-  (let [context (v8/create-context)]
-    (v8/run-script-in-context context uglify)
-    context))
+(defn prepare-uglify-engine
+  []
+  (let [engine (js/make-js-engine)]
+    (.eval engine uglify)
+    engine))
 
-(defn- run-script-with-error-handling [context script file-path]
-  (throw-v8-exception
-   (try
-     (v8/run-script-in-context context script)
-     (catch Exception e
-       (str "ERROR: " (.getMessage e))))
+(defn- js-error?
+  [obj]
+  (and (map? obj)
+       (= "js-error" (get obj "type"))))
+
+(defn- throwing-js-exception
+  [result path]
+  (if (js-error? result)
+    (let [line (int (get result "line"))
+          col  (int (get result "col"))]
+      (throw
+        (ex-info (str
+                   (if path (format "Exception in %s: " path) "")
+                   (get result "msg")
+                   (if (and line col) (format " (line %s, col %s)" line col) ""))
+                 {:type ::js-error, :line line, :col col})))
+    result))
+
+(defn- run-script-with-error-handling
+  [engine script file-path]
+  (throwing-js-exception
+   (try (java.data/from-java (.eval engine script))
+        (catch Exception e
+          {"type" "js-error", "msg" (.getMessage e)}))
    file-path))
 
 (defn minify-js
   ([js] (minify-js js {}))
   ([js options]
-   (with-context [context (create-uglify-context)]
-     (minify-js context js options)))
-  ([context js options]
+   (with-engine [engine (prepare-uglify-engine)]
+     (minify-js engine js options)))
+  ([engine js options]
    (if (looks-like-already-minified js)
      js
-     (run-script-with-error-handling context (js-minify-code js (:uglify-js options)) (:path options)))))
+     (run-script-with-error-handling
+       engine
+       (js-minification-code js (:uglify-js options))
+       (:path options)))))
 
 (defn minify-js-asset
-  [context asset options]
+  [engine asset options]
   (let [#^String path (:path asset)]
     (if (.endsWith path ".js")
-      (update-in asset [:contents] #(minify-js context % (assoc options :path path)))
+      (update-in asset [:contents] #(minify-js engine % (assoc options :path path)))
       asset)))
 
 (defn minify-js-assets
   ([assets] (minify-js-assets assets {}))
   ([assets options]
-   (with-context [context (create-uglify-context)]
-     (doall (map #(minify-js-asset context % options) assets)))))
+   (with-engine [engine (prepare-uglify-engine)]
+     (doall (map #(minify-js-asset engine % options)
+                 assets)))))
 
 ;; minify CSS
 
-(defn- css-minify-code [css options]
+(defn- css-minification-code
+  [css options]
   (str "
 var console = {
     error: function (message) {
@@ -125,7 +141,7 @@ var console = {
         };
         var minified = new CleanCSS(options).minify(source).styles;
         return minified;
-    } catch (e) { return 'ERROR: ' + e.message; }
+    } catch (e) { /* return 'ERROR: ' + e.message;*/ return {\"msg\": e.message}; }
 }());"))
 
 (def clean-css
@@ -133,33 +149,36 @@ var console = {
   stripped context"
   (slurp (clojure.java.io/resource "clean-css.js")))
 
-(defn create-clean-css-context
+(defn prepare-clean-css-engine
   "Minify CSS with the bundled clean-css version"
   []
-  (let [context (v8/create-context)]
-    (v8/run-script-in-context context "var window = { XMLHttpRequest: {} };")
-    (v8/run-script-in-context context clean-css)
-    context))
+  (let [engine (js/make-js-engine)]
+    (.eval engine "var window = { XMLHttpRequest: {} };")
+    (.eval engine clean-css)
+    engine))
 
 (defn minify-css
   ([css] (minify-css css {}))
   ([css options]
-   (with-context [context (create-clean-css-context)]
-     (minify-css context css options)))
-  ([context css options]
+   (with-engine [engine (prepare-clean-css-engine)]
+     (minify-css engine css options)))
+  ([engine css options]
    (if (looks-like-already-minified css)
      css
-     (run-script-with-error-handling context (css-minify-code css (:clean-css options)) (:path options)))))
+     (run-script-with-error-handling
+       engine
+       (css-minification-code css (:clean-css options))
+       (:path options)))))
 
 (defn minify-css-asset
-  [context asset options]
+  [engine asset options]
   (let [#^String path (:path asset)]
     (if (.endsWith path ".css")
-      (update-in asset [:contents] #(minify-css context % (assoc options :path path)))
+      (update-in asset [:contents] #(minify-css engine % (assoc options :path path)))
       asset)))
 
 (defn minify-css-assets
   ([assets] (minify-css-assets assets {}))
   ([assets options]
-   (with-context [context (create-clean-css-context)]
-     (doall (map #(minify-css-asset context % options) assets)))))
+   (with-engine [engine (prepare-clean-css-engine)]
+     (doall (map #(minify-css-asset engine % options) assets)))))
