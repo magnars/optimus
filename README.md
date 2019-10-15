@@ -58,8 +58,9 @@ you might want to [read more about them](breaking-changes.md).
 
 #### Why isn't Optimus 1.0 yet?
 
-We're using clj-v8 to run JavaScript, which doesn't work on Windows or
-CentOS/RHEL 5. The plan is to replace clj-v8 with Nashorn, and then release 1.0.
+We were using clj-v8 to run JavaScript, which doesn't work on Windows or
+CentOS/RHEL 5. The plan is to replace clj-v8 with javax.script engines such as GraalJS,
+and then release 1.0.
 
 ## Usage
 
@@ -685,6 +686,78 @@ It's about
 including requires. And adding support for more transpilers require no
 changes to Optimus itself.
 
+## Can I switch JavaScript engines?
+
+Yes.
+
+Optimus relies on the `javax.script` (JSR-223) API to load a JS engine from the
+classpath. Optimus only adds GraalJS to the classpath, as an explicit dependency, to
+ensure there is a sensible default.
+
+So it is possible to swap out GraalJS for any other `javax.script`-compatible JS engine
+that is available on the classpath. Simply add your alternative JS engine as a dependency
+using your project's build system. (Note: if doing so, you may wish to add Optimus'
+GraalJS dependencies to its `:exclusions`.)
+
+Once another JS engine is made available to `javax.script`, Optimus can be instructed to
+prefer it using the [environ](https://github.com/weavejester/environ) setting
+`:optimus-js-engines`.
+
+This can be declared in various possible ways:
+
+- Using Leiningen: add `lein-environ` as a plugin. Then add `:env {:optimus-js-engines
+  "my-engine-name"}` to `project.clj` (or other source that gets merged into the project
+  map).
+- Using Boot: add `boot-environ` as a dependency and invoke its `environ` task, passing
+  `:env {:optimus-js-engines "my-engine-name"}`.
+- Using Java system properties, without dependencies, pass
+  `-Doptimus.js.engines=my-engine-name`.
+- Using the shell's environment, ensure the variable `OPTIMUS_JS_ENGINES=my-engine-name`
+  is set for the Java process running Optimus.
+
+The value `my-engine-name` can be a single preferred engine, or a comma-separated list of
+engine names, e.g. `nashorn,rhino`, ordered left-to-right from most-preferred to
+least-preferred. Only the first, most-preferred available engine gets loaded and used.
+
+### Example: Rhino
+
+To use Rhino, first add a dependency on a JSR-223 API for Rhino such as
+`[cat.inspiracio/rhino-js-engine "1.7.10"]` (this uses
+[bunkenberg/rhino-js-engine](https://bitbucket.org/bunkenburg/rhino-js-engine/)).
+
+Then if using Leiningen, add `{:env {:optimus-js-engines "rhino"}}` to `project.clj`. (You
+may want to add this to a profile, e.g. if switching between engines.)
+
+Alternatively, define a Java system property in your run context, such as
+`-Doptimus.js.engines=rhino`. Or set the shell environment variable
+`OPTIMUS_JS_ENGINES=rhino` for the execution context.
+
+### Example: Nashorn
+
+_Warning: Nashorn is slow and deprecated beyond Java 9._
+
+Using a suitable JDK that ships with Nashorn, just declare:
+
+- `:env {:optimus-js-engines "nashorn"}` in Leiningen with the `lein-environ` plugin, or
+- `:env {:optimus-js-engines "nashorn"}` in Boot with the `environ` task from
+  `boot-environ`, or
+- `-Doptimus.js.engines=nashorn` as a Java system property, or
+- `export OPTIMUS_JS_ENGINES=nashorn` in the shell context.
+
+### What about V8 or other engines?
+
+In past Optimus versions before we switched to `javax.script`, V8 was loaded using clj-v8,
+but clj-v8 does not expose a `javax.script` API. At the time of writing, there is no
+maintained V8 binding for general-purpose use from Java, let alone a maintained
+`javax.script` binding for V8.
+
+If such a project should emerge, it should be possible to add it to your dependencies and
+declare its short name in `:optimus-js-engines` to load it, without any changes to Optimus
+itself.
+
+Likewise, for any other JS engine that implements `javax.script` interfaces.
+
+
 ## Change log
 
 There were breaking changes in `0.16`, `0.17` and `0.19`. If you're upgrading,
@@ -817,6 +890,12 @@ dependencies. The actual fetching is automated however.
 watcher on the code files. If they change, only the relevant tests will be
 run again.
 
+`lein with-profile +rhino midje [...]` will fetch and load Rhino dependencies, and execute
+JS code in tests with it.
+
+`lein with-profile +nashorn midje [...]` will use Nashorn to execute JS code in tests,
+only on JDKs which ship with it.
+
 ## Contributors
 
 - [Christian Johansen](https://github.com/cjohansen) added CSS and JS
@@ -836,4 +915,3 @@ Thanks!
 Copyright © Magnar Sveen, since 2013
 
 Distributed under the Eclipse Public License, the same as Clojure.
-

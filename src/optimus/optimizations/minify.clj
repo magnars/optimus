@@ -1,7 +1,6 @@
 (ns optimus.optimizations.minify
   (:require
     [clojure.string :as str]
-    [clojure.java.data :as java.data]
     [optimus.js :as js]))
 
 (defn- escape [str]
@@ -9,17 +8,6 @@
       (str/replace "\\" "\\\\")
       (str/replace "'" "\\'")
       (str/replace "\n" "\\n")))
-
-(defmacro with-engine
-  [[lname engine] & body]
-  `(let [~lname ~engine]
-     (try
-       ~@body
-       (finally
-         (when (instance? java.lang.AutoCloseable ~lname)
-           (try
-             (.close ~lname)
-             (finally nil)))))))
 
 (defn looks-like-already-minified
   "Files with a single line over 5000 characters are considered already
@@ -38,7 +26,6 @@
 (defn- js-minification-code
   [js options]
   (str "(function () {
-    try {
         var ast = UglifyJS.parse('" (escape (normalize-line-endings js)) "');
         ast.figure_out_scope();
         var compressor = UglifyJS.Compressor();
@@ -49,7 +36,6 @@
         "var stream = UglifyJS.OutputStream();
         compressed.print(stream);
         return stream.toString();
-    } catch (e) { /*return 'ERROR: ' + e.message + ' (line ' + e.line + ', col ' + e.col + ')';*/ return {\"type\": \"js-error\", \"msg\": e.message, \"line\": e.line, \"col\": e.col}; }
 }());"))
 
 (def ^String uglify
@@ -59,45 +45,19 @@
 
 (defn prepare-uglify-engine
   []
-  (let [engine (js/make-js-engine)]
+  (let [engine (js/make-engine)]
     (.eval engine uglify)
     engine))
-
-(defn- js-error?
-  [obj]
-  (and (map? obj)
-       (= "js-error" (get obj "type"))))
-
-(defn- throwing-js-exception
-  [result path]
-  (if (js-error? result)
-    (let [line (int (get result "line"))
-          col  (int (get result "col"))]
-      (throw
-        (ex-info (str
-                   (if path (format "Exception in %s: " path) "")
-                   (get result "msg")
-                   (if (and line col) (format " (line %s, col %s)" line col) ""))
-                 {:type ::js-error, :line line, :col col})))
-    result))
-
-(defn- run-script-with-error-handling
-  [engine script file-path]
-  (throwing-js-exception
-   (try (java.data/from-java (.eval engine script))
-        (catch Exception e
-          {"type" "js-error", "msg" (.getMessage e)}))
-   file-path))
 
 (defn minify-js
   ([js] (minify-js js {}))
   ([js options]
-   (with-engine [engine (prepare-uglify-engine)]
+   (js/with-engine [engine (prepare-uglify-engine)]
      (minify-js engine js options)))
   ([engine js options]
    (if (looks-like-already-minified js)
      js
-     (run-script-with-error-handling
+     (js/run-script-with-error-handling
        engine
        (js-minification-code js (:uglify-js options))
        (:path options)))))
@@ -112,7 +72,7 @@
 (defn minify-js-assets
   ([assets] (minify-js-assets assets {}))
   ([assets options]
-   (with-engine [engine (prepare-uglify-engine)]
+   (js/with-engine [engine (prepare-uglify-engine)]
      (doall (map #(minify-js-asset engine % options)
                  assets)))))
 
@@ -120,15 +80,7 @@
 
 (defn- css-minification-code
   [css options]
-  (str "
-var console = {
-    error: function (message) {
-        throw new Error(message);
-    }
-};
-
-(function () {
-    try {
+  (str "(function () {
         var CleanCSS = require('clean-css');
         var source = '" (escape (normalize-line-endings css)) "';
         var options = {
@@ -141,7 +93,6 @@ var console = {
         };
         var minified = new CleanCSS(options).minify(source).styles;
         return minified;
-    } catch (e) { /* return 'ERROR: ' + e.message;*/ return {\"msg\": e.message}; }
 }());"))
 
 (def clean-css
@@ -152,7 +103,7 @@ var console = {
 (defn prepare-clean-css-engine
   "Minify CSS with the bundled clean-css version"
   []
-  (let [engine (js/make-js-engine)]
+  (let [engine (js/make-engine)]
     (.eval engine "var window = { XMLHttpRequest: {} };")
     (.eval engine clean-css)
     engine))
@@ -160,12 +111,12 @@ var console = {
 (defn minify-css
   ([css] (minify-css css {}))
   ([css options]
-   (with-engine [engine (prepare-clean-css-engine)]
+   (js/with-engine [engine (prepare-clean-css-engine)]
      (minify-css engine css options)))
   ([engine css options]
    (if (looks-like-already-minified css)
      css
-     (run-script-with-error-handling
+     (js/run-script-with-error-handling
        engine
        (css-minification-code css (:clean-css options))
        (:path options)))))
@@ -180,5 +131,5 @@ var console = {
 (defn minify-css-assets
   ([assets] (minify-css-assets assets {}))
   ([assets options]
-   (with-engine [engine (prepare-clean-css-engine)]
+   (js/with-engine [engine (prepare-clean-css-engine)]
      (doall (map #(minify-css-asset engine % options) assets)))))
