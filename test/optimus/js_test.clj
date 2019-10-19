@@ -42,38 +42,38 @@
 
 (fact
   "`make-engine` returns an available engine or throws"
-  (instance? javax.script.ScriptEngine (make-engine "graal.js")) => true
-  (instance? javax.script.ScriptEngine (make-engine ["graal.js"])) => true
-  (instance? javax.script.ScriptEngine (make-engine ["skipme" "graal.js"])) => true
-  (instance? javax.script.ScriptEngine (make-engine "skipme, graal.js")) => true
-  (instance? javax.script.ScriptEngine (make-engine "skipme")) => (throws clojure.lang.ExceptionInfo)
-  (instance? javax.script.ScriptEngine (make-engine "")) => (throws clojure.lang.ExceptionInfo)
-  (instance? javax.script.ScriptEngine (make-engine [])) => (throws clojure.lang.ExceptionInfo))
+  (instance? javax.script.ScriptEngine (make-engine {:prefer "graal.js"})) => true
+  (instance? javax.script.ScriptEngine (make-engine {:prefer ["graal.js"]})) => true
+  (instance? javax.script.ScriptEngine (make-engine {:prefer ["skipme" "graal.js"]})) => true
+  (instance? javax.script.ScriptEngine (make-engine {:prefer "skipme, graal.js"})) => true
+  (instance? javax.script.ScriptEngine (make-engine {:prefer "skipme"})) => (throws clojure.lang.ExceptionInfo)
+  (instance? javax.script.ScriptEngine (make-engine {:prefer ""})) => (throws clojure.lang.ExceptionInfo)
+  (instance? javax.script.ScriptEngine (make-engine {:prefer []})) => (throws clojure.lang.ExceptionInfo))
 
 (fact
   "`with-engine` evaluates body and closes AutoCloseable engines such as GraalJS"
-  (let [eng (make-engine "graal.js")]
+  (let [eng (make-engine {:prefer "graal.js"})]
     (js/with-engine [e eng] (.eval e "5 + 5"))) => 10
-  (let [eng (make-engine "graal.js")]
+  (let [eng (make-engine {:prefer "graal.js"})]
     (js/with-engine [e eng] (.eval e "\"still open\""))
     (.eval eng "\"closed now!\"")) => (throws IllegalStateException))
 
 (fact
   "`run-script-with-error-handling` runs the script and converts results to Clojure values"
-  (js/with-engine [eng (js/make-engine "graal.js")]
+  (js/with-engine [eng (js/make-engine {:prefer "graal.js"})]
     (js/run-script-with-error-handling
       eng "32 + 32" "<none>")) => 64
-  (js/with-engine [eng (js/make-engine "graal.js")]
+  (js/with-engine [eng (js/make-engine {:prefer "graal.js"})]
     (js/run-script-with-error-handling
       eng "Object" "<none>")) => {})
 
 (fact
   "`run-script-with-error-handling` throws a script-error or engine-error when there is a problem"
-  (js/with-engine [eng (js/make-engine "graal.js")]
+  (js/with-engine [eng (js/make-engine {:prefer "graal.js"})]
     (try (js/run-script-with-error-handling
            eng "Object.nonexisting()" "<none>")
          (catch clojure.lang.ExceptionInfo e (ex-data e)))) => (contains {:type :optimus.js/script-error})
-  (js/with-engine [eng (js/make-engine "graal.js")]
+  (js/with-engine [eng (js/make-engine {:prefer "graal.js"})]
     (try (js/run-script-with-error-handling
            eng "syntax_error =" "<none>")
          (catch clojure.lang.ExceptionInfo e (ex-data e)))) => (contains {:type :optimus.js/engine-error}))

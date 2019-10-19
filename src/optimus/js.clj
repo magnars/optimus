@@ -44,9 +44,33 @@
         (when-not (empty? remaining)
           (recur (first remaining) (rest remaining)))))))
 
+(def nashorn-array-splice-on-java8-patch-code
+  "JS code altering the definition of `Array.splice` on Nashorn
+  for Java 8, to match the behaviour of `Array.splice` on later
+  versions of Nashorn or other JS engines."
+  "(function(){
+  var nashorn_splice = Array.prototype.splice;
+  Array.prototype.splice = function() {
+  if (arguments.length === 1) {
+   return nashorn_splice.call(this, arguments[0], this.length);
+  } else {
+   return nashorn_splice.apply(this, arguments);
+ }}})();")
+
+(defn nashorn?
+  "Returns true if the given `javax.script.ScriptEngine` instance
+  is a Nashorn script engine."
+  [engine]
+  (contains? (-> engine .getFactory .getNames set) "nashorn"))
+
+(defn java8?
+  "Returns true if the system's Java specification version is 1.8."
+  []
+  (= "1.8" (System/getProperty "java.specification.version")))
+
 (defn make-engine
   "Returns a newly instantiated javax.script.ScriptEngine for the
-  first available engine name listed in the `preferences-list-or-str`,
+  first available engine name listed in the `prefer` key of the map arg,
   which can be a comma-separated string of engine names, or a sequence
   of engine-name strings. If no engine preference argument is given,
   the default value is read from `:optimus-js-engines` using `environ`,
@@ -54,26 +78,33 @@
   (`java -Doptimus.js.engines=...`), or a system environment
   variable (`OPTIMUS_JS_ENGINES=...`). If no environ value is given,
   `default-engines` is used. If no available engine is found for
-  the given engine names, an exception is thrown."
-  ([preference-list-or-str]
-   ;;{:pre [(truss/have? #(or (sequential? %) (string? %)) preference-list-or-str)]}
-   (let [preference-list (->> (if (string? preference-list-or-str)
-                                (preference-str->list preference-list-or-str)
-                                preference-list-or-str))
+  the given engine names, an exception is thrown.
+
+  The `patch-nashorn8-slice?` key defaults to true and causes any
+  Nashorn engine that will be returned in a Java 8 environment,
+  to have its `Array.splice` function altered to behave similarly to
+  later Nashorn versions and other JS engines."
+  ([{:keys [prefer patch-nashorn8-slice?]
+     :or {prefer (or (env :optimus-js-engines) default-engines)
+          patch-nashorn8-slice? true}}]
+   (let [preference-list (->> (if (string? prefer)
+                                (preference-str->list prefer)
+                                prefer))
          manager         (javax.script.ScriptEngineManager.)
          engine          (first-available-engine manager preference-list)]
-     (or engine
-         (throw (ex-info (str "No preferred JS engines found named "
-                              (pr-str preference-list)
-                              " among available engines "
-                              (.getEngineFactories manager))
-                         {:error           :preferred-js-engines-not-found
-                          :preference-list preference-list
-                          :factories       (.getEngineFactories manager)})))))
+     (when-not engine
+       (throw (ex-info (str "No preferred JS engines found named "
+                            (pr-str preference-list)
+                            " among available engines "
+                            (.getEngineFactories manager))
+                       {:error           :preferred-js-engines-not-found
+                        :preference-list preference-list
+                        :factories       (.getEngineFactories manager)})))
+     (when (and patch-nashorn8-slice? (java8?) (nashorn? engine))
+       (.eval engine nashorn-array-splice-on-java8-patch-code))
+     engine))
   ([]
-   (make-engine
-     (or (env :optimus-js-engines)
-         default-engines))))
+   (make-engine {})))
 
 (defmacro with-engine
   "Evaluates body in a try expression with `lname` bound to the value
