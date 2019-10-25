@@ -57,6 +57,5 @@
       (make-css-urls-absolute)
       (update-css-references)))
 
-(defn load-css-asset [public-dir path]
-  (let [resource (existing-resource public-dir path)]
-    (create-css-asset path (slurp resource) (last-modified resource))))
+(defn load-css-asset [public-dir path resource]
+  (create-css-asset path (slurp resource) (last-modified resource)))
