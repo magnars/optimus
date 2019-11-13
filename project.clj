@@ -20,4 +20,4 @@
                    :resource-paths ["test/resources"]
                    :source-paths ["dev"]
                    :jvm-opts ["-Djava.awt.headless=true"]}}
-  :prep-tasks [["shell" "./build-js-sources.sh"]])
+  :prep-tasks [["shell" "make"]])
