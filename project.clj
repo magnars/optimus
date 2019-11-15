@@ -27,4 +27,4 @@
              :rhino   {:dependencies [[cat.inspiracio/rhino-js-engine "1.7.10"]]
                        :env          {:optimus-js-engines "rhino"}}
              :nashorn {:env {:optimus-js-engines "nashorn"}}}
-  :prep-tasks [["shell" "./build-js-sources.sh"]])
+  :prep-tasks [["shell" "make"]])
