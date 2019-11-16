@@ -80,7 +80,7 @@ Let's look at an example:
                         "/styles/main.css"]) ;; 9
    (assets/load-bundles "public" ;; 10
                         {"lib.js" ["/scripts/ext/angular.js"
-                                   #"/scripts/ext/.+\.js$"] ;; 11
+                                   ["scripts" "ext" "*.js"]] ;; 11
                          "app.js" ["/scripts/controllers.js"
                                    "/scripts/directives.js"]})
    (assets/load-assets "public" ;; 12
@@ -129,13 +129,24 @@ Let's look at an example:
 
 10. You can declare several bundles at once with `load-bundles`.
 
-11. You can use regexen to find multiple files without specifying each
+11. You can use glob patterns to find multiple files without specifying each
     individually. Make sure you're specific enough to avoid including
     weird things out of other jars on the class path.
 
     Notice that `angular.js` is included first, even tho it is
-    included by the regex. This way you can make sure dependencies are
+    included by the glob. This way you can make sure dependencies are
     loaded before their dependents.
+    
+    The glob patterns compile down to standard java.nio.file.PathMatcher
+    globs.
+    
+    Full documentation of supported glob patterns can be found here:
+    
+    https://docs.oracle.com/javase/7/docs/api/java/nio/file/FileSystem.html#getPathMatcher(java.lang.String)
+    
+    You can also use regexps to match, but they are not inherently cross
+    platform (macOS, Linux, Windows, ...), so it's probably safer to use
+    globs.
 
 12. You can add individual assets that aren't part of a bundle, but
     should be optimized and served through Optimus. This is useful to

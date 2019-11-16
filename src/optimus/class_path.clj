@@ -1,11 +1,14 @@
 (ns optimus.class-path
   (:require [clojure.string :as s])
   (:import [java.io File]
+           (java.util.regex Pattern)
            [java.util.zip ZipFile ZipEntry]))
 
+(def file-separator-pattern (Pattern/compile (File/pathSeparator)))
+
 (defn class-path-elements []
-  (->> (s/split (System/getProperty "java.class.path" ".") #":")
-       (remove (fn [#^String s] (.contains s "/.m2/")))))
+  (->> (s/split (System/getProperty "java.class.path" ".") file-separator-pattern)
+       (remove (fn [#^String s] (.contains s (str (File/separator) ".m2" (File/separator)))))))
 ;; there are major performance improvements to be gained by not
 ;; traversing the entirety of the class path when running locally and
 ;; picking up files from the class path for every request. Since

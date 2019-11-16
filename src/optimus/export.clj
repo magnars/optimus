@@ -9,8 +9,9 @@
 (defn- save-asset-to-path [asset path]
   (if-let [contents (:contents asset)]
     (spit path contents)
-    (io/copy (io/input-stream (:resource asset))
-             (FileOutputStream. (io/file path)))))
+    (with-open [input-stream (io/input-stream (:resource asset))
+                output-stream (FileOutputStream. (io/file path))]
+      (io/copy input-stream output-stream))))
 
 (defn save-assets [assets target-dir]
   (doseq [asset assets]

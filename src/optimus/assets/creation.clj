@@ -1,11 +1,14 @@
 (ns optimus.assets.creation
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
-            [optimus.paths :refer [just-the-filename filename-ext]]
+            [optimus.paths :refer [just-the-filename filename-ext create-path]]
             [optimus.class-path :refer [file-paths-on-class-path]])
-  (:import [java.io FileNotFoundException]
+  (:import [java.io FileNotFoundException File]
            [java.net URL]
-           [java.util.zip ZipFile ZipEntry]))
+           [java.util.zip ZipFile ZipEntry]
+           (java.nio.file FileSystems Paths Path)))
+
+(def is-windows (.contains (System/getProperty "os.name") "Windows"))
 
 (defn guard-path [#^String path]
   (when-not (.startsWith path "/")
@@ -73,7 +76,7 @@
 
 (defn slice-path-to-after [public-dir #^String s]
   (subs s (+ (count public-dir)
-             (.indexOf s (str public-dir "/")))))
+             (.indexOf s (str public-dir (File/separator))))))
 
 (defn- emacs-file-artefact? [#^String path]
   (let [filename (just-the-filename path)]
@@ -81,26 +84,46 @@
         (and (.startsWith filename "#")
              (.endsWith filename "#")))))
 
-(defn realize-regex-paths [public-dir path]
-  (if (instance? java.util.regex.Pattern path)
+(defn filesystem-path-to-web-path [s]
+  (if is-windows
+    (clojure.string/replace s #"\\" "/")
+    s))
+
+(defn match-paths [public-dir pred-path path-matcher]
+  (cond
+    (string? pred-path) [pred-path]
+    :else
     (let [paths (->> (file-paths-on-class-path)
                      (filter (fn [#^String p] (.contains p public-dir)))
                      (remove emacs-file-artefact?)
                      (map #(slice-path-to-after public-dir %))
-                     (filter #(re-find path %)))]
+                     (filter #(path-matcher %))
+                     (map filesystem-path-to-web-path))]
       (if (empty? paths)
-        (throw (Exception. (str "No files matched regex " path)))
-        paths))
-    [path]))
+        (throw (Exception. (str "No files matched " pred-path)))
+        paths))))
+
+(def pattern-separator (if is-windows "\\\\" "/"))
+
+(defn get-path-matcher [pred-path]
+  (cond
+    (vector? pred-path)
+    (let [pattern (clojure.string/join pattern-separator pred-path)
+          glob-expression (str "glob:" pattern-separator pattern)
+          path-matcher (.getPathMatcher (FileSystems/getDefault) glob-expression)]
+      #(.matches path-matcher (create-path %)))
+
+    (instance? java.util.regex.Pattern pred-path)
+    #(re-find pred-path %)))
 
 (defn load-assets [public-dir paths]
   (->> paths
-       (mapcat #(realize-regex-paths public-dir %))
+       (mapcat #(match-paths public-dir % (get-path-matcher %)))
        (mapcat #(load-asset-and-refs public-dir %))
        (distinct)))
 
 (defn load-bundle [public-dir bundle paths]
-  (let [paths (mapcat #(realize-regex-paths public-dir %) paths)
+  (let [paths (mapcat #(match-paths public-dir % (get-path-matcher %)) paths)
         assets (load-assets public-dir paths)
         path-set (set paths)
         set-bundle-for-original-files (fn [asset] (if (contains? path-set (original-path asset))

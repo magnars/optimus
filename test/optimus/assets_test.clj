@@ -45,41 +45,54 @@
              ["/styles/main.css" ""]
              ["/external/kalendae.css" ""]]
   (fact
-   "You can load multiple assets using regex."
+   "You can load multiple assets using glob."
 
-   (->> (load-assets public-dir [#"/styles/.+\.css$"])
+   (->> (load-assets public-dir [["styles" "*.css"]])
         (map :path)
         (set)) => #{"/styles/reset.css"
                     "/styles/main.css"})
 
   (fact
+   "You can load multiple assets using regex."
+
+   (->> (load-assets public-dir [#"styles.+\.css$"])
+        (map :path)
+        (set)) => #{"/styles/reset.css"
+                    "/styles/main.css"})
+
+  (fact
+   "If no files match the glob, you want to know."
+
+   (load-assets public-dir [["stlyes" "*.css"]]) => (throws Exception "No files matched [\"stlyes\" \"*.css\"]"))
+
+  (fact
    "If no files match the regex, you want to know."
 
-   (load-assets public-dir [#"/stlyes/.+\.css%"]) => (throws Exception "No files matched regex /stlyes/.+\\.css%"))
+   (load-assets public-dir [#"stlyes.+\.css$"]) => (throws Exception "No files matched stlyes.+\\.css$"))
 
   (fact
    "If you need the files in a specific order, you can list the
     ordered ones first."
 
    (->> (load-assets public-dir ["/styles/reset.css"
-                                 #"/styles/.+\.css$"])
+                                 ["styles" "*.css"]])
         (map :path)) => ["/styles/reset.css"
                          "/styles/main.css"])
 
   (fact
    (->> (load-assets public-dir ["/styles/main.css"
-                                 #"/styles/.+\.css$"])
+                                 ["styles" "*.css"]])
         (map :path)) => ["/styles/main.css"
                          "/styles/reset.css"]))
 
 (fact
- "Emacs file artifacts are ignored by the regex matcher."
+ "Emacs file artifacts are ignored by the matcher."
 
  (with-files [["/app/code.js" ""]
               ["/app/#code.js#" ""]
               ["/app/.#code.js" ""]]
 
-   (->> (load-assets public-dir [#"/app/*"])
+   (->> (load-assets public-dir [["app" "*"]])
         (map :path)) => ["/app/code.js"]))
 
 (fact
@@ -198,9 +211,9 @@
                                                                   :bundle "app.js"}])
 
   (fact
-   "Files matched with a regexp are also part of the bundle."
+   "Files matched with a pattern are also part of the bundle."
 
-   (set (map :path (load-bundle public-dir "app.js" [#"/.+\.js$"])))) => #{"/code.js" "/more.js"}
+   (set (map :path (load-bundle public-dir "app.js" [["*.js"]])))) => #{"/code.js" "/more.js"}
 
    (fact
     "There's load-bundles to reduce verbosity."
