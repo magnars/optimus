@@ -16,7 +16,7 @@
 (defn sha-1 [contents]
   (bytes->hex-str
     (.digest (MessageDigest/getInstance "SHA-1")
-      (.getBytes contents))))
+      (.getBytes contents "UTF-8"))))
 
 (defn base64-string [contents]
-  (String. (b64/encode (.getBytes contents)) "UTF-8"))
+  (String. (b64/encode (.getBytes contents "UTF-8")) "UTF-8"))
