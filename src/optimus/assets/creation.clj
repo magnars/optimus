@@ -3,8 +3,9 @@
             [clojure.string :as str]
             [optimus.paths :refer [just-the-filename filename-ext]]
             [optimus.class-path :refer [file-paths-on-class-path]])
-  (:import [java.io FileNotFoundException]
+  (:import [java.io FileNotFoundException File]
            [java.net URL]
+           [java.nio.file Paths]
            [java.util.zip ZipFile ZipEntry]))
 
 (defn guard-path [#^String path]
@@ -73,7 +74,20 @@
 
 (defn slice-path-to-after [public-dir #^String s]
   (subs s (+ (count public-dir)
-             (.indexOf s (str public-dir "/")))))
+             (.indexOf s (str public-dir (File/separator))))))
+
+(defn file-system-path-to-url-path [path-str]
+  (str
+    "/"
+    (->> (Paths/get path-str (make-array String 0))
+         (.iterator)
+         (iterator-seq)
+         (map #(.toString %))
+         (clojure.string/join "/"))))
+
+(defn absolute-fs-path-to-url-like [public-dir #^String s]
+  (file-system-path-to-url-path
+    (slice-path-to-after public-dir s)))
 
 (defn- emacs-file-artefact? [#^String path]
   (let [filename (just-the-filename path)]
@@ -85,8 +99,8 @@
   (if (instance? java.util.regex.Pattern path)
     (let [paths (->> (file-paths-on-class-path)
                      (filter (fn [#^String p] (.contains p public-dir)))
+                     (map #(absolute-fs-path-to-url-like public-dir %))
                      (remove emacs-file-artefact?)
-                     (map #(slice-path-to-after public-dir %))
                      (filter #(re-find path %)))]
       (if (empty? paths)
         (throw (Exception. (str "No files matched regex " path)))
