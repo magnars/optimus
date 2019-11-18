@@ -4,6 +4,7 @@
             [optimus.paths :refer [just-the-filename filename-ext]]
             [optimus.class-path :refer [file-paths-on-class-path]])
   (:import [java.io FileNotFoundException]
+           [java.nio.file FileSystems Paths]
            [java.net URL]
            [java.util.zip ZipFile ZipEntry]))
 
@@ -81,26 +82,44 @@
         (and (.startsWith filename "#")
              (.endsWith filename "#")))))
 
-(defn realize-regex-paths [public-dir path]
-  (if (instance? java.util.regex.Pattern path)
-    (let [paths (->> (file-paths-on-class-path)
-                     (filter (fn [#^String p] (.contains p public-dir)))
-                     (remove emacs-file-artefact?)
-                     (map #(slice-path-to-after public-dir %))
-                     (filter #(re-find path %)))]
-      (if (empty? paths)
-        (throw (Exception. (str "No files matched regex " path)))
-        paths))
-    [path]))
+(defn realize-paths-with-matcher [public-dir matcher-type matcher-val path-matcher]
+  (let [paths (->> (file-paths-on-class-path)
+                   (filter (fn [#^String p] (.contains p public-dir)))
+                   (remove emacs-file-artefact?)
+                   (map #(slice-path-to-after public-dir %))
+                   (filter #(path-matcher %)))]
+    (if (empty? paths)
+      (throw (Exception. (str "No files matched " (name matcher-type) " " matcher-val)))
+      paths)))
+
+(defmulti realize-path (fn [public-dir [type val]] type))
+
+(defmethod realize-path :path [public-dir [type val]]
+  [val])
+
+(defmethod realize-path :regex [public-dir [type val]]
+  (realize-paths-with-matcher public-dir type val #(re-find val %)))
+
+(defmethod realize-path :glob [public-dir [type val]]
+  (let [glob-expression (str "glob:" val)
+        path-matcher (.getPathMatcher (FileSystems/getDefault) glob-expression)]
+    (realize-paths-with-matcher public-dir type val #(.matches path-matcher (Paths/get % (make-array String 0))))))
+
+(defn normalize-path [path]
+  (cond
+    (string? path) [:path path]
+    (instance? java.util.regex.Pattern path) [:regex path]
+    (vector? path) path
+    :else (IllegalArgumentException. (str "Provided path " path " must be a string, a regex or a vector"))))
 
 (defn load-assets [public-dir paths]
   (->> paths
-       (mapcat #(realize-regex-paths public-dir %))
+       (mapcat #(realize-path public-dir (normalize-path %)))
        (mapcat #(load-asset-and-refs public-dir %))
        (distinct)))
 
 (defn load-bundle [public-dir bundle paths]
-  (let [paths (mapcat #(realize-regex-paths public-dir %) paths)
+  (let [paths (mapcat #(realize-path public-dir (normalize-path %)) paths)
         assets (load-assets public-dir paths)
         path-set (set paths)
         set-bundle-for-original-files (fn [asset] (if (contains? path-set (original-path asset))
