@@ -1,10 +1,11 @@
 (ns optimus.optimizations.add-cache-busted-expires-headers-test
-  (:use [midje.sweet]
-        [optimus.optimizations.add-cache-busted-expires-headers])
-  (:require [clj-time.core :as time]
-            [clojure.java.io :as io]))
+  (:require [clojure.java.io :as io]
+            [midje.sweet :refer :all]
+            [optimus.optimizations.add-cache-busted-expires-headers :as sut :refer :all]
+            [optimus.time :as time])
+  (:import java.time.ZonedDateTime))
 
-(with-redefs [time/now (fn [] (time/date-time 2013 07 30))]
+(with-redefs [time/now (fn [] (ZonedDateTime/parse "2013-07-30T00:00:00.000000Z[GMT]"))]
 
   (fact
    "By adding cache busters based on content to the path, we can
@@ -23,7 +24,7 @@
         :original-path "/code.js"
         :contents "1 + 2"
         :headers {"Cache-Control" "max-age=315360000"
-                  "Expires" "Fri, 28 Jul 2023 00:00:00 GMT"}}])
+                  "Expires" "Sun, 30 Jul 2023 00:00:00 GMT"}}])
 
   (fact
    "While it's important that the :original-path property is set, so
@@ -41,13 +42,13 @@
    "It shouldn't overwrite other headers that are there either."
 
    (->> (add-cache-busted-expires-headers [{:path "/c.js"
-                                            :headers {"Last-Modified" "Fri, 28 Jul 2023 00:00:00 GMT"}
+                                            :headers {"Last-Modified" "Sun, 30 Jul 2023 00:00:00 GMT"}
                                             :contents "1 + 2"}])
         (map (juxt :path :headers)))
-   => [["/c.js" {"Last-Modified" "Fri, 28 Jul 2023 00:00:00 GMT"}]
-       ["/f549e6e556ea/c.js" {"Last-Modified" "Fri, 28 Jul 2023 00:00:00 GMT"
+   => [["/c.js" {"Last-Modified" "Sun, 30 Jul 2023 00:00:00 GMT"}]
+       ["/f549e6e556ea/c.js" {"Last-Modified" "Sun, 30 Jul 2023 00:00:00 GMT"
                               "Cache-Control" "max-age=315360000"
-                              "Expires" "Fri, 28 Jul 2023 00:00:00 GMT"}]])
+                              "Expires" "Sun, 30 Jul 2023 00:00:00 GMT"}]])
 
   (fact
    "The file paths in CSS files must be updated to include cache
@@ -74,7 +75,7 @@
        ["/8dad5059aff0/bg.png" nil nil]])
 
   (fact
-    "Cache busters should be added to the end of a path (right before the
+   "Cache busters should be added to the end of a path (right before the
     filename) rather than the beginning. This is so the root paths are still
     stable and predictable. For example, if a site keeps static files under
     `/static`, cache-busted files will still be under `/static`."

@@ -1,18 +1,13 @@
 (ns optimus.optimizations.add-cache-busted-expires-headers
   (:require [cemerick.url :as url]
-            [clj-time.core :as time]
-            [clj-time.format]
             [clojure.set :as set]
             [clojure.string :as str]
             [optimus.assets :refer [original-path]]
             [optimus.digest :as digest]
-            [optimus.homeless :refer [assoc-non-nil]]
-            [optimus.paths :as paths]))
-
-(def http-date-format
-  (clj-time.format/formatter "EEE, dd MMM yyyy HH:mm:ss 'GMT'"))
-
-(def http-date-formatter (partial clj-time.format/unparse http-date-format))
+            [optimus.paths :as paths]
+            [optimus.time :as time])
+  (:import [java.time ZonedDateTime ZoneId]
+           [java.time.format DateTimeFormatter]))
 
 (defn- get-contents [file]
   (or (:contents file)
@@ -26,8 +21,8 @@
                         (paths/just-the-filename (:path file))))
       (assoc :original-path (original-path file))
       (assoc-in [:headers "Cache-Control"] "max-age=315360000")
-      (assoc-in [:headers "Expires"] (http-date-formatter (time/plus (time/now)
-                                                                     (time/days 3650))))))
+      (assoc-in [:headers "Expires"] (time/format-http-date
+                                      (.plusYears (time/now) 10)))))
 
 (defn- by-path [path files]
   (first (filter #(= path (:path %)) files)))

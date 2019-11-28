@@ -8,7 +8,6 @@
                  [org.clojure/data.codec "0.1.1"]
                  [org.clojure/java.data "0.1.4"]
                  [pathetic "0.5.1"]
-                 [clj-time "0.15.2"]
                  [org.graalvm.js/js "19.3.0"]
                  [org.graalvm.js/js-scriptengine "19.3.0"]
                  [environ "1.1.0"]

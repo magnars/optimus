@@ -1,13 +1,14 @@
 (ns optimus.optimizations-test
-  (:require [clj-time.core :as time]
-            [optimus.assets]
+  (:require [optimus.assets]
             [optimus.optimizations :as optimizations]
+            [optimus.time :as time]
             [test-with-files.core :refer [with-files public-dir]])
-  (:use midje.sweet))
+  (:use midje.sweet)
+  (:import java.time.ZonedDateTime))
 
-(with-redefs [time/now (fn [] (time/date-time 2013 07 30))]
+(with-redefs [time/now (fn [] (ZonedDateTime/parse "2013-07-30T00:00:00.000000Z[GMT]"))]
   (def headers {"Cache-Control" "max-age=315360000"
-                "Expires" "Fri, 28 Jul 2023 00:00:00 GMT"})
+                "Expires" "Sun, 30 Jul 2023 00:00:00 GMT"})
 
   (fact
    "This is a big integration test, for sure. It bundles bundles, it
