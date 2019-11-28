@@ -2,3 +2,7 @@ target
 node_modules
 /resources/uglify.js
 /resources/clean-css.js
+/.lein-env
+/pom.xml
+/pom.xml.asc
+/.nrepl-port
