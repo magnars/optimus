@@ -1,6 +1,6 @@
 (ns optimus.user-agents-test
-  (:use optimus.user-agents
-        midje.sweet))
+  (:use midje.sweet
+        optimus.user-agents))
 
 (def ie10-user-agent-strings
   ["Mozilla/5.0 (compatible; MSIE 10.6; Windows NT 6.1; Trident/5.0; InfoPath.2; SLCC1; .NET CLR 3.0.4506.2152; .NET CLR 3.5.30729; .NET CLR 2.0.50727) 3gpp-gba UNTRUSTED/1.0"
@@ -252,7 +252,7 @@
    "Mozilla/1.22 (compatible; MSIE 2.0; Windows 95)"
    "Mozilla/1.22 (compatible; MSIE 2.0; Windows 3.1)"])
 
-(facts "IE versions"
+(facts "ie10"
   (doseq [ua ie10-user-agent-strings]
     (fact (ie ua) => truthy)
     (fact (ie10 ua) => truthy)
@@ -260,53 +260,58 @@
     (fact (ie>8 ua) => truthy)
     (fact (ie>7 ua) => truthy)
     (fact (ie>6 ua) => truthy)
-    (fact (ie<10 ua) => falsey))
+    (fact (ie<10 ua) => falsey)))
 
-  (doseq [ua ie9-user-agent-strings]
-    (fact (ie ua) => truthy)
-    (fact (ie<10 ua) => truthy)
-    (fact (ie9 ua) => truthy)
-    (fact (ie>8 ua) => truthy)
-    (fact (ie>7 ua) => truthy)
-    (fact (ie>6 ua) => truthy)
-    (fact (ie>9 ua) => falsey)
-    (fact (ie<9 ua) => falsey))
+(facts "ie9"
+ (doseq [ua ie9-user-agent-strings]
+   (fact (ie ua) => truthy)
+   (fact (ie<10 ua) => truthy)
+   (fact (ie9 ua) => truthy)
+   (fact (ie>8 ua) => truthy)
+   (fact (ie>7 ua) => truthy)
+   (fact (ie>6 ua) => truthy)
+   (fact (ie>9 ua) => falsey)
+   (fact (ie<9 ua) => falsey)))
 
-  (doseq [ua ie8-user-agent-strings]
-    (fact (ie ua) => truthy)
-    (fact (ie<10 ua) => truthy)
-    (fact (ie<9 ua) => truthy)
-    (fact (ie8 ua) => truthy)
-    (fact (ie>7 ua) => truthy)
-    (fact (ie>6 ua) => truthy)
-    (fact (ie>8 ua) => falsey)
-    (fact (ie<8 ua) => falsey))
+(facts "ie8"
+ (doseq [ua ie8-user-agent-strings]
+   (fact (ie ua) => truthy)
+   (fact (ie<10 ua) => truthy)
+   (fact (ie<9 ua) => truthy)
+   (fact (ie8 ua) => truthy)
+   (fact (ie>7 ua) => truthy)
+   (fact (ie>6 ua) => truthy)
+   (fact (ie>8 ua) => falsey)
+   (fact (ie<8 ua) => falsey)))
 
-  (doseq [ua ie7-user-agent-strings]
-    (fact (ie ua) => truthy)
-    (fact (ie<10 ua) => truthy)
-    (fact (ie<9 ua) => truthy)
-    (fact (ie<8 ua) => truthy)
-    (fact (ie7 ua) => truthy)
-    (fact (ie>6 ua) => truthy)
-    (fact (ie>7 ua) => falsey)
-    (fact (ie<7 ua) => falsey))
+(facts "ie7"
+ (doseq [ua ie7-user-agent-strings]
+   (fact (ie ua) => truthy)
+   (fact (ie<10 ua) => truthy)
+   (fact (ie<9 ua) => truthy)
+   (fact (ie<8 ua) => truthy)
+   (fact (ie7 ua) => truthy)
+   (fact (ie>6 ua) => truthy)
+   (fact (ie>7 ua) => falsey)
+   (fact (ie<7 ua) => falsey)))
 
-  (doseq [ua ie6-user-agent-strings]
-    (fact (ie ua) => truthy)
-    (fact (ie<10 ua) => truthy)
-    (fact (ie<9 ua) => truthy)
-    (fact (ie<8 ua) => truthy)
-    (fact (ie<7 ua) => truthy)
-    (fact (ie6 ua) => truthy)
-    (fact (ie>6 ua) => falsey)
-    (fact (ie<6 ua) => falsey))
+(facts "ie6"
+ (doseq [ua ie6-user-agent-strings]
+   (fact (ie ua) => truthy)
+   (fact (ie<10 ua) => truthy)
+   (fact (ie<9 ua) => truthy)
+   (fact (ie<8 ua) => truthy)
+   (fact (ie<7 ua) => truthy)
+   (fact (ie6 ua) => truthy)
+   (fact (ie>6 ua) => falsey)
+   (fact (ie<6 ua) => falsey)))
 
-  (doseq [ua ie<6-user-agent-strings]
-    (fact (ie ua) => truthy)
-    (fact (ie<10 ua) => truthy)
-    (fact (ie<9 ua) => truthy)
-    (fact (ie<8 ua) => truthy)
-    (fact (ie<7 ua) => truthy)
-    (fact (ie<6 ua) => truthy)
-    (fact (ie>5 ua) => falsey)))
+(facts "ie<6"
+ (doseq [ua ie<6-user-agent-strings]
+   (fact (ie ua) => truthy)
+   (fact (ie<10 ua) => truthy)
+   (fact (ie<9 ua) => truthy)
+   (fact (ie<8 ua) => truthy)
+   (fact (ie<7 ua) => truthy)
+   (fact (ie<6 ua) => truthy)
+   (fact (ie>5 ua) => falsey)))
