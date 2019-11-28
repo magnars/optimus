@@ -35,9 +35,9 @@
 (fact
  "To save some time minifying a lot of files, we can create the
   uglify.JS context up front, and then reuse that for all the assets."
- (let [cx (create-uglify-context)]
-   (minify-js cx "var hello = 2 + 3;" {}) => "var hello=5;"
-   (minify-js cx "var hello = 3 + 4;" {}) => "var hello=7;"))
+ (let [eng (prepare-uglify-engine)]
+   (minify-js eng "var hello = 2 + 3;" {}) => "var hello=5;"
+   (minify-js eng "var hello = 3 + 4;" {}) => "var hello=7;"))
 
 (fact
  "It minifies a list of JS assets."
@@ -145,3 +145,7 @@
                      {:path "styles.css" :contents "#id { margin: 0; }"}])
  => [{:path "code.js" :contents "var a = 2 + 3;"}
      {:path "styles.css" :contents "#id{margin:0}"}])
+
+(fact
+  "It correctly minifies several rules for the same selector"
+  (minify-css (prepare-clean-css-engine) "table,div {border:0} table {margin:0}" {}) => "div,table{border:0}table{margin:0}")
