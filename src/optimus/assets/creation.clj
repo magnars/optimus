@@ -1,8 +1,8 @@
 (ns optimus.assets.creation
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
-            [optimus.paths :refer [just-the-filename filename-ext]]
-            [optimus.class-path :refer [file-paths-on-class-path]])
+            [optimus.class-path :refer [file-paths-on-class-path]]
+            [optimus.paths :refer [just-the-filename filename-ext]])
   (:import [java.io FileNotFoundException File]
            [java.net URL]
            [java.nio.file Paths]
@@ -90,7 +90,7 @@
     (slice-path-to-after public-dir s)))
 
 (defn- emacs-file-artefact? [#^String path]
-  (let [filename (just-the-filename path)]
+  (when-let [filename (just-the-filename path)]
     (or (.startsWith filename ".#")
         (and (.startsWith filename "#")
              (.endsWith filename "#")))))
