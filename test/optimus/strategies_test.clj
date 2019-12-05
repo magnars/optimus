@@ -17,9 +17,19 @@
  (defn get-assets []
    [{:path "/code.js" :contents "1 + 2"}])
 
- (let [app (serve-live-assets noop get-assets dont-optimize {})]
+ (let [handler (fn [req] {:status 404 :body "Not found"})
+       app (serve-live-assets handler get-assets dont-optimize {})]
    (app {:uri "/code.js"}) => {:status 200 :body "1 + 2"}
-   (app {:uri "/gone.js"}) => nil))
+   (app {:uri "/gone.js"}) => {:status 404 :body "Not found"})
+
+ (let [handler (fn [req respond raise] (respond {:status 404 :body "Not found"}))
+       app (serve-live-assets handler get-assets dont-optimize {})
+       response (atom nil)
+       respond (partial reset! response)]
+   (app {:uri "/code.js"} respond noop)
+   @response => {:status 200 :body "1 + 2"}
+   (app {:uri "/gone.js"} respond noop)
+   @response => {:status 404 :body "Not found"}))
 
 (fact
  "Headers are included."
@@ -153,18 +163,47 @@
                                (reset! watchdir-callback callback)
                                (reset! watchdir-path path))]
 
-       (let [app (serve-live-assets-autorefresh noop get-assets dont-optimize {:assets-dir tmp-dir})]
+       (let [handler (fn [req] {:status 404 :body "Nothing"})
+             app (serve-live-assets-autorefresh handler get-assets dont-optimize {:assets-dir tmp-dir})]
          @watchdir-path => (clojure.java.io/file tmp-dir) ;; we are watching a directory passed via options
          (app {:uri "/code.js"}) => {:status 200 :body "abc"}
          (spit full-file-path "def")
          (app {:uri "/code.js"}) => {:status 200 :body "abc"} ;; still cached
          (notify-about-file-change)
-         (app {:uri "/code.js"}) => {:status 200 :body "def"})
+         (app {:uri "/code.js"}) => {:status 200 :body "def"}
+
+         (fact
+          "passes unknown request to app"
+          (app {:uri "/nope"}) => {:status 404 :body "Nothing"}))
 
        (fact
         "resources directory is watched when :assets-dir option is not specified"
         (let [app (serve-live-assets-autorefresh noop get-assets dont-optimize {})]
-          @watchdir-path => (clojure.java.io/file "resources")))))))
+          @watchdir-path => (clojure.java.io/file "resources")))))
+
+   (with-files [[file-path "abc"]]
+     (with-redefs [watch-dir (fn [callback path]
+                               (reset! watchdir-callback callback)
+                               (reset! watchdir-path path))]
+
+       (let [handler (fn [req respond raise] (respond {:status 404 :body "Nothing"}))
+             app (serve-live-assets-autorefresh handler get-assets dont-optimize {:assets-dir tmp-dir})
+             response (atom nil)
+             respond (partial reset! response)]
+         @watchdir-path => (clojure.java.io/file tmp-dir) ;; we are watching a directory passed via options
+         (app {:uri "/code.js"} respond noop)
+         @response => {:status 200 :body "abc"}
+         (spit full-file-path "def")
+         (app {:uri "/code.js"} respond noop)
+         @response => {:status 200 :body "abc"} ;; still cached
+         (notify-about-file-change)
+         (app {:uri "/code.js"} respond noop)
+         @response => {:status 200 :body "def"}
+
+         (fact
+          "async passes unknown request to app"
+          (app {:uri "/nope"} respond noop)
+          @response => {:status 404 :body "Nothing"}))))))
 
 (fact
  "serve-live-assets serves the assets :contents when the request :uri
@@ -197,4 +236,19 @@
 
  (let [app (serve-frozen-assets noop get-assets dont-optimize {})]
    (app {:uri "/code.js"}) => nil
-   (app {:uri "/somewhere/code.js"}) => {:status 200 :body "1 + 2"}))
+   (app {:uri "/somewhere/code.js"}) => {:status 200 :body "1 + 2"})
+
+ (let [handler (fn [req] {:status 404 :body "Nope"})
+       app (serve-frozen-assets handler get-assets dont-optimize {})]
+   (app {:uri "/code.js"}) => {:status 404 :body "Nope"}
+   (app {:uri "/somewhere/code.js"}) => {:status 200 :body "1 + 2"}
+   (app {:uri "/gone"}) => {:status 404 :body "Nope"})
+
+ (let [response (atom nil)
+       respond (partial reset! response)
+       handler (fn [req respond raise] (respond {:status 404 :body "Nope"}))
+       app (serve-frozen-assets handler get-assets dont-optimize {})]
+   (app {:uri "/somewhere/code.js"} respond noop)
+   @response => {:status 200 :body "1 + 2"}
+   (app {:uri "/"} respond noop)
+   @response => {:status 404 :body "Nope"}))

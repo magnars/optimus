@@ -1,4 +1,7 @@
 (ns optimus.prime)
 
 (defn wrap [app get-assets optimize strategy & [options]]
-  (strategy app get-assets optimize (or options {})))
+  (let [f (strategy app get-assets optimize (or options {}))]
+    (fn handler
+      ([req] (f req))
+      ([req respond raise] (f req respond raise)))))
