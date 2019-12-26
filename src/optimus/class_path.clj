@@ -21,11 +21,14 @@
     [(.getCanonicalPath file)]))
 
 (defn get-jar-paths [jar]
-  (->> jar
-       (java.util.zip.ZipFile.)
-       (.entries)
-       (enumeration-seq)
-       (map (fn [#^ZipEntry e] (.getName e)))))
+  (if-let [zip (try
+                 (java.util.zip.ZipFile. jar)
+                 (catch Exception e nil))]
+    (->> zip
+         (.entries)
+         (enumeration-seq)
+         (map (fn [#^ZipEntry e] (.getName e))))
+    []))
 
 (defn get-resource-paths [path]
   (let [path-plus-slash-length (inc (count path))
