@@ -44,23 +44,13 @@ You might also be interested in:
 
 ## Install
 
-Add `[optimus "0.20.2"]` to `:dependencies` in your `project.clj`.
+Add `[optimus "2022-02-13"]` to `:dependencies` in your `project.clj`.
 
-Please note that this project uses
-[Semantic Versioning](http://semver.org/). As long as we're on a `0`
-major version, there will likely be API changes. Pay attention when
-upgrading to a new minor version. Read the
-[change log](#change-log). As soon as we're on a `1` major version,
-there will be no breaking changes without a major version increase.
+This project no longer uses Semantic Versioning. Instead we're aiming to never
+break the API. Feel free to check out the [change log](#change-log).
 
-There were breaking changes in `0.16`, `0.17` and `0.19`. If you're upgrading,
-you might want to [read more about them](breaking-changes.md).
-
-#### Why isn't Optimus 1.0 yet?
-
-We were using clj-v8 to run JavaScript, which doesn't work on Windows or
-CentOS/RHEL 5. The plan is to replace clj-v8 with javax.script engines such as GraalJS,
-and then release 1.0.
+There were breaking changes in `0.16`, `0.17`, `0.19` and `2022-02-13`. If
+you're upgrading, you might want to [read more about them](breaking-changes.md).
 
 ## Usage
 
@@ -763,6 +753,25 @@ Likewise, for any other JS engine that implements `javax.script` interfaces.
 There were breaking changes in `0.16`, `0.17` and `0.19`. If you're upgrading,
 you might want to [read more about them](breaking-changes.md).
 
+#### From 0.20.2 to 2022-02-13
+
+- Pluggable JS engine via JSR223. Execute JS optimizations w/ GraalJS, Nashorn or Rhino (radhika reddy)
+
+  This means that the dependency on clj-v8 and its V8 binaries are gone. This allows us to:
+
+- Add support for Windows (August Lilleaas)
+
+This is what we have been waiting for to release the big 1.0, except that we [no
+longer belive in semantic
+versioning](https://www.youtube.com/watch?v=oyLBGkS5ICk) - or to be more
+precise: We aim to never again break the API, removing the need.
+
+Also:
+
+ - removed clj-time and Joda
+ - bumped dependency versions
+
+
 #### From 0.20.0 to 0.20.2
 
 - Respect context-path in export (Christian Johansen)
@@ -907,6 +916,8 @@ only on JDKs which ship with it.
 - [Anton Onyshchenko](https://github.com/env0der) added the `serve-live-assets-autorefresh` strategy.
 - [Allen Rohner](https://github.com/arohner) fixed a memory leak.
 - [Luke Snape](https://github.com/lsnape) fixed an issue with files referenced in CSS files when using `:base-url`.
+- [radhika reddy](https://github.com/radhikalism) introduced JSR223, removing our dependency on V8 binaries.
+- [August Lilleaas](https://github.com/augustl) added support for Windows.
 
 Thanks!
 

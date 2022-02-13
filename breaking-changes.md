@@ -1,5 +1,13 @@
 ## Breaking changes
 
+### 2022-02-13
+
+- **We have removed clj-v8, and replaced it with pluggable JS-engine JSR223**
+
+  This lets us support Windows, and avoid shipping binaries. For most people,
+  this should not be a breaking change. Do let us know if anything broke for
+  you. Some Optimus middlewares might need to be upgraded to the newest version.
+
 ### 0.19.0
 
 - **We have updated to Clojure 1.8.0 and now require JDK 1.7 or higher.**
