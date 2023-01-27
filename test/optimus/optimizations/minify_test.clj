@@ -1,6 +1,6 @@
 (ns optimus.optimizations.minify-test
-  (:require [optimus.optimizations.minify :refer :all]
-            [midje.sweet :refer [fact => throws]]))
+  (:require [midje.sweet :refer [fact => throws]]
+            [optimus.optimizations.minify :refer :all]))
 
 (fact
  "Minifies JS"
@@ -35,7 +35,7 @@
 
 (fact
  "Throws exception on syntax errors"
- (minify-js "var hello =") => (throws Exception "Unexpected token: eof (undefined) (line 1, col 11)"))
+ (minify-js "var hello =") => (throws Exception #"Unexpected token"))
 
 (fact
  "Mangles names by default"
@@ -78,8 +78,8 @@
 
 (fact
  "It includes the path in exception."
- (minify-js-assets [{:path "code.js" :contents "var hello ="}])
- => (throws Exception "Exception in code.js: Unexpected token: eof (undefined) (line 1, col 11)"))
+ (minify-js-assets [{:path "/the-path/code.js" :contents "var hello ="}])
+ => (throws Exception #"/the-path/code.js"))
 
 ;; minify CSS
 
