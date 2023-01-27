@@ -1,7 +1,8 @@
 (ns optimus.optimizations.minify
   (:require
     [clojure.string :as str]
-    [optimus.js :as js]))
+    [optimus.js :as js]
+    [clojure.java.io :as jio]))
 
 (defn- escape [str]
   (-> str
@@ -23,10 +24,14 @@
       (str/replace "\r\n" "\n")
       (str/replace "\r" "\n")))
 
+(def ^String babel
+  (slurp (clojure.java.io/resource "babel.js")))
+
 (defn- js-minification-code
   [js options]
   (str "(function () {
-        var ast = UglifyJS.parse('" (escape (normalize-line-endings js)) "');
+        var transpiled = Babel.transform('" (escape (normalize-line-endings js)) "', { presets: ['env'], sourceType: 'script' }).code;
+        var ast = UglifyJS.parse(transpiled);
         ast.figure_out_scope();
         var compressor = UglifyJS.Compressor();
         var compressed = ast.transform(compressor);
@@ -47,6 +52,7 @@
   []
   (let [engine (js/make-engine)]
     (.eval engine uglify)
+    (.eval engine babel)
     engine))
 
 (defn minify-js
