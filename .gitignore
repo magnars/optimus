@@ -2,7 +2,14 @@ target
 node_modules
 /resources/uglify.js
 /resources/clean-css.js
+/resources/babel.js
 /.lein-env
 /pom.xml
 /pom.xml.asc
 /.nrepl-port
+/package-lock.json
+/package.json
+.calva/
+.clj-kondo/
+.devcontainer/
+.lsp/
