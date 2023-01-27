@@ -3,6 +3,7 @@
 BROWSERIFY_VERSION=10.2.6
 CLEAN_CSS_VERSION=3.0.7
 UGLIFY_VERSION=2.4.24
+BABEL_VERSION=7.20.13
 
 RESOURCES_PATH=resources
 UGLIFY_TARGET=$(RESOURCES_PATH)/uglify.js
@@ -33,10 +34,14 @@ $(CLEAN_CSS_PATH):
 $(UGLIFY_CMD):
 	npm install uglify-js@$(UGLIFY_VERSION)
 
+babel: $(RESOURCES_PATH)
+	npm install @babel/standalone@$(BABEL_VERSION)
+	cp node_modules/@babel/standalone/babel.min.js resources/babel.js
+
 $(UGLIFY_TARGET): $(UGLIFY_CMD) $(RESOURCES_PATH)
 	$(UGLIFY_CMD) --self -c -m -o resources/uglify.js
 
 $(CLEAN_CSS_TARGET): $(BROWSERIFY_CMD) $(CLEAN_CSS_PATH) $(RESOURCES_PATH)
 	$(BROWSERIFY_CMD)  -r clean-css -o resources/clean-css.js
 
-all: $(UGLIFY_TARGET) $(CLEAN_CSS_TARGET)
+all: $(UGLIFY_TARGET) $(CLEAN_CSS_TARGET) babel

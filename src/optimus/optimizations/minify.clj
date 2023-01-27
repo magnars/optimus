@@ -1,7 +1,8 @@
 (ns optimus.optimizations.minify
   (:require
     [clojure.string :as str]
-    [optimus.js :as js]))
+    [optimus.js :as js]
+    [clojure.java.io :as io]))
 
 (defn- escape [str]
   (-> str
@@ -23,10 +24,14 @@
       (str/replace "\r\n" "\n")
       (str/replace "\r" "\n")))
 
+(def ^String babel
+  (slurp (io/resource "babel.js")))
+
 (defn- js-minification-code
   [js options]
   (str "(function () {
-        var ast = UglifyJS.parse('" (escape (normalize-line-endings js)) "');
+        var transpiled = Babel.transform('" (escape (normalize-line-endings js)) "', { presets: ['env'], sourceType: 'script' }).code;
+        var ast = UglifyJS.parse(transpiled);
         ast.figure_out_scope();
         var compressor = UglifyJS.Compressor();
         var compressed = ast.transform(compressor);
@@ -41,12 +46,13 @@
 (def ^String uglify
   "The UglifyJS source code, free of dependencies and runnable in a
   stripped context"
-  (slurp (clojure.java.io/resource "uglify.js")))
+  (slurp (io/resource "uglify.js")))
 
 (defn prepare-uglify-engine
   []
   (let [engine (js/make-engine)]
     (.eval engine uglify)
+    (.eval engine babel)
     engine))
 
 (defn minify-js
@@ -98,7 +104,7 @@
 (def clean-css
   "The clean-css source code, free of dependencies and runnable in a
   stripped context"
-  (slurp (clojure.java.io/resource "clean-css.js")))
+  (slurp (io/resource "clean-css.js")))
 
 (defn prepare-clean-css-engine
   "Minify CSS with the bundled clean-css version"
