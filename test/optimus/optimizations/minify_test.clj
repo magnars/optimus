@@ -29,6 +29,11 @@
  => "function _typeof(e){\"@babel/helpers - typeof\";return(_typeof=\"function\"==typeof Symbol&&\"symbol\"==typeof Symbol.iterator?function(e){return typeof e}:function(e){return e&&\"function\"==typeof Symbol&&e.constructor===Symbol&&e!==Symbol.prototype?\"symbol\":typeof e})(e)}function _defineProperties(e,t){for(var r=0;r<t.length;r++){var o=t[r];o.enumerable=o.enumerable||!1,o.configurable=!0,\"value\"in o&&(o.writable=!0),Object.defineProperty(e,_toPropertyKey(o.key),o)}}function _createClass(e,t,r){return t&&_defineProperties(e.prototype,t),r&&_defineProperties(e,r),Object.defineProperty(e,\"prototype\",{writable:!1}),e}function _toPropertyKey(e){var t=_toPrimitive(e,\"string\");return\"symbol\"===_typeof(t)?t:String(t)}function _toPrimitive(e,t){if(\"object\"!==_typeof(e)||null===e)return e;var r=e[Symbol.toPrimitive];if(void 0!==r){var o=r.call(e,t||\"default\");if(\"object\"!==_typeof(o))return o;throw new TypeError(\"@@toPrimitive must return a primitive value.\")}return(\"string\"===t?String:Number)(e)}function _classCallCheck(e,t){if(!(e instanceof t))throw new TypeError(\"Cannot call a class as a function\")}var Test=_createClass(function e(){\"use strict\";_classCallCheck(this,e)});")
 
 (fact
+ "Transpiles 'let' to valid ES5 and minifies expressions"
+ (minify-js "let apekatt = 7+3;")
+ => "var apekatt=10;")
+
+(fact
  "Throws exception on syntax errors"
  (minify-js "var hello =") => (throws Exception "Unexpected token: eof (undefined) (line 1, col 11)"))
 

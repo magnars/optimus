@@ -2,7 +2,7 @@
   (:require
     [clojure.string :as str]
     [optimus.js :as js]
-    [clojure.java.io :as jio]))
+    [clojure.java.io :as io]))
 
 (defn- escape [str]
   (-> str
@@ -25,7 +25,7 @@
       (str/replace "\r" "\n")))
 
 (def ^String babel
-  (slurp (clojure.java.io/resource "babel.js")))
+  (slurp (io/resource "babel.js")))
 
 (defn- js-minification-code
   [js options]
@@ -46,7 +46,7 @@
 (def ^String uglify
   "The UglifyJS source code, free of dependencies and runnable in a
   stripped context"
-  (slurp (clojure.java.io/resource "uglify.js")))
+  (slurp (io/resource "uglify.js")))
 
 (defn prepare-uglify-engine
   []
@@ -104,7 +104,7 @@
 (def clean-css
   "The clean-css source code, free of dependencies and runnable in a
   stripped context"
-  (slurp (clojure.java.io/resource "clean-css.js")))
+  (slurp (io/resource "clean-css.js")))
 
 (defn prepare-clean-css-engine
   "Minify CSS with the bundled clean-css version"
