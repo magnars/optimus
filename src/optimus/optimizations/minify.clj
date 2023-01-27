@@ -1,8 +1,7 @@
 (ns optimus.optimizations.minify
-  (:require
-    [clojure.string :as str]
-    [optimus.js :as js]
-    [clojure.java.io :as io]))
+  (:require [clojure.java.io :as io]
+            [clojure.string :as str]
+            [optimus.js :as js]))
 
 (defn- escape [str]
   (-> str
@@ -29,19 +28,22 @@
 
 (defn- js-minification-code
   [js options]
-  (str "(function () {
-        var transpiled = Babel.transform('" (escape (normalize-line-endings js)) "', { presets: ['env'], sourceType: 'script' }).code;
-        var ast = UglifyJS.parse(transpiled);
-        ast.figure_out_scope();
-        var compressor = UglifyJS.Compressor();
-        var compressed = ast.transform(compressor);
-        compressed.figure_out_scope();
-        compressed.compute_char_frequency();"
-        (if (get options :mangle-names true) "compressed.mangle_names();" "")
-        "var stream = UglifyJS.OutputStream();
-        compressed.print(stream);
-        return stream.toString();
-}());"))
+  (let [js-code (escape (normalize-line-endings js))]
+    (str "(function () {"
+         (if (:transpile-es6? options)
+           (str "var jsCode = Babel.transform('" js-code "', { presets: ['env'], sourceType: 'script' }).code;")
+           (str "var jsCode = '" js-code "';"))
+         "var ast = UglifyJS.parse(jsCode);
+          ast.figure_out_scope();
+          var compressor = UglifyJS.Compressor();
+          var compressed = ast.transform(compressor);
+          compressed.figure_out_scope();
+          compressed.compute_char_frequency();"
+         (if (get options :mangle-names true) "compressed.mangle_names();" "")
+         "var stream = UglifyJS.OutputStream();
+          compressed.print(stream);
+          return stream.toString();
+}());")))
 
 (def ^String uglify
   "The UglifyJS source code, free of dependencies and runnable in a

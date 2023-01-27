@@ -467,7 +467,8 @@ Now, for the options. You pass them to the wrapper after the strategy:
     (optimus/wrap
      get-assets optimize the-strategy
      {:cache-live-assets 2000
-      :uglify-js {:mangle-names true}
+      :uglify-js {:mangle-names true
+                  :transpile-es6? false}
       :clean-css {:aggressive-merging true
                   :advanced-optimizations true
                   :keep-line-breaks false
@@ -491,6 +492,9 @@ Values in this example are all defaults, so it's just a verbose noop.
   are changed to be just one letter. This reduces file size, but disrupts some
   libraries that use clever reflection tricks - like Angular.JS. Set to `false`
   to keep local variable names intact.
+
+- `:transpile-es6?` - UglifyJS does not support the new syntax in ES6. Set this
+  to `true` to let Babel transpile ES6 code into ES5 before minification.
 
 #### `:clean-css`
 
