@@ -44,7 +44,7 @@ You might also be interested in:
 
 ## Install
 
-Add `[optimus "2022-02-13"]` to `:dependencies` in your `project.clj`.
+Add `[optimus "2023-01-29"]` to `:dependencies` in your `project.clj`.
 
 This project no longer uses Semantic Versioning. Instead we're aiming to never
 break the API. Feel free to check out the [change log](#change-log).
@@ -756,6 +756,10 @@ Likewise, for any other JS engine that implements `javax.script` interfaces.
 
 There were breaking changes in `0.16`, `0.17` and `0.19`. If you're upgrading,
 you might want to [read more about them](breaking-changes.md).
+
+#### From 2022-02-13 to 2023-01-29
+
+- Added option to transpile JS from ES6 to ES5 with Babel before running UglifyJS. ([the-exodus](https://github.com/the-exodus))
 
 #### From 0.20.2 to 2022-02-13
 
