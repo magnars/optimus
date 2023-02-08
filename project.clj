@@ -6,7 +6,7 @@
   :dependencies [[org.clojure/clojure "1.10.1"]
                  [org.clojure/core.memoize "0.8.2"]
                  [org.clojure/data.codec "0.1.1"]
-                 [org.clojure/java.data "0.1.4"]
+                 [org.clojure/java.data "1.0.95"]
                  [pathetic "0.5.1"]
                  [org.graalvm.js/js "19.3.0"]
                  [org.graalvm.js/js-scriptengine "19.3.0"]
