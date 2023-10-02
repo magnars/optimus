@@ -1,7 +1,7 @@
 (ns optimus.strategies
   (:require [clojure.core.memoize :as memo]
             [clojure.java.io :as io]
-            [juxt.dirwatch :refer [watch-dir]]
+            [nextjournal.beholder :as beholder]
             [optimus.asset :as asset]
             [optimus.homeless :refer [assoc-non-nil jdk-version]]))
 
@@ -40,12 +40,11 @@
 
 (defn serve-live-assets-autorefresh [app get-assets optimize options]
   (let [get-optimized-assets #(optimize (guard-against-duplicate-assets (get-assets)) options)
-        assets-dir (clojure.java.io/file (get options :assets-dir "resources"))
-        assets-cache (atom (get-optimized-assets))
-        on-assets-changed (fn [change]
-                            (when-not (.isDirectory (:file change))
-                              (reset! assets-cache (get-optimized-assets))))]
-    (watch-dir on-assets-changed assets-dir)
+        assets-cache (atom (get-optimized-assets))]
+    (beholder/watch
+     (fn [_e]
+       (reset! assets-cache (get-optimized-assets)))
+     (get options :assets-dir "resources"))
     (fn [request]
       (let [assets @assets-cache
             path->asset (into {} (map (juxt asset/path identity) assets))]

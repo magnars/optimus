@@ -1,6 +1,6 @@
 (ns optimus.strategies-test
-  (:use [juxt.dirwatch :only [watch-dir]]
-        [midje.sweet]
+  (:require nextjournal.beholder)
+  (:use [midje.sweet]
         [optimus.homeless]
         [optimus.strategies]
         [test-with-files.core]))
@@ -149,12 +149,13 @@
      (@watchdir-callback {:file (clojure.java.io/file full-file-path)}))
 
    (with-files [[file-path "abc"]]
-     (with-redefs [watch-dir (fn [callback path]
-                               (reset! watchdir-callback callback)
-                               (reset! watchdir-path path))]
+     (with-redefs [nextjournal.beholder/watch
+                   (fn [callback path]
+                     (reset! watchdir-callback callback)
+                     (reset! watchdir-path path))]
 
        (let [app (serve-live-assets-autorefresh noop get-assets dont-optimize {:assets-dir tmp-dir})]
-         @watchdir-path => (clojure.java.io/file tmp-dir) ;; we are watching a directory passed via options
+         @watchdir-path => tmp-dir ;; we are watching a directory passed via options
          (app {:uri "/code.js"}) => {:status 200 :body "abc"}
          (spit full-file-path "def")
          (app {:uri "/code.js"}) => {:status 200 :body "abc"} ;; still cached
@@ -164,7 +165,7 @@
        (fact
         "resources directory is watched when :assets-dir option is not specified"
         (let [app (serve-live-assets-autorefresh noop get-assets dont-optimize {})]
-          @watchdir-path => (clojure.java.io/file "resources")))))))
+          @watchdir-path => "resources"))))))
 
 (fact
  "serve-live-assets serves the assets :contents when the request :uri
