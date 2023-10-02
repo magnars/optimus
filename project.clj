@@ -11,7 +11,7 @@
                  [org.graalvm.js/js "19.3.0"]
                  [org.graalvm.js/js-scriptengine "19.3.0"]
                  [environ "1.1.0"]
-                 [juxt/dirwatch "0.2.5"]
+                 [com.nextjournal/beholder "1.0.2"]
                  [potemkin "0.4.5"]
                  [com.cemerick/url "0.1.1"]]
   :profiles {:dev     {:dependencies   [[midje "1.9.9"]
