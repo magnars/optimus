@@ -1,4 +1,4 @@
-(defproject optimus "2023-02-08"
+(defproject optimus "2023-10-03"
   :description "A Ring middleware for frontend performance optimization."
   :url "http://github.com/magnars/optimus"
   :license {:name "Eclipse Public License"

@@ -44,7 +44,7 @@ You might also be interested in:
 
 ## Install
 
-Add `[optimus "2023-02-08"]` to `:dependencies` in your `project.clj`.
+Add `[optimus "2023-10-03"]` to `:dependencies` in your `project.clj`.
 
 This project no longer uses Semantic Versioning. Instead we're aiming to never
 break the API. Feel free to check out the [change log](#change-log).
@@ -756,6 +756,10 @@ Likewise, for any other JS engine that implements `javax.script` interfaces.
 
 There were breaking changes in `0.16`, `0.17` and `0.19`. If you're upgrading,
 you might want to [read more about them](breaking-changes.md).
+
+#### From 2023-02-08 to 2023-10-03
+
+- Use nextjournal/beholder instead of juxt/dirwatch for a faster live assets autorefresh strategy. ([Christian Johansen](https://github.com/cjohansen))
 
 #### From 2022-02-13 to 2023-02-08
 
