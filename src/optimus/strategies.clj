@@ -3,7 +3,7 @@
             [clojure.java.io :as io]
             [nextjournal.beholder :as beholder]
             [optimus.asset :as asset]
-            [optimus.homeless :refer [assoc-non-nil jdk-version]]))
+            [optimus.homeless :refer [assoc-non-nil]]))
 
 (defn- serve-asset [asset]
   (-> {:status 200 :body (or (:contents asset)
@@ -40,11 +40,13 @@
 
 (defn serve-live-assets-autorefresh [app get-assets optimize options]
   (let [get-optimized-assets #(optimize (guard-against-duplicate-assets (get-assets)) options)
-        assets-cache (atom (get-optimized-assets))]
-    (beholder/watch
-     (fn [_e]
-       (reset! assets-cache (get-optimized-assets)))
-     (get options :assets-dir "resources"))
+        assets-cache (atom (get-optimized-assets))
+        dirs-to-watch (or (:assets-dirs options)
+                          [(:assets-dir options "resources")])]
+    (apply beholder/watch
+           (fn [_e]
+             (reset! assets-cache (get-optimized-assets)))
+           dirs-to-watch)
     (fn [request]
       (let [assets @assets-cache
             path->asset (into {} (map (juxt asset/path identity) assets))]

@@ -513,13 +513,13 @@ This strategy will watch for changes in assets source files and
 recompile assets in the background whenever it's needed.
 Compiled assets are then cached until the next change in the source files.
 By default it assumes that assets sources are located in `resources` directory,
-but it can be customized with `:assets-dir` config option.
+but it can be customized with `:assets-dirs` config option.
 
 ```cl
 (-> app
     (optimus/wrap
      get-assets optimize serve-live-assets-autorefresh
-     {:assets-dir "resources/public"}))
+     {:assets-dirs ["resources/public"]}))
 ```
 
 ## What are these assets anyway? They seem magical to me.

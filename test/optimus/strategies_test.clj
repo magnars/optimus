@@ -154,7 +154,7 @@
                      (reset! watchdir-callback callback)
                      (reset! watchdir-path path))]
 
-       (let [app (serve-live-assets-autorefresh noop get-assets dont-optimize {:assets-dir tmp-dir})]
+       (let [app (serve-live-assets-autorefresh noop get-assets dont-optimize {:assets-dirs [tmp-dir]})]
          @watchdir-path => tmp-dir ;; we are watching a directory passed via options
          (app {:uri "/code.js"}) => {:status 200 :body "abc"}
          (spit full-file-path "def")
@@ -163,7 +163,7 @@
          (app {:uri "/code.js"}) => {:status 200 :body "def"})
 
        (fact
-        "resources directory is watched when :assets-dir option is not specified"
+        "resources directory is watched when :assets-dirs option is not specified"
         (let [app (serve-live-assets-autorefresh noop get-assets dont-optimize {})]
           @watchdir-path => "resources"))))))
 
