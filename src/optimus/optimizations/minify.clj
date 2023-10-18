@@ -1,5 +1,6 @@
 (ns optimus.optimizations.minify
-  (:require [clojure.java.io :as io]
+  (:require [clojure.data.json :as json]
+            [clojure.java.io :as io]
             [clojure.string :as str]
             [optimus.js :as js]))
 
@@ -66,9 +67,9 @@
    (if (looks-like-already-minified js)
      js
      (js/run-script-with-error-handling
-       engine
-       (js-minification-code js (:uglify-js options))
-       (:path options)))))
+      engine
+      (js-minification-code js (:uglify-js options))
+      (:path options)))))
 
 (defn minify-js-asset
   [engine asset options]
@@ -86,19 +87,36 @@
 
 ;; minify CSS
 
+;; TODO:
+;; - oppdag gammel config, og gjør vårt beste for å mappe til ny
+;; - gjør hele clean-css opts tilgjengelig ved å bare sende den videre som json
+
+(def default-clean-css-settings
+  {:level 2})
+
+(defn create-legacy-clean-css-settings [options]
+  {:level {1 {:all true
+              :specialComments (:keep-special-comments options "'all'")}
+           2 {:all (:advanced-optimizations options true)}}
+   :format (if (:keep-line-breaks options) "keep-breaks" false)
+   :compatibility (:compatibility options "*")})
+
+(defn is-legacy-clean-css-opts? [options]
+  (seq (select-keys options [:keep-special-comments :advanced-optimizations :keep-line-breaks])))
+
+(defn get-clean-css-settings [options]
+  (-> (let [options (dissoc options :aggressive-merging)]
+        (if (is-legacy-clean-css-opts? options)
+          (create-legacy-clean-css-settings options)
+          (or (not-empty options) default-clean-css-settings)))
+      (assoc :inline false)))
+
 (defn- css-minification-code
   [css options]
   (str "(function () {
         var CleanCSS = require('clean-css');
         var source = '" (escape (normalize-line-endings css)) "';
-        var options = {
-            processImport: false,
-            aggressiveMerging: " (:aggressive-merging options true) ",
-            advanced: " (:advanced-optimizations options true) ",
-            keepBreaks: " (:keep-line-breaks options false) ",
-            keepSpecialComments: '" (:keep-special-comments options "*") "',
-            compatibility: '" (:compatibility options "*") "'
-        };
+        var options = " (json/write-str (get-clean-css-settings options)) ";
         var minified = new CleanCSS(options).minify(source).styles;
         return minified;
 }());"))
@@ -125,9 +143,9 @@
    (if (looks-like-already-minified css)
      css
      (js/run-script-with-error-handling
-       engine
-       (css-minification-code css (:clean-css options))
-       (:path options)))))
+      engine
+      (css-minification-code css (:clean-css options))
+      (:path options)))))
 
 (defn minify-css-asset
   [engine asset options]

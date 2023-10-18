@@ -102,20 +102,14 @@
 (fact
  "You can turn off advanced optimizations."
 
- (sut/minify-css "body { padding: 10px 10px; }")
- => "body{padding:10px}"
+ (sut/minify-css ".one{padding:0}.two{margin:0}.one{margin-bottom:3px}")
+ => ".two{margin:0}.one{padding:0;margin-bottom:3px}"
 
- (sut/minify-css "body { padding: 10px 10px; }" {:clean-css {:advanced-optimizations false}})
- => "body{padding:10px 10px}")
+ (sut/minify-css ".one{padding:0}.two{margin:0}.one{margin-bottom:3px}" {:clean-css {:advanced-optimizations false}})
+ => ".one{padding:0}.two{margin:0}.one{margin-bottom:3px}"
 
-(fact
- "You can turn off aggressive merging."
-
- (sut/minify-css "a{display:inline-block;color:red;display:-moz-block}")
- => "a{color:red;display:-moz-block}"
-
- (sut/minify-css "a{display:inline-block;color:red;display:-moz-block}" {:clean-css {:aggressive-merging false}})
- => "a{display:inline-block;color:red;display:-moz-block}")
+ (sut/minify-css ".one{padding:0}.two{margin:0}.one{margin-bottom:3px}" {:clean-css {:level 1}})
+ => ".one{padding:0}.two{margin:0}.one{margin-bottom:3px}")
 
 (fact
  "You can keep line-breaks."
@@ -142,6 +136,12 @@
  => "body{background:-webkit-linear-gradient(bottom,#d1d1d1 10%,#fafafa 55%)}")
 
 (fact
+ "It doesn't mess up variable names."
+
+ (sut/minify-css "body { background: magenta; color: var(--light-magenta); }")
+ => "body{background:#ff00ff;color:var(--light-magenta)}")
+
+(fact
  "It skips minification of css files with very long one-liners. It's a decent
   heuristic that it's already minified."
  (let [css (str "/* comment */\nbody {" (apply str (repeat 500 "color:red;")) "}")]
@@ -150,12 +150,12 @@
 (fact
  "It doesn't mess up media queries."
  (sut/minify-css "@media screen and (orientation:landscape) {#id{color:red}}") => "@media screen and (orientation:landscape){#id{color:red}}"
- (sut/minify-css "@import 'abc.css' screen and (min-width:7) and (max-width:9);") => "@import 'abc.css' screen and (min-width:7) and (max-width:9);")
+ (sut/minify-css "@import url(abc.css) screen and (min-width:7) and (max-width:9);") => "@import url(abc.css) screen and (min-width:7) and (max-width:9);")
 
 (fact
  "It minifies a list of CSS assets."
  (sut/minify-css-assets [{:path "reset.css" :contents "body { color: red; }"}
-                     {:path "style.css" :contents "body { color: #ffff00; }"}])
+                         {:path "style.css" :contents "body { color: #ffff00; }"}])
  => [{:path "reset.css" :contents "body{color:red}"}
      {:path "style.css" :contents "body{color:#ff0}"}])
 

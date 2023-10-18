@@ -469,11 +469,7 @@ Now, for the options. You pass them to the wrapper after the strategy:
      {:cache-live-assets 2000
       :uglify-js {:mangle-names true
                   :transpile-es6? false}
-      :clean-css {:aggressive-merging true
-                  :advanced-optimizations true
-                  :keep-line-breaks false
-                  :keep-special-comments "*"
-                  :compatibility "*"}}))
+      :clean-css {:level 2}}))
 ```
 
 Values in this example are all defaults, so it's just a verbose noop.
@@ -498,11 +494,14 @@ Values in this example are all defaults, so it's just a verbose noop.
 
 #### `:clean-css`
 
-- `:aggressive-merging` - set to false to disable aggressive merging of properties.
-- `:advanced-optimizations` - set to false to disable advanced optimizations; selector & property merging, reduction, etc.
-- `:keep-line-breaks` - set to true to keep line breaks.
-- `:keep-special-comments` - `"*"` for keeping all (default), `1` for keeping first one only, `0` for removing all
-- `:compatibility` - enables compatibility mode, [see clean-css docs for examples](https://github.com/jakubpawlowicz/clean-css#how-to-set-compatibility-mode)
+These options are passed straight to clean-css. Please see the [clean-css
+documentation](https://github.com/clean-css/clean-css#constructor-options) for
+available options.
+
+In earlier versions of Optimus, this was a [curated set of
+options](old-clean-css.md). These old options will still work (we're trying not
+to break your stuff), but it is probably a good idea to take a look at all the
+available settings in clean-css.
 
 ## Automatic compilation when assets source files change
 
