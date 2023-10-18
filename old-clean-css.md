@@ -21,3 +21,9 @@ settings were available (here showing defaults):
 These old options will still work (we're trying not to break your stuff), but it
 is probably a good idea to take a look at all the available settings in
 clean-css.
+
+## New clean-css options
+
+Please see the [clean-css
+documentation](https://github.com/clean-css/clean-css#constructor-options) for
+available options. We now pass all options straight to clean-css.

@@ -756,6 +756,13 @@ Likewise, for any other JS engine that implements `javax.script` interfaces.
 There were breaking changes in `0.16`, `0.17` and `0.19`. If you're upgrading,
 you might want to [read more about them](breaking-changes.md).
 
+#### From 2023.10.13 to 2023.10.18
+
+- Update clean-css to 5.3.2
+
+     This includes exposing all the clean-css options. The legacy option format
+     is still supported, but switching to the new one is recommended. [Read more](old-clean-css.md)
+
 #### From 2023-10-03 to 2023.10.13
 
 - Add option for multiple :assets-dirs (used by live reload)
