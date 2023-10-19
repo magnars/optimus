@@ -11,13 +11,13 @@
       (str/replace "\n" "\\n")))
 
 (defn looks-like-already-minified
-  "Files with a single line over 5000 characters are considered already
+  "Files with a single line over 1000 characters are considered already
   minified, and skipped. This avoid issues with huge bootstrap.css files
   and its ilk."
   [contents]
   (->> contents
        (str/split-lines)
-       (some (fn [^String s] (> (.length s) 5000)))))
+       (some (fn [^String s] (> (.length s) 1000)))))
 
 (defn normalize-line-endings [str]
   (-> str
