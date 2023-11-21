@@ -44,7 +44,7 @@ You might also be interested in:
 
 ## Install
 
-Add `[optimus "2023.10.19"]` to `:dependencies` in your `project.clj`.
+Add `[optimus "2023.11.21"]` to `:dependencies` in your `project.clj`.
 
 This project no longer uses Semantic Versioning. Instead we're aiming to never
 break the API. Feel free to check out the [change log](#change-log).
@@ -756,7 +756,7 @@ Likewise, for any other JS engine that implements `javax.script` interfaces.
 There were breaking changes in `0.16`, `0.17` and `0.19`. If you're upgrading,
 you might want to [read more about them](breaking-changes.md).
 
-#### From 2023.10.13 to 2023.10.19
+#### From 2023.10.13 to 2023.11.21
 
 - Update clean-css to 5.3.2
 
@@ -768,6 +768,11 @@ you might want to [read more about them](breaking-changes.md).
       This used to be 5000 chars on a single line, now reduced to 1000 chars.
       This due to smaller clojurescript projects not needing 5000 chars in
       total. We're hoping people don't write 1000 chars wide lines manually.
+
+- Support directly using optimized path in link/file-path
+
+      In case you already have the optimized path for some reason, this will no
+      longer trip you up.
 
 #### From 2023-10-03 to 2023.10.13
 
