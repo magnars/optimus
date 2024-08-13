@@ -327,6 +327,122 @@ Like this:
         (optimus.export/save-assets assets "./cdn-export/")))
 ```
 
+#### But now it takes more time when the app starts in production!
+
+Yes, doing work takes time. If you want to avoid optimizing all the assets on
+every app startup, you can do it during build time. The build server will build
+and optimize the assets, write the assets to disk, and also write an asset
+manifest that your app will read during startup. Your uberjar should include
+the assets and the asset manifest.
+
+Now, hold tight while I dump this code on you. You've already seen bits and
+pieces of it above. The `build` and `get-prebuilt-assets` functions are the two
+sister functions that work in tandem to produce and consume the asset manifest
+during build and runtime, respectively:
+
+```cl
+(ns my-app.assets
+  (:require
+    [clojure.edn :as edn]
+    [clojure.java.io :as io]
+    [clojure.string :as string]
+    [optimus.export]
+    [optimus.optimizations]))
+
+;; Functions used during build
+
+(defn get-optimized-assets [get-assets-fn optimize-assets-fn]
+  (->> (get-assets-fn)
+       (optimize-assets-fn)
+       (into []
+             (comp (remove :outdated)
+                   (remove :bundled)))))
+
+(defn get-asset-manifest [assets]
+  (for [asset assets] (dissoc asset :contents :resource)))
+
+(defn build
+  "Build and optimize assets using Optimus. Saves the optimized assets to the target dir, and writes an
+   asset-manifest.edn to the target dir."
+  [get-assets-fn optimize-assets-fn target]
+  (let [optimized (get-optimized-assets get-assets-fn optimize-assets-fn)]
+    (optimus.export/save-assets optimized target)
+    (spit (str target "/asset-manifest.edn")
+          (pr-str (get-asset-manifest optimized)))))
+
+;; Functions used during app startup
+
+(defn add-asset-resource [asset]
+  (if-let [resource (-> (:path asset)
+                        (string/replace-first \/ "")
+                        (io/resource))]
+    (assoc asset :resource resource)
+    (throw (ex-info "Could not read resource for asset" {:asset asset}))))
+
+(defn get-prebuilt-assets
+  "Reads the asset-manifest.edn file and returns a vector of Optimus bundle assets to be used by Optimus middleware.
+
+   Throws if asset-manifest.edn or any of the referenced assets couldn't be read."
+  []
+  (if-let [assets (edn/read-string (slurp (io/resource "asset-manifest.edn")))]
+    (mapv add-asset-resource assets)
+    (throw (Exception. "Could not read assets from asset-manifest.edn"))))
+
+;; Your app-specific assets and optimizations
+
+(defn get-assets []
+  ;; Your vanilla get-assets function, used for dev and prod both.
+  )
+
+(defn optimize-assets [assets]
+  ;; Your production optimizations
+  (-> assets
+      (optimus.optimizations/all {})))
+      
+(defn build-assets!
+  [target-dir]
+  (println "Building assets into" target-dir)
+  (build get-assets optimize-assets target-dir))
+```
+
+From Leiningen you can build your assets like this:
+
+1. Have a task alias that invokes the `build-assets!` function. In your
+`project.clj`:
+    ```clojure
+      :profiles {:uberjar {:resource-paths ["build-resources"]}}
+      :aliases {"build-assets" ["run" "-m" "my-app.assets/build-assets!" "build-resources"]}
+    ```
+
+1. Augment the command for building your uberjar thus:
+    ```clojure
+    lein do clean, build-assets, uberjar
+    ```
+
+If you're using [tools.build](https://clojure.org/guides/tools_build) you must
+call `build-assets!` from your uberjar-building function.
+
+That was the build. Now your optimized bundles are part of the uberjar. During
+startup your app must now read the asset manifest instead of going off and
+optimizing all the assets all over again. So the middleware must be set up
+somewhat differently than what we have seen so far:
+
+```clojure
+(optimus/wrap
+  (if (= :dev (:env config)) ;; 1
+    assets/get-assets
+    assets/get-prebuilt-assets)
+  optimus.optimizations/none ;; 2
+  (if (= :dev (:env config)) ;;3
+    optimus.strategies/serve-live-assets
+    optimus.strategies/serve-frozen-assets))
+```
+
+1. In prod, get the assets from the asset manifest.
+2. Never optimize anything - prod assets will be pre-optimized, and in dev you
+don't want to optimize.
+3. Choose you strategy - this is the same as above.
+
 #### Serving bundles under a custom URL prefix
 
 `optimizations/concatenate-bundles` generates a bundled asset with the
