@@ -1,13 +1,12 @@
 (ns optimus.strategies
   (:require [clojure.core.memoize :as memo]
-            [clojure.java.io :as io]
             [nextjournal.beholder :as beholder]
             [optimus.asset :as asset]
+            [optimus.assets :as assets]
             [optimus.homeless :refer [assoc-non-nil]]))
 
 (defn- serve-asset [asset]
-  (-> {:status 200 :body (or (:contents asset)
-                             (io/input-stream (:resource asset)))}
+  (-> {:status 200 :body (assets/get-contents asset)}
       (assoc-non-nil :headers (:headers asset))))
 
 (defn- serve-asset-or-continue [assets path->asset app request]
