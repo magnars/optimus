@@ -28,7 +28,7 @@
    "Missing files are not tolerated."
    (load-assets public-dir ["/gone.js"]) => (throws FileNotFoundException "/gone.js")))
 
-(defn- plausible-timestamp? [actual-timestamp]
+(defn plausible-timestamp? [actual-timestamp]
   (let [upstream-timestamp 1384517932000
         twenty-four-hours (* 24 3600 1000)]
     (< (- upstream-timestamp twenty-four-hours)

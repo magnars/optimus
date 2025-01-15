@@ -5,10 +5,10 @@
 
 (def import-re #"@import (?:url)?[('\"]{1,2}([^']+?)[)'\"]{1,2} ?([^;]*);")
 
-(defn- by-path [path assets]
+(defn by-path [path assets]
   (first (filter #(= path (:path %)) assets)))
 
-(defn- inline-import-match [asset assets [match path media]]
+(defn inline-import-match [asset assets [match path media]]
   (if (external-url? path)
     (throw (Exception. (str "Import of external URL " path " in " (:path asset) " is strongly adviced against. It's a performance killer. In fact, there's no option to allow this. Use a link in your HTML instead. Open an issue if you really, really need it.")))
     (let [contents (:contents (by-path path assets))]
@@ -16,13 +16,13 @@
         contents
         (str "@media " media " { " contents " }")))))
 
-(defn- is-css [#^String path]
+(defn is-css [#^String path]
   (.endsWith path ".css"))
 
-(defn- referenced-assets [asset assets]
+(defn referenced-assets [asset assets]
   (map #(by-path % assets) (:references asset)))
 
-(defn- inline-css-imports-1 [asset assets]
+(defn inline-css-imports-1 [asset assets]
   (if-not (is-css (:path asset))
     asset
     (-> asset

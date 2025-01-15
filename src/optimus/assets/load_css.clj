@@ -5,7 +5,7 @@
 
 (def css-url-re #"(?:url\( *['\"]?([^\)]+?)['\"]?\)|@import ['\"](.+?)['\"] *)")
 
-(defn- data-url? [#^String url]
+(defn data-url? [#^String url]
   (.startsWith url "data:"))
 
 (defn external-url? [#^String url]
@@ -19,24 +19,24 @@
       (external-url? url)
       (behavior-url? url)))
 
-(defn- url-match [[match & urls]]
+(defn url-match [[match & urls]]
   (first (remove nil? urls)))
 
-(defn- match-url-to-absolute [original-path [match :as matches]]
+(defn match-url-to-absolute [original-path [match :as matches]]
   (let [url (url-match matches)]
     (if (leave-url-alone? url)
       match
       (str/replace match url (to-absolute-url original-path url)))))
 
-(defn- make-css-urls-absolute [file]
+(defn make-css-urls-absolute [file]
   (->> (partial match-url-to-absolute (original-path file))
        (str/replace (:contents file) css-url-re)
        (assoc-in file [:contents])))
 
-(defn- remove-url-appendages [s]
+(defn remove-url-appendages [s]
   (first (str/split s #"[\?#]")))
 
-(defn- paths-in-css [file]
+(defn paths-in-css [file]
   (->> file :contents
        (re-seq css-url-re)
        (map url-match)

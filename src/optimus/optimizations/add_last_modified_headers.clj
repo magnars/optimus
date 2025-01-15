@@ -1,7 +1,7 @@
 (ns optimus.optimizations.add-last-modified-headers
   (:require [optimus.time :as time]))
 
-(defn- add-last-modified-headers-1
+(defn add-last-modified-headers-1
   [asset]
   (if (:last-modified asset)
     (assoc-in asset [:headers "Last-Modified"]

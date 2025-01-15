@@ -3,10 +3,10 @@
             [optimus.asset :as asset])
   (:import [java.io FileOutputStream]))
 
-(defn- create-folders [path]
+(defn create-folders [path]
   (.mkdirs (.getParentFile (io/file path))))
 
-(defn- save-asset-to-path [asset path]
+(defn save-asset-to-path [asset path]
   (if-let [contents (:contents asset)]
     (spit path contents)
     (with-open [input-stream (io/input-stream (:resource asset))
