@@ -246,3 +246,11 @@
     "code.js"]) => ["/scripts/angular/some.js"
                     "/scripts/angular/more.js"
                     "/scripts/angular/code.js"])
+
+(fact
+ (let [request {:optimus-assets [{:path "/bg.png"}
+                                 {:path "/main.js" :outdated true}
+                                 {:path "/12/m.js" :original-path "/main.js"}]}]
+
+   (get-asset-by-path request "/bg.png") => {:path "/bg.png"}
+   (get-asset-by-path request "/main.js") => {:path "/12/m.js" :original-path "/main.js"}))
