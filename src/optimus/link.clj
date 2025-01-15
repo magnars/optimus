@@ -5,13 +5,9 @@
   (str base-url context-path path))
 
 (defn file-path [request path & {:as options}]
-  (let [path (->> request :optimus-assets
-                  (filter #(or (= path (:path %))
-                               (= path (assets/original-path %))))
-                  (remove :outdated)
-                  (first))]
-    (if path
-      (full-path path)
+  (let [asset (assets/get-asset-by-path request path)]
+    (if asset
+      (full-path asset)
       (when-let [fallback (:fallback options)]
         (file-path request fallback)))))
 

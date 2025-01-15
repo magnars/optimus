@@ -14,6 +14,12 @@
               load-bundles
               original-path])
 
+(defn get-asset-by-path [request path]
+  (->> request :optimus-assets
+       (filter #(= path (original-path %)))
+       (remove :outdated)
+       (first)))
+
 (defn with-prefix
   [prefix & paths]
   (map (partial str prefix)
