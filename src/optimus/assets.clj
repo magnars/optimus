@@ -1,5 +1,6 @@
 (ns optimus.assets
-  (:require [optimus.assets.creation :refer [load-asset]]
+  (:require [clojure.java.io :as io]
+            [optimus.assets.creation :refer [load-asset]]
             [optimus.assets.load-css]
             [potemkin :refer [import-vars]]))
 
@@ -19,6 +20,10 @@
        (filter #(= path (original-path %)))
        (remove :outdated)
        (first)))
+
+(defn get-contents [asset]
+  (or (:contents asset)
+      (io/input-stream (:resource asset))))
 
 (defn with-prefix
   [prefix & paths]
