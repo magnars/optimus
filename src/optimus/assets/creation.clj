@@ -26,13 +26,13 @@
   (or (io/resource (str public-dir path))
       (throw (FileNotFoundException. path))))
 
-(defn- file-last-modified [#^URL resource]
+(defn file-last-modified [#^URL resource]
   (let [url-connection (.openConnection resource)
         modified (.getLastModified url-connection)]
     (.close (.getInputStream url-connection))
     (* (.intValue (/ modified 1000)) 1000)))
 
-(defn- jar-file-last-modified [#^URL resource]
+(defn jar-file-last-modified [#^URL resource]
   (let [[jar-path file-path] (-> (.getPath resource)
                                  (subs 5)
                                  (str/split #"!/"))]
@@ -68,7 +68,7 @@
   [public-dir path]
   (create-binary-asset public-dir path))
 
-(defn- load-asset-and-refs [public-dir path]
+(defn load-asset-and-refs [public-dir path]
   (let [asset (load-asset public-dir path)]
     (concat [asset] (mapcat #(load-asset-and-refs public-dir %) (:references asset)))))
 
@@ -89,7 +89,7 @@
   (file-system-path-to-url-path
     (slice-path-to-after public-dir s)))
 
-(defn- emacs-file-artefact? [#^String path]
+(defn emacs-file-artefact? [#^String path]
   (when-let [filename (just-the-filename path)]
     (or (.startsWith filename ".#")
         (and (.startsWith filename "#")

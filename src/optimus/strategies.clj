@@ -5,21 +5,21 @@
             [optimus.assets :as assets]
             [optimus.homeless :refer [assoc-non-nil]]))
 
-(defn- serve-asset [asset]
+(defn serve-asset [asset]
   (-> {:status 200 :body (assets/get-contents asset)}
       (assoc-non-nil :headers (:headers asset))))
 
-(defn- serve-asset-or-continue [assets path->asset app request]
+(defn serve-asset-or-continue [assets path->asset app request]
   (if-let [asset (path->asset (:uri request))]
     (serve-asset asset)
     (app (assoc request :optimus-assets assets))))
 
-(defn- collapse-equal-assets [asset-1 asset-2]
+(defn collapse-equal-assets [asset-1 asset-2]
   (when-not (= asset-1 asset-2)
     (throw (Exception. (str "Two assets have the same path \"" (:path asset-1) "\", but are not equal."))))
   asset-1)
 
-(defn- guard-against-duplicate-assets [assets]
+(defn guard-against-duplicate-assets [assets]
   (let [pb->assets (group-by (juxt :path :bundle) assets)]
     (->> assets
          (map (juxt :path :bundle))

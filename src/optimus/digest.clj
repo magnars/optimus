@@ -9,7 +9,7 @@
     #(+ % 0x100)
     #(bit-and % 0xff)))
 
-(defn- bytes->hex-str [bytes]
+(defn bytes->hex-str [bytes]
   (apply str
     (map byte->hex-str bytes)))
 

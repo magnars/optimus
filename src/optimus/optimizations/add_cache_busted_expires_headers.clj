@@ -9,11 +9,11 @@
   (:import [java.time ZonedDateTime ZoneId]
            [java.time.format DateTimeFormatter]))
 
-(defn- get-contents [file]
+(defn get-contents [file]
   (or (:contents file)
       (slurp (:resource file))))
 
-(defn- add-cache-busted-expires-header [file]
+(defn add-cache-busted-expires-header [file]
   (-> file
       (assoc :path (str (paths/just-the-path (:path file))
                         (subs (digest/sha-1 (get-contents file)) 0 12)
@@ -24,7 +24,7 @@
       (assoc-in [:headers "Expires"] (time/format-http-date
                                       (.plusYears (time/now) 10)))))
 
-(defn- by-path [path files]
+(defn by-path [path files]
   (first (filter #(= path (:path %)) files)))
 
 (defn qualify-url [{:keys [base-url context-path path]}]
@@ -35,14 +35,14 @@
 (defn inverse-string-length [^String s]
   (- (.length s)))
 
-(defn- replace-referenced-url [file old new]
+(defn replace-referenced-url [file old new]
   (update-in file [:contents] #(str/replace % old new)))
 
-(defn- replace-referenced-urls [file old->new]
+(defn replace-referenced-urls [file old->new]
   (reduce #(replace-referenced-url %1 %2 (old->new %2)) file
           (sort-by inverse-string-length (:references file))))
 
-(defn- replace-referenced-urls-with-new-ones [file files]
+(defn replace-referenced-urls-with-new-ones [file files]
   (if-let [references (:references file)]
     (let [orig->curr (into {} (map (juxt original-path qualify-url) files))]
       (-> file
@@ -50,7 +50,7 @@
           (assoc :references (set (replace orig->curr references)))))
     file))
 
-(defn- add-cache-busted-expires-headers-in-order [to-replace files]
+(defn add-cache-busted-expires-headers-in-order [to-replace files]
   ;; three cases:
 
   ;; 1. nothing more to replace? return the files

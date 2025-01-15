@@ -11,7 +11,7 @@
       (when-let [fallback (:fallback options)]
         (file-path request fallback)))))
 
-(defn- bundle-paths-1 [optimus-assets bundle]
+(defn bundle-paths-1 [optimus-assets bundle]
   (->> optimus-assets
        (filter #(= bundle (:bundle %)))
        (remove :outdated)

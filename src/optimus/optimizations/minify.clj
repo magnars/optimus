@@ -4,7 +4,7 @@
             [clojure.string :as str]
             [optimus.js :as js]))
 
-(defn- escape [str]
+(defn escape [str]
   (-> str
       (str/replace "\\" "\\\\")
       (str/replace "'" "\\'")
@@ -27,7 +27,7 @@
 (def ^String babel
   (slurp (io/resource "babel.js")))
 
-(defn- js-minification-code
+(defn js-minification-code
   [js options]
   (let [js-code (escape (normalize-line-endings js))]
     (str "(function () {"
@@ -111,7 +111,7 @@
           (or (not-empty options) default-clean-css-settings)))
       (assoc :inline false)))
 
-(defn- css-minification-code
+(defn css-minification-code
   [css options]
   (str "(function () {
         var CleanCSS = require('clean-css');
