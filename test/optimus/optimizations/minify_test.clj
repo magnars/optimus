@@ -169,3 +169,10 @@
 (fact
   "It correctly minifies several rules for the same selector"
   (sut/minify-css (sut/prepare-clean-css-engine) "table,div {border:0} table {margin:0}" {}) => "div,table{border:0}table{margin:0}")
+
+(fact
+ "doesn't remove transition property with never features"
+ (sut/minify-css (sut/prepare-clean-css-engine)
+                 "#menu{transform:translateX(-100%);transition:transform .25s ease-in,overlay .25s allow-discrete,display .25s allow-discrete;overflow-y:scroll}"
+                 {})
+ => "#menu{transform:translateX(-100%);transition:transform .25s ease-in,overlay .25s allow-discrete,display .25s allow-discrete;overflow-y:scroll}")

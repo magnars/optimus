@@ -1,7 +1,8 @@
 .DEFAULT_GOAL := all
 
 BROWSERIFY_VERSION=10.2.6
-CLEAN_CSS_VERSION=5.3.2
+#CLEAN_CSS_VERSION=5.3.3 -- not used, checking out directly from a PR branch for now
+# we are waiting for this to get merged: https://github.com/clean-css/clean-css/pull/1275
 UGLIFY_VERSION=2.4.24
 BABEL_VERSION=7.20.13
 
@@ -29,7 +30,7 @@ $(BROWSERIFY_CMD):
 	npm install browserify@$(BROWSERIFY_VERSION)
 
 $(CLEAN_CSS_PATH):
-	npm install clean-css@$(CLEAN_CSS_VERSION)
+	npm install github:bes-internal/clean-css#transition-behavior
 
 $(UGLIFY_CMD):
 	npm install uglify-js@$(UGLIFY_VERSION)
