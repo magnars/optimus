@@ -17,7 +17,7 @@
 
 (defn get-asset-by-path [request path]
   (->> request :optimus-assets
-       (filter #(= path (original-path %)))
+       (filter #(or (= path (original-path %)) (= path (:path %))))
        (remove :outdated)
        (first)))
 
