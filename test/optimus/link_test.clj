@@ -27,7 +27,7 @@
   "You can link to optimized paths."
 
   (let [request {:optimus-assets [{:path "/main.js" :bundle "app.js" :outdated true}
-                                  {:path "/12/m.js" :bundle "app.js"}]}]
+                                  {:path "/12/m.js" :bundle "app.js" :original-path "app.js"}]}]
 
     (file-path request "/12/m.js") => "/12/m.js"))
 
