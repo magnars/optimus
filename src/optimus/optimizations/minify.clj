@@ -1,6 +1,7 @@
 (ns optimus.optimizations.minify
   (:require [clojure.string :as str]
             [optimus.clean-css :as clean-css]
+            [optimus.csso :as csso]
             [optimus.uglify-js :as uglify-js]))
 
 (defn looks-like-already-minified
@@ -40,25 +41,36 @@
 
 ;; minify CSS
 
-(defn minify-css
-  ([css] (minify-css css {}))
-  ([css options]
-   (with-open [context (clean-css/create-context)]
-     (minify-css context css options)))
-  ([context css options]
-   (if (looks-like-already-minified css)
-     css
-     (clean-css/minify-css context css (:clean-css options)))))
+(defn get-css-minifier [options]
+  (if-let [clean-css (:clean-css options)]
+    {:context (clean-css/create-context)
+     :optimize #'clean-css/minify-css
+     :options clean-css}
+    {:context (csso/create-context)
+     :optimize #'csso/minify
+     :options (:csso options)}))
+
+(defn minify-css [optimizer css {:keys [path]}]
+  (if (looks-like-already-minified css)
+    css
+    (let [{:keys [optimize context options]} optimizer]
+      (try
+        (optimize context css options)
+        (catch Exception e
+          (throw (ex-info (str "Failed to optimize " path)
+                          {:path path :options options}
+                          e)))))))
 
 (defn minify-css-asset
-  [context asset options]
+  [optimizer asset]
   (let [#^String path (:path asset)]
     (if (.endsWith path ".css")
-      (update-in asset [:contents] #(minify-css context % (assoc options :path path)))
+      (update-in asset [:contents] #(minify-css optimizer % {:path path}))
       asset)))
 
 (defn minify-css-assets
   ([assets] (minify-css-assets assets {}))
   ([assets options]
-   (with-open [context (clean-css/create-context)]
-     (mapv #(minify-css-asset context % options) assets))))
+   (let [optimizer (get-css-minifier options)]
+     (with-open [_context (:context optimizer)]
+       (mapv #(minify-css-asset optimizer %) assets)))))

@@ -38,8 +38,9 @@
 (fact
  "It skips minification of css files with very long one-liners. It's a decent
   heuristic that it's already minified."
- (let [css (str "/* comment */\nbody {" (apply str (repeat 500 "color:red;")) "}")]
-   (sut/minify-css css) => css))
+ (let [css {:path "styles.css"
+            :contents (str "/* comment */\nbody {" (apply str (repeat 500 "color:red;")) "}")}]
+   (sut/minify-css-assets [css]) => [css]))
 
 (fact
  "It minifies a list of CSS assets."
@@ -54,3 +55,13 @@
                      {:path "styles.css" :contents "#id { margin: 0; }"}])
  => [{:path "code.js" :contents "var a = 2 + 3;"}
      {:path "styles.css" :contents "#id{margin:0}"}])
+
+(fact
+ "It uses clean-css when there are explicit clean-css options"
+ (sut/minify-css-assets [{:path "styles.css" :contents "body {color: red;} body {background: blue;}"}] {:clean-css {}})
+ => [{:path "styles.css", :contents "body{color:red;background:#00f}"}])
+
+(fact
+ "It defaults to using csso when there are explicit clean-css options"
+ (sut/minify-css-assets [{:path "styles.css" :contents "body {color: red;} body {background: blue;}"}] {:csso {:restructure false}})
+ => [{:path "styles.css", :contents "body{color:red}body{background:#00f}"}])
