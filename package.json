@@ -3,6 +3,7 @@
     "@babel/standalone": "^7.20.13",
     "browserify": "^10.2.6",
     "clean-css": "github:bes-internal/clean-css#transition-behavior",
+    "csso": "^5.0.5",
     "uglify-js": "^2.4.24"
   }
 }
