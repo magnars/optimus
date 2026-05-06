@@ -1,6 +1,7 @@
 (ns optimus.optimizations.minify
   (:require [clojure.string :as str]
             [optimus.clean-css :as clean-css]
+            [optimus.csso :as csso]
             [optimus.js :as js]
             [optimus.uglify-js :as uglify-js]))
 
@@ -39,9 +40,13 @@
 ;; minify CSS
 
 (defn get-css-minifier [options]
-  {:engine (clean-css/create-engine)
-   :optimize #'clean-css/minify-css
-   :options (:clean-css options)})
+  (let [clean-css (:clean-css options)]
+    {:engine (clean-css/create-engine)
+     :optimize #'clean-css/minify-css
+     :options clean-css}
+    {:engine (csso/create-engine)
+     :optimize #'csso/minify
+     :options (:csso options)}))
 
 (defn minify-css [optimizer css {:keys [path]}]
   (if (looks-like-already-minified css)

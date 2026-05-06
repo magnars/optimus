@@ -17,7 +17,7 @@ Depending on how you use it, Optimus:
 - adds cache-busters to your static asset URLs
 - adds [far future Expires headers](http://developer.yahoo.com/performance/rules.html#expires)
 - minifies your JavaScript with [UglifyJS 2](https://github.com/mishoo/UglifyJS2)
-- minifies your CSS with [clean-css](https://github.com/jakubpawlowicz/clean-css)
+- minifies your CSS with [csso](https://github.com/css/csso) or [clean-css](https://github.com/jakubpawlowicz/clean-css)
 - inlines CSS imports while preserving media queries
 
 You might also be interested in:
@@ -585,7 +585,7 @@ Now, for the options. You pass them to the wrapper after the strategy:
      {:cache-live-assets 2000
       :uglify-js {:mangle-names true
                   :transpile-es6? false}
-      :clean-css {:level 2}}))
+      :csso {:restructure true}}))
 ```
 
 Values in this example are all defaults, so it's just a verbose noop.
@@ -608,7 +608,17 @@ Values in this example are all defaults, so it's just a verbose noop.
 - `:transpile-es6?` - UglifyJS does not support the new syntax in ES6. Set this
   to `true` to let Babel transpile ES6 code into ES5 before minification.
 
+#### `:csso`
+
+These options are passed straight to csso. Please see the [csso
+documentation](https://github.com/css/csso#minifysource-options) for available
+options.
+
 #### `:clean-css`
+
+When `:clean-css` is present, Optimus will use clean-css instead of csso for CSS
+optimization. clean-css is the old default, but it is no longer developed, has
+known shortcomings and is generally discouraged.
 
 These options are passed straight to clean-css. Please see the [clean-css
 documentation](https://github.com/clean-css/clean-css#constructor-options) for
