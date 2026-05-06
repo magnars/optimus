@@ -1,33 +1,22 @@
 (ns optimus.csso
-  (:require [clojure.data.json :as json]
-            [clojure.java.io :as io]
-            [optimus.js :as js]))
+  (:require [clojure.java.io :as io]
+            [optimus.javascript :as js])
+  (:import [org.graalvm.polyglot Context]))
 
-(defn css-minification-code [css options]
-  (str "csso.minify("
-       "'" (js/escape (js/normalize-line-endings css)) "', "
-       (json/write-str options) ").css"))
+(def scripts
+  (future [(slurp (io/resource "csso.js"))]))
 
-(def csso (slurp (io/resource "csso.js")))
-
-(defn create-engine []
-  (let [engine (js/make-engine)]
-    (.eval engine csso)
-    engine))
+(defn create-context []
+  (js/create-context {:scripts @scripts}))
 
 (defn minify
-  ([css] (minify css {}))
+  ([css]
+   (minify css {}))
   ([css options]
-   (js/with-engine [engine (create-engine)]
-     (minify engine css options)))
-  ([engine css options]
-   (js/run-script-with-error-handling
-    engine
-    (css-minification-code css options)
-    (:path options))))
-
-(comment
-
-  (minify "body { color: red; }")
-
-)
+   (with-open [context (create-context)]
+     (minify context css options)))
+  ([^Context context css options]
+   (let [csso (-> (.getBindings context "js")
+                  (.getMember "csso"))]
+     (-> (js/call-method csso :minify css (js/clj->js context options))
+         (js/get-string :css)))))

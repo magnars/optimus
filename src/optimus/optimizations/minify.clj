@@ -2,7 +2,6 @@
   (:require [clojure.string :as str]
             [optimus.clean-css :as clean-css]
             [optimus.csso :as csso]
-            [optimus.js :as js]
             [optimus.ph-css :as ph-css]
             [optimus.uglify-js :as uglify-js]))
 
@@ -18,36 +17,39 @@
 (defn minify-js
   ([js] (minify-js js {}))
   ([js options]
-   (js/with-engine [engine (uglify-js/create-engine)]
-     (minify-js engine js options)))
-  ([engine js options]
+   (with-open [context (uglify-js/create-context)]
+     (minify-js context js options)))
+  ([context js options]
    (if (looks-like-already-minified js)
      js
-     (uglify-js/minify engine js (assoc (:uglify-js options) :path (:path options))))))
+     (try
+       (uglify-js/minify context js (:uglify-js options))
+       (catch Exception e
+         (throw (ex-info (str "Failed to minify " (:path options)) options e)))))))
 
 (defn minify-js-asset
-  [engine asset options]
+  [context asset options]
   (let [#^String path (:path asset)]
     (if (.endsWith path ".js")
-      (update-in asset [:contents] #(minify-js engine % (assoc options :path path)))
+      (update-in asset [:contents] #(minify-js context % (assoc options :path path)))
       asset)))
 
 (defn minify-js-assets
   ([assets] (minify-js-assets assets {}))
   ([assets options]
-   (js/with-engine [engine (uglify-js/create-engine)]
-     (mapv #(minify-js-asset engine % options) assets))))
+   (with-open [context (uglify-js/create-context)]
+     (mapv #(minify-js-asset context % options) assets))))
 
 ;; minify CSS
 
 (defn get-css-minifier [options]
   (or
    (when-let [clean-css (:clean-css options)]
-     {:engine (clean-css/create-engine)
+     {:context (clean-css/create-context)
       :optimize #'clean-css/minify-css
       :options clean-css})
    (when-let [csso (:csso options)]
-     {:engine (csso/create-engine)
+     {:context (csso/create-context)
       :optimize #'csso/minify
       :options csso})
    {:optimize #'ph-css/minify
@@ -56,10 +58,10 @@
 (defn minify-css [optimizer css {:keys [path]}]
   (if (looks-like-already-minified css)
     css
-    (let [{:keys [optimize engine options]} optimizer]
+    (let [{:keys [optimize context options]} optimizer]
       (try
-        (if engine
-          (optimize engine css options)
+        (if context
+          (optimize context css options)
           (optimize css options))
         (catch Exception e
           (throw (ex-info (str "Failed to optimize " path)
@@ -77,7 +79,7 @@
   ([assets] (minify-css-assets assets {}))
   ([assets options]
    (let [optimizer (get-css-minifier options)]
-     (if (:engine optimizer)
-       (js/with-engine [_engine (:engine optimizer)]
+     (if (:context optimizer)
+       (with-open [_context (:context optimizer)]
          (mapv #(minify-css-asset optimizer %) assets))
        (mapv #(minify-css-asset optimizer %) assets)))))
