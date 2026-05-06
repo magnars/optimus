@@ -1,8 +1,7 @@
 (ns optimus.js
-  (:require
-    [clojure.string :as str]
-    [clojure.java.data :as java.data]
-    [environ.core :refer [env]]))
+  (:require [clojure.java.data :as java.data]
+            [clojure.string :as str]
+            [environ.core :refer [env]]))
 
 (def default-engines
   "Officially supported JS engines (which may or may not be available
@@ -185,3 +184,14 @@
        (catch Exception e
          ;; TODO verbose logging here would be nice to inspect the wrapped script
          (throw (optimus-js-error engine file-path e)))))
+
+(defn escape [str]
+  (-> str
+      (str/replace "\\" "\\\\")
+      (str/replace "'" "\\'")
+      (str/replace "\n" "\\n")))
+
+(defn normalize-line-endings [str]
+  (-> str
+      (str/replace "\r\n" "\n")
+      (str/replace "\r" "\n")))
