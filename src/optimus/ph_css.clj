@@ -1,4 +1,5 @@
 (ns optimus.ph-css
+  (:require [clojure.string :as str])
   (:import (com.helger.base.system ENewLineMode)
            (com.helger.css.reader CSSReader CSSReaderSettings)
            (com.helger.css.writer CSSWriter CSSWriterSettings)
@@ -19,7 +20,7 @@
       (.setNewLineMode new-line-mode)
 
       (number? (:indent options))
-      (.setIndent (repeat (:indent options) " "))
+      (.setIndent (str/join "" (repeat (:indent options) " ")))
 
       (contains? options :quote-urls?)
       (.setQuoteURLs (:quote-urls? options))
