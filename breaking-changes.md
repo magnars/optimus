@@ -1,5 +1,13 @@
 ## Breaking changes
 
+### 2026.05.16
+
+- **We have upgraded the GraalVM JS engine and removed pluggable JS-engines**
+
+  The GraalVM dependencies where 7 major versions behind and produced
+  deprecation warnings. The upgraded tooling is faster and safer, but makes
+  uberjar packaging harder.
+
 ### 2022-02-13
 
 - **We have removed clj-v8, and replaced it with pluggable JS-engine JSR223**

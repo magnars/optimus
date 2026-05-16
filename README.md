@@ -49,8 +49,9 @@ Add `[optimus "2026.05.27"]` to `:dependencies` in your `project.clj`.
 This project no longer uses Semantic Versioning. Instead we're aiming to never
 break the API. Feel free to check out the [change log](#change-log).
 
-There were breaking changes in `0.16`, `0.17`, `0.19` and `2022-02-13`. If
-you're upgrading, you might want to [read more about them](breaking-changes.md).
+There were breaking changes in `0.16`, `0.17`, `0.19`, `2022-02-13` and
+`2026.05.16`. If you're upgrading, you might want to [read more about
+them](breaking-changes.md).
 
 ## Usage
 
@@ -879,8 +880,17 @@ Likewise, for any other JS engine that implements `javax.script` interfaces.
 
 ## Change log
 
-There were breaking changes in `0.16`, `0.17` and `0.19`. If you're upgrading,
-you might want to [read more about them](breaking-changes.md).
+There were breaking changes in `0.16`, `0.17`, `0.19`, `2022-02-13` and
+`2026.05.16`. If you're upgrading, you might want to [read more about
+them](breaking-changes.md).
+
+#### From 2026.05.05 to 2026.05.16
+
+- Upgrade GraalVM dependencies
+
+The newer GraalVM APIs are faster, safer, and produce less deprecation warnings.
+Unfortunately, they also make packaging your app in an uberjar more complicated,
+see [breaking-changes.md](breaking-changes.md).
 
 #### From 2025.01.19.2 to 2026.05.27
 
