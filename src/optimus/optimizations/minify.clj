@@ -40,7 +40,7 @@
 ;; minify CSS
 
 (defn get-css-minifier [options]
-  (let [clean-css (:clean-css options)]
+  (if-let [clean-css (:clean-css options)]
     {:engine (clean-css/create-engine)
      :optimize #'clean-css/minify-css
      :options clean-css}
