@@ -11,6 +11,7 @@
                  [pathetic "0.5.1"]
                  [org.graalvm.js/js "19.3.0"]
                  [org.graalvm.js/js-scriptengine "19.3.0"]
+                 [com.helger/ph-css "8.2.0"]
                  [environ "1.1.0"]
                  [com.nextjournal/beholder "1.0.2"]
                  [potemkin "0.4.5"]

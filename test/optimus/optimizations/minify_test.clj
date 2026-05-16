@@ -57,11 +57,16 @@
      {:path "styles.css" :contents "#id{margin:0}"}])
 
 (fact
- "It uses clean-css when there are explicit clean-css options"
- (sut/minify-css-assets [{:path "styles.css" :contents "body {color: red;} body {background: blue;}"}] {:clean-css {}})
- => [{:path "styles.css", :contents "body{color:red;background:#00f}"}])
+  "It uses clean-css when there are explicit clean-css options"
+  (sut/minify-css-assets [{:path "styles.css" :contents "body {color: red;} body {background: blue;}"}] {:clean-css {}})
+  => [{:path "styles.css", :contents "body{color:red;background:#00f}"}])
 
 (fact
-  "It defaults to using csso when there are explicit clean-css options"
+  "It uses csso when there are explicit csso options"
   (sut/minify-css-assets [{:path "styles.css" :contents "body {color: red;} body {background: blue;}"}] {:csso {:restructure false}})
   => [{:path "styles.css", :contents "body{color:red}body{background:#00f}"}])
+
+(fact
+  "It defaults to ph-css which can handle modern CSS syntax"
+  (sut/minify-css-assets [{:path "styles.css" :contents ".prose { :where(h1) { font-weight: 800; } } "}] {})
+  => [{:path "styles.css", :contents ".prose{:where(h1){font-weight:800}}"}])

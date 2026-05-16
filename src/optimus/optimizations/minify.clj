@@ -3,6 +3,7 @@
             [optimus.clean-css :as clean-css]
             [optimus.csso :as csso]
             [optimus.js :as js]
+            [optimus.ph-css :as ph-css]
             [optimus.uglify-js :as uglify-js]))
 
 (defn looks-like-already-minified
@@ -40,20 +41,26 @@
 ;; minify CSS
 
 (defn get-css-minifier [options]
-  (if-let [clean-css (:clean-css options)]
-    {:engine (clean-css/create-engine)
-     :optimize #'clean-css/minify-css
-     :options clean-css}
-    {:engine (csso/create-engine)
-     :optimize #'csso/minify
-     :options (:csso options)}))
+  (or
+   (when-let [clean-css (:clean-css options)]
+     {:engine (clean-css/create-engine)
+      :optimize #'clean-css/minify-css
+      :options clean-css})
+   (when-let [csso (:csso options)]
+     {:engine (csso/create-engine)
+      :optimize #'csso/minify
+      :options csso})
+   {:optimize #'ph-css/minify
+    :options (:ph-css options)}))
 
 (defn minify-css [optimizer css {:keys [path]}]
   (if (looks-like-already-minified css)
     css
     (let [{:keys [optimize engine options]} optimizer]
       (try
-        (optimize engine css options)
+        (if engine
+          (optimize engine css options)
+          (optimize css options))
         (catch Exception e
           (throw (ex-info (str "Failed to optimize " path)
                           {:path path :options options}
@@ -70,5 +77,7 @@
   ([assets] (minify-css-assets assets {}))
   ([assets options]
    (let [optimizer (get-css-minifier options)]
-     (js/with-engine [_engine (:engine optimizer)]
+     (if (:engine optimizer)
+       (js/with-engine [_engine (:engine optimizer)]
+         (mapv #(minify-css-asset optimizer %) assets))
        (mapv #(minify-css-asset optimizer %) assets)))))
