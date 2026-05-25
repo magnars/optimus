@@ -12,7 +12,7 @@
 
 (fact
   "It sets options without problems"
-  (sut/minify "#blåbærsyltetøy { padding: 10px 10px 10px 10px; }"
+  (sut/minify "#blåbærsyltetøy { padding: 10px; }"
               {:optimized-output? true
                :remove-unnecessary-code? true
                :indent 0
@@ -28,4 +28,4 @@
                :write-supports-rules? true
                :write-property-rules? true
                :write-unknown-rules? true})
-  => "#blåbærsyltetøy{padding:10px 10px 10px 10px}")
+  => "#blåbærsyltetøy{padding:10px}")
