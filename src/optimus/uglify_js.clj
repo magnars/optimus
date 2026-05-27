@@ -1,48 +1,46 @@
 (ns optimus.uglify-js
   (:require [clojure.java.io :as io]
-            [optimus.js :as js]))
+            [optimus.javascript :as js]))
 
-(def ^String babel
-  (slurp (io/resource "babel.js")))
+(def scripts
+  (future
+    [(slurp (io/resource "babel.js"))
+     (slurp (io/resource "uglify.js"))]))
 
-(defn js-minification-code
-  [js options]
-  (let [js-code (js/escape (js/normalize-line-endings js))]
-    (str "(function () {"
-         (if (:transpile-es6? options)
-           (str "var jsCode = Babel.transform('" js-code "', { presets: ['env'], sourceType: 'script' }).code;")
-           (str "var jsCode = '" js-code "';"))
-         "var ast = UglifyJS.parse(jsCode);
-          ast.figure_out_scope();
-          var compressor = UglifyJS.Compressor();
-          var compressed = ast.transform(compressor);
-          compressed.figure_out_scope();
-          compressed.compute_char_frequency();"
-         (if (get options :mangle-names true) "compressed.mangle_names();" "")
-         "var stream = UglifyJS.OutputStream();
-          compressed.print(stream);
-          return stream.toString();
-}());")))
+(defn create-context []
+  (js/create-context {:scripts @scripts}))
 
-(def ^String uglify
-  "The UglifyJS source code, free of dependencies and runnable in a
-  stripped context"
-  (slurp (io/resource "uglify.js")))
+(defn transpile [context code]
+  (-> (.getBindings context "js")
+      (.getMember "Babel")
+      (.getMember "transform")
+      (.execute (into-array Object [code (js/clj->js context
+                                           {:presets ["env"] :sourceType "script"})]))
+      (.getMember "code")
+      .asString))
 
-(defn create-engine
-  []
-  (let [engine (js/make-engine)]
-    (.eval engine uglify)
-    (.eval engine babel)
-    engine))
+(defn call-uglify-fn [context fn & args]
+  (-> (.getBindings context "js")
+      (.getMember "UglifyJS")
+      (.getMember (name fn))
+      (.execute (into-array Object args))))
 
 (defn minify
-  ([js] (minify js {}))
+  ([js]
+   (minify js {}))
   ([js options]
-   (js/with-engine [engine (create-engine)]
-     (minify engine js options)))
-  ([engine js options]
-   (js/run-script-with-error-handling
-    engine
-    (js-minification-code js options)
-    (:path options))))
+   (with-open [context (create-context)]
+     (minify context js options)))
+  ([ctx js options]
+   (let [ast (->> (cond->> js
+                    (:transpile-es6? options) (transpile ctx))
+                  (call-uglify-fn ctx :parse))]
+     (js/call-method ast :figure_out_scope)
+     (let [compressed (js/call-method ast :transform (call-uglify-fn ctx :Compressor))]
+       (js/call-method compressed :figure_out_scope)
+       (js/call-method compressed :compute_char_frequency)
+       (when (get options :mangle-names true)
+         (js/call-method compressed :mangle_names))
+       (let [stream (call-uglify-fn ctx :OutputStream)]
+         (js/call-method compressed :print stream)
+         (.asString (js/call-method stream :toString)))))))
