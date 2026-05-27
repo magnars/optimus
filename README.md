@@ -44,7 +44,7 @@ You might also be interested in:
 
 ## Install
 
-Add `[optimus "2026.05.06"]` to `:dependencies` in your `project.clj`.
+Add `[optimus "2026.05.27"]` to `:dependencies` in your `project.clj`.
 
 This project no longer uses Semantic Versioning. Instead we're aiming to never
 break the API. Feel free to check out the [change log](#change-log).
@@ -882,12 +882,12 @@ Likewise, for any other JS engine that implements `javax.script` interfaces.
 There were breaking changes in `0.16`, `0.17` and `0.19`. If you're upgrading,
 you might want to [read more about them](breaking-changes.md).
 
-#### From 2025.01.19.2 to 2026.05.05
+#### From 2025.01.19.2 to 2026.05.27
 
-- Change default CSS optimizer to csso
+- Change default CSS optimizer to ph-css
 
-CSSO is more resilient with modern CSS syntax, and is used as the default unless
-Optimus receives specific clean-css options.
+ph-css is more resilient with modern CSS syntax, and is used as the default
+unless Optimus receives specific clean-css or csso options.
 
 #### From 2023.11.21 to 2025.01.19.2
 
